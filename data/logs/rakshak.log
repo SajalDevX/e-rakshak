@@ -1,0 +1,1384 @@
+2026-01-14 00:27:28 | INFO     | __main__ | Initializing RAKSHAK components...
+2026-01-14 00:27:28 | INFO     | core.threat_logger | ThreatLogger initialized
+2026-01-14 00:27:28 | INFO     | core.network_scanner | Loaded 8 simulated devices
+2026-01-14 00:27:28 | INFO     | core.network_scanner | NetworkScanner initialized (simulation=True)
+2026-01-14 00:28:56 | INFO     | __main__ | Initializing RAKSHAK components...
+2026-01-14 00:28:56 | INFO     | core.threat_logger | ThreatLogger initialized
+2026-01-14 00:28:56 | INFO     | core.network_scanner | Loaded 8 simulated devices
+2026-01-14 00:28:56 | INFO     | core.network_scanner | NetworkScanner initialized (simulation=True)
+2026-01-14 00:28:56 | WARNING  | core.agentic_defender | PyTorch not available, using rule-based decision making
+2026-01-14 00:28:56 | INFO     | core.agentic_defender | AgenticDefender initialized (rule-based mode)
+2026-01-14 00:28:56 | WARNING  | core.llm_honeypot | Running in template mode (no LLM)
+2026-01-14 00:28:56 | INFO     | core.llm_honeypot | LLMHoneypot initialized (LLM available: False)
+2026-01-14 00:28:56 | INFO     | core.deception_engine | DeceptionEngine initialized (enabled=True)
+2026-01-14 00:28:56 | INFO     | api.app | Flask app created successfully
+2026-01-14 00:28:56 | INFO     | __main__ | RAKSHAK components initialized successfully
+2026-01-14 00:28:56 | INFO     | __main__ | Starting RAKSHAK in SIMULATION mode...
+2026-01-14 00:31:59 | INFO     | __main__ | Processing threat: port_scan from 10.188.191.153
+2026-01-14 00:31:59 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 00:31:59 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 00:31:59 | INFO     | core.deception_engine | Deployed honeypot HP-0001 (telnet:2323)
+2026-01-14 00:31:59 | INFO     | core.deception_engine | Telnet honeypot HP-0001 listening on port 2323
+2026-01-14 00:31:59 | WARNING  | core.threat_logger | THREAT: port_scan | medium | 10.188.191.153 -> Router
+2026-01-14 00:31:59 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2323 | success
+2026-01-14 00:31:59 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 10.188.191.153 | decided
+2026-01-14 00:32:05 | INFO     | core.deception_engine | Deployed honeypot HP-0002 (telnet:2324)
+2026-01-14 00:32:05 | INFO     | core.deception_engine | Telnet honeypot HP-0002 listening on port 2324
+2026-01-14 00:32:05 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2324 | success
+2026-01-14 00:32:38 | WARNING  | core.network_scanner | Device isolated: 192.168.1.101
+2026-01-14 00:32:38 | INFO     | core.threat_logger | ACTION: isolate_device | 192.168.1.101 | success
+2026-01-14 00:34:38 | WARNING  | core.threat_logger | THREAT: suspicious_traffic | low | 10.35.19.221 -> Smart TV
+2026-01-14 00:34:39 | INFO     | __main__ | Processing threat: suspicious_traffic from 10.35.19.221
+2026-01-14 00:34:39 | INFO     | __main__ | KAAL decided: MONITOR
+2026-01-14 00:34:39 | INFO     | core.threat_logger | ACTION: MONITOR | 10.35.19.221 | decided
+2026-01-14 00:34:47 | INFO     | __main__ | Processing threat: suspicious_traffic from 10.170.58.63
+2026-01-14 00:34:47 | INFO     | __main__ | KAAL decided: MONITOR
+2026-01-14 00:34:47 | WARNING  | core.threat_logger | THREAT: suspicious_traffic | low | 10.170.58.63 -> Smart Bulb
+2026-01-14 00:34:47 | INFO     | core.threat_logger | ACTION: MONITOR | 10.170.58.63 | decided
+2026-01-14 00:34:50 | INFO     | __main__ | Processing threat: port_scan from 10.23.50.56
+2026-01-14 00:34:50 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 00:34:50 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 00:34:50 | INFO     | core.deception_engine | Deployed honeypot HP-0003 (telnet:2325)
+2026-01-14 00:34:50 | INFO     | core.deception_engine | Telnet honeypot HP-0003 listening on port 2325
+2026-01-14 00:34:50 | WARNING  | core.threat_logger | THREAT: port_scan | medium | 10.23.50.56 -> Smart Bulb
+2026-01-14 00:34:50 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2325 | success
+2026-01-14 00:34:50 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 10.23.50.56 | decided
+2026-01-14 00:34:51 | WARNING  | core.threat_logger | THREAT: port_scan | medium | 10.67.45.233 -> Smart TV
+2026-01-14 00:34:51 | INFO     | __main__ | Processing threat: port_scan from 10.67.45.233
+2026-01-14 00:34:51 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 00:34:51 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 00:34:51 | INFO     | core.deception_engine | Deployed honeypot HP-0004 (telnet:2326)
+2026-01-14 00:34:51 | INFO     | core.deception_engine | Telnet honeypot HP-0004 listening on port 2326
+2026-01-14 00:34:51 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2326 | success
+2026-01-14 00:34:51 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 10.67.45.233 | decided
+2026-01-14 00:34:52 | INFO     | __main__ | Processing threat: dos_attack from 10.15.203.160
+2026-01-14 00:34:52 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 00:34:52 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 00:34:52 | INFO     | core.deception_engine | Deployed honeypot HP-0005 (telnet:2327)
+2026-01-14 00:34:52 | INFO     | core.deception_engine | Telnet honeypot HP-0005 listening on port 2327
+2026-01-14 00:34:52 | WARNING  | core.threat_logger | THREAT: dos_attack | high | 10.15.203.160 -> Smart TV
+2026-01-14 00:34:52 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2327 | success
+2026-01-14 00:34:52 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 10.15.203.160 | decided
+2026-01-14 00:34:52 | INFO     | __main__ | Processing threat: suspicious_traffic from 10.158.246.62
+2026-01-14 00:34:52 | INFO     | __main__ | KAAL decided: MONITOR
+2026-01-14 00:34:52 | WARNING  | core.threat_logger | THREAT: suspicious_traffic | low | 10.158.246.62 -> Router
+2026-01-14 00:34:52 | INFO     | core.threat_logger | ACTION: MONITOR | 10.158.246.62 | decided
+2026-01-14 00:34:52 | INFO     | __main__ | Processing threat: suspicious_traffic from 10.108.250.117
+2026-01-14 00:34:52 | INFO     | __main__ | KAAL decided: MONITOR
+2026-01-14 00:34:52 | WARNING  | core.threat_logger | THREAT: suspicious_traffic | low | 10.108.250.117 -> Gaming Console
+2026-01-14 00:34:52 | INFO     | core.threat_logger | ACTION: MONITOR | 10.108.250.117 | decided
+2026-01-14 00:34:52 | INFO     | __main__ | Processing threat: port_scan from 10.189.137.36
+2026-01-14 00:34:52 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 00:34:52 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 00:34:52 | INFO     | core.deception_engine | Telnet honeypot HP-0006 listening on port 2328
+2026-01-14 00:34:52 | INFO     | core.deception_engine | Deployed honeypot HP-0006 (telnet:2328)
+2026-01-14 00:34:52 | WARNING  | core.threat_logger | THREAT: port_scan | medium | 10.189.137.36 -> Smart Speaker
+2026-01-14 00:34:52 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2328 | success
+2026-01-14 00:34:52 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 10.189.137.36 | decided
+2026-01-14 00:34:52 | INFO     | __main__ | Processing threat: brute_force from 10.109.233.71
+2026-01-14 00:34:52 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-14 00:34:52 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-14 00:34:52 | INFO     | core.deception_engine | Engaging attacker from 10.109.233.71
+2026-01-14 00:34:52 | INFO     | core.deception_engine | Deployed honeypot HP-0007 (telnet:2329)
+2026-01-14 00:34:52 | INFO     | core.deception_engine | Telnet honeypot HP-0007 listening on port 2329
+2026-01-14 00:34:52 | WARNING  | core.threat_logger | THREAT: brute_force | high | 10.109.233.71 -> Router
+2026-01-14 00:34:52 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2329 | success
+2026-01-14 00:34:52 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.109.233.71 | decided
+2026-01-14 00:34:53 | WARNING  | core.threat_logger | THREAT: brute_force | high | 10.206.69.143 -> Smart Speaker
+2026-01-14 00:34:53 | WARNING  | core.threat_logger | THREAT: dos_attack | high | 10.34.112.13 -> Smart TV
+2026-01-14 00:34:53 | WARNING  | core.threat_logger | THREAT: suspicious_traffic | low | 10.49.59.82 -> Smart Thermostat
+2026-01-14 00:34:53 | INFO     | __main__ | Processing threat: brute_force from 10.206.69.143
+2026-01-14 00:34:53 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-14 00:34:53 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-14 00:34:53 | INFO     | core.deception_engine | Engaging attacker from 10.206.69.143
+2026-01-14 00:34:53 | INFO     | core.deception_engine | Deployed honeypot HP-0008 (telnet:2330)
+2026-01-14 00:34:53 | INFO     | core.deception_engine | Telnet honeypot HP-0008 listening on port 2330
+2026-01-14 00:34:53 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2330 | success
+2026-01-14 00:34:53 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.206.69.143 | decided
+2026-01-14 00:34:53 | INFO     | __main__ | Processing threat: dos_attack from 10.34.112.13
+2026-01-14 00:34:53 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 00:34:53 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 00:34:53 | INFO     | core.deception_engine | Deployed honeypot HP-0009 (telnet:2331)
+2026-01-14 00:34:53 | INFO     | core.deception_engine | Telnet honeypot HP-0009 listening on port 2331
+2026-01-14 00:34:53 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2331 | success
+2026-01-14 00:34:53 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 10.34.112.13 | decided
+2026-01-14 00:34:53 | INFO     | __main__ | Processing threat: suspicious_traffic from 10.49.59.82
+2026-01-14 00:34:53 | INFO     | __main__ | KAAL decided: MONITOR
+2026-01-14 00:34:53 | INFO     | core.threat_logger | ACTION: MONITOR | 10.49.59.82 | decided
+2026-01-14 00:34:53 | INFO     | __main__ | Processing threat: brute_force from 10.68.142.26
+2026-01-14 00:34:53 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-14 00:34:53 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-14 00:34:54 | INFO     | core.deception_engine | Engaging attacker from 10.68.142.26
+2026-01-14 00:34:54 | INFO     | core.deception_engine | Deployed honeypot HP-0010 (telnet:2332)
+2026-01-14 00:34:54 | INFO     | core.deception_engine | Telnet honeypot HP-0010 listening on port 2332
+2026-01-14 00:34:54 | WARNING  | core.threat_logger | THREAT: brute_force | high | 10.68.142.26 -> Smart Thermostat
+2026-01-14 00:34:54 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2332 | success
+2026-01-14 00:34:54 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.68.142.26 | decided
+2026-01-14 00:34:54 | INFO     | __main__ | Processing threat: suspicious_traffic from 10.251.162.146
+2026-01-14 00:34:54 | INFO     | __main__ | KAAL decided: MONITOR
+2026-01-14 00:34:54 | WARNING  | core.threat_logger | THREAT: suspicious_traffic | low | 10.251.162.146 -> Smart Thermostat
+2026-01-14 00:34:54 | INFO     | core.threat_logger | ACTION: MONITOR | 10.251.162.146 | decided
+2026-01-14 00:34:54 | INFO     | __main__ | Processing threat: port_scan from 10.230.63.232
+2026-01-14 00:34:54 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 00:34:54 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 00:34:54 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:34:54 | WARNING  | core.threat_logger | THREAT: port_scan | medium | 10.230.63.232 -> Smart Speaker
+2026-01-14 00:34:54 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 10.230.63.232 | decided
+2026-01-14 00:34:54 | INFO     | __main__ | Processing threat: exploit_attempt from 10.185.159.24
+2026-01-14 00:34:54 | INFO     | __main__ | KAAL decided: ISOLATE_DEVICE
+2026-01-14 00:34:54 | WARNING  | __main__ | Action: Isolating device Smart Thermostat
+2026-01-14 00:34:54 | WARNING  | core.threat_logger | THREAT: exploit_attempt | critical | 10.185.159.24 -> Smart Thermostat
+2026-01-14 00:34:54 | INFO     | core.threat_logger | ACTION: ISOLATE_DEVICE | 10.185.159.24 | decided
+2026-01-14 00:34:54 | INFO     | __main__ | Processing threat: dos_attack from 10.79.211.205
+2026-01-14 00:34:54 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 00:34:54 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 00:34:54 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:34:54 | WARNING  | core.threat_logger | THREAT: dos_attack | high | 10.79.211.205 -> Smart Thermostat
+2026-01-14 00:34:54 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 10.79.211.205 | decided
+2026-01-14 00:34:54 | INFO     | __main__ | Processing threat: brute_force from 10.253.155.210
+2026-01-14 00:34:54 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-14 00:34:54 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-14 00:34:54 | INFO     | core.deception_engine | Engaging attacker from 10.253.155.210
+2026-01-14 00:34:54 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:34:54 | WARNING  | core.threat_logger | THREAT: brute_force | high | 10.253.155.210 -> Smart Lock
+2026-01-14 00:34:54 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.253.155.210 | decided
+2026-01-14 00:34:55 | INFO     | __main__ | Processing threat: suspicious_traffic from 10.230.54.76
+2026-01-14 00:34:55 | INFO     | __main__ | KAAL decided: MONITOR
+2026-01-14 00:34:55 | WARNING  | core.threat_logger | THREAT: suspicious_traffic | low | 10.230.54.76 -> Smart Thermostat
+2026-01-14 00:34:55 | INFO     | core.threat_logger | ACTION: MONITOR | 10.230.54.76 | decided
+2026-01-14 00:34:55 | INFO     | __main__ | Processing threat: suspicious_traffic from 10.116.231.231
+2026-01-14 00:34:55 | INFO     | __main__ | KAAL decided: MONITOR
+2026-01-14 00:34:55 | WARNING  | core.threat_logger | THREAT: suspicious_traffic | low | 10.116.231.231 -> Router
+2026-01-14 00:34:55 | INFO     | core.threat_logger | ACTION: MONITOR | 10.116.231.231 | decided
+2026-01-14 00:34:55 | INFO     | __main__ | Processing threat: port_scan from 10.3.150.130
+2026-01-14 00:34:55 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 00:34:55 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 00:34:55 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:34:55 | WARNING  | core.threat_logger | THREAT: port_scan | medium | 10.3.150.130 -> Smart TV
+2026-01-14 00:34:55 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 10.3.150.130 | decided
+2026-01-14 00:34:55 | INFO     | __main__ | Processing threat: brute_force from 10.0.103.252
+2026-01-14 00:34:55 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-14 00:34:55 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-14 00:34:55 | INFO     | core.deception_engine | Engaging attacker from 10.0.103.252
+2026-01-14 00:34:55 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:34:55 | WARNING  | core.threat_logger | THREAT: brute_force | high | 10.0.103.252 -> Router
+2026-01-14 00:34:55 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.0.103.252 | decided
+2026-01-14 00:34:55 | INFO     | __main__ | Processing threat: suspicious_traffic from 10.24.44.28
+2026-01-14 00:34:55 | INFO     | __main__ | KAAL decided: MONITOR
+2026-01-14 00:34:55 | WARNING  | core.threat_logger | THREAT: suspicious_traffic | low | 10.24.44.28 -> IP Camera
+2026-01-14 00:34:56 | INFO     | core.threat_logger | ACTION: MONITOR | 10.24.44.28 | decided
+2026-01-14 00:34:56 | INFO     | __main__ | Processing threat: brute_force from 10.150.136.160
+2026-01-14 00:34:56 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-14 00:34:56 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-14 00:34:56 | INFO     | core.deception_engine | Engaging attacker from 10.150.136.160
+2026-01-14 00:34:56 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:34:56 | WARNING  | core.threat_logger | THREAT: brute_force | high | 10.150.136.160 -> Smart Thermostat
+2026-01-14 00:34:56 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.150.136.160 | decided
+2026-01-14 00:34:56 | INFO     | __main__ | Processing threat: brute_force from 10.8.74.79
+2026-01-14 00:34:56 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-14 00:34:56 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-14 00:34:56 | INFO     | core.deception_engine | Engaging attacker from 10.8.74.79
+2026-01-14 00:34:56 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:34:56 | WARNING  | core.threat_logger | THREAT: brute_force | high | 10.8.74.79 -> Smart Bulb
+2026-01-14 00:34:56 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.8.74.79 | decided
+2026-01-14 00:34:56 | INFO     | __main__ | Processing threat: dos_attack from 10.130.40.36
+2026-01-14 00:34:56 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 00:34:56 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 00:34:56 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:34:56 | WARNING  | core.threat_logger | THREAT: dos_attack | high | 10.130.40.36 -> Smart TV
+2026-01-14 00:34:56 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 10.130.40.36 | decided
+2026-01-14 00:35:04 | WARNING  | core.threat_logger | THREAT: exploit_attempt | critical | 10.16.213.126 -> Smart Speaker
+2026-01-14 00:35:04 | INFO     | __main__ | Processing threat: exploit_attempt from 10.16.213.126
+2026-01-14 00:35:04 | INFO     | __main__ | KAAL decided: ISOLATE_DEVICE
+2026-01-14 00:35:04 | WARNING  | __main__ | Action: Isolating device Smart Speaker
+2026-01-14 00:35:04 | INFO     | core.threat_logger | ACTION: ISOLATE_DEVICE | 10.16.213.126 | decided
+2026-01-14 00:35:12 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:35:13 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:35:16 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:35:16 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:35:16 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:35:17 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:35:23 | WARNING  | core.threat_logger | THREAT: suspicious_traffic | low | 10.113.35.108 -> Smart Speaker
+2026-01-14 00:35:23 | INFO     | __main__ | Processing threat: suspicious_traffic from 10.113.35.108
+2026-01-14 00:35:23 | INFO     | __main__ | KAAL decided: MONITOR
+2026-01-14 00:35:23 | INFO     | core.threat_logger | ACTION: MONITOR | 10.113.35.108 | decided
+2026-01-14 00:35:36 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:35:37 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:35:40 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:35:41 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:35:41 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:35:41 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:35:42 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:35:43 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:35:43 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:35:43 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:35:49 | INFO     | __main__ | Processing threat: exploit_attempt from 10.7.248.6
+2026-01-14 00:35:49 | INFO     | __main__ | KAAL decided: ISOLATE_DEVICE
+2026-01-14 00:35:49 | WARNING  | __main__ | Action: Isolating device Smart TV
+2026-01-14 00:35:49 | WARNING  | core.threat_logger | THREAT: exploit_attempt | critical | 10.7.248.6 -> Smart TV
+2026-01-14 00:35:49 | INFO     | core.threat_logger | ACTION: ISOLATE_DEVICE | 10.7.248.6 | decided
+2026-01-14 00:35:56 | INFO     | __main__ | Processing threat: suspicious_traffic from 10.114.25.26
+2026-01-14 00:35:56 | INFO     | __main__ | KAAL decided: MONITOR
+2026-01-14 00:35:56 | WARNING  | core.threat_logger | THREAT: suspicious_traffic | low | 10.114.25.26 -> Smart Thermostat
+2026-01-14 00:35:56 | INFO     | core.threat_logger | ACTION: MONITOR | 10.114.25.26 | decided
+2026-01-14 00:36:43 | WARNING  | core.threat_logger | THREAT: exploit_attempt | critical | 10.60.192.153 -> Smart Speaker
+2026-01-14 00:36:44 | INFO     | __main__ | Processing threat: exploit_attempt from 10.60.192.153
+2026-01-14 00:36:44 | INFO     | __main__ | KAAL decided: ISOLATE_DEVICE
+2026-01-14 00:36:44 | WARNING  | __main__ | Action: Isolating device Smart Speaker
+2026-01-14 00:36:44 | INFO     | core.threat_logger | ACTION: ISOLATE_DEVICE | 10.60.192.153 | decided
+2026-01-14 00:36:46 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-14 00:36:46 | INFO     | core.deception_engine | Stopped all honeypots
+2026-01-14 00:36:46 | INFO     | __main__ | RAKSHAK stopped
+2026-01-14 00:37:01 | INFO     | __main__ | Initializing RAKSHAK components...
+2026-01-14 00:37:01 | INFO     | core.threat_logger | ThreatLogger initialized
+2026-01-14 00:37:01 | INFO     | core.network_scanner | Loaded 8 simulated devices
+2026-01-14 00:37:01 | INFO     | core.network_scanner | NetworkScanner initialized (simulation=True)
+2026-01-14 00:37:01 | WARNING  | core.agentic_defender | PyTorch not available, using rule-based decision making
+2026-01-14 00:37:01 | INFO     | core.agentic_defender | AgenticDefender initialized (rule-based mode)
+2026-01-14 00:37:01 | WARNING  | core.llm_honeypot | Running in template mode (no LLM)
+2026-01-14 00:37:01 | INFO     | core.llm_honeypot | LLMHoneypot initialized (LLM available: False)
+2026-01-14 00:37:01 | INFO     | core.deception_engine | DeceptionEngine initialized (enabled=True)
+2026-01-14 00:37:02 | INFO     | api.app | Flask app created successfully
+2026-01-14 00:37:02 | INFO     | __main__ | RAKSHAK components initialized successfully
+2026-01-14 00:37:02 | INFO     | __main__ | Starting RAKSHAK in SIMULATION mode...
+2026-01-14 00:37:30 | WARNING  | core.threat_logger | THREAT: port_scan | medium | 10.23.141.196 -> Gaming Console
+2026-01-14 00:37:31 | INFO     | __main__ | Processing threat: port_scan from 10.23.141.196
+2026-01-14 00:37:31 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 00:37:31 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 00:37:31 | INFO     | core.deception_engine | Deployed honeypot HP-0001 (telnet:2323)
+2026-01-14 00:37:31 | INFO     | core.deception_engine | Telnet honeypot HP-0001 listening on port 2323
+2026-01-14 00:37:31 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2323 | success
+2026-01-14 00:37:31 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 10.23.141.196 | decided
+2026-01-14 00:40:31 | INFO     | __main__ | Processing threat: dos_attack from 10.152.128.60
+2026-01-14 00:40:31 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 00:40:31 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 00:40:31 | INFO     | core.deception_engine | Deployed honeypot HP-0002 (telnet:2324)
+2026-01-14 00:40:31 | INFO     | core.deception_engine | Telnet honeypot HP-0002 listening on port 2324
+2026-01-14 00:40:31 | WARNING  | core.threat_logger | THREAT: dos_attack | high | 10.152.128.60 -> IP Camera
+2026-01-14 00:40:31 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2324 | success
+2026-01-14 00:40:31 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 10.152.128.60 | decided
+2026-01-14 00:40:36 | WARNING  | core.threat_logger | THREAT: brute_force | high | 10.148.205.91 -> IP Camera
+2026-01-14 00:40:36 | INFO     | __main__ | Processing threat: brute_force from 10.148.205.91
+2026-01-14 00:40:36 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-14 00:40:36 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-14 00:40:36 | INFO     | core.deception_engine | Engaging attacker from 10.148.205.91
+2026-01-14 00:40:36 | INFO     | core.deception_engine | Deployed honeypot HP-0003 (telnet:2325)
+2026-01-14 00:40:36 | INFO     | core.deception_engine | Telnet honeypot HP-0003 listening on port 2325
+2026-01-14 00:40:36 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2325 | success
+2026-01-14 00:40:36 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.148.205.91 | decided
+2026-01-14 00:40:46 | INFO     | __main__ | Processing threat: dos_attack from 10.161.184.248
+2026-01-14 00:40:46 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 00:40:46 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 00:40:46 | INFO     | core.deception_engine | Deployed honeypot HP-0004 (telnet:2326)
+2026-01-14 00:40:46 | INFO     | core.deception_engine | Telnet honeypot HP-0004 listening on port 2326
+2026-01-14 00:40:46 | WARNING  | core.threat_logger | THREAT: dos_attack | high | 10.161.184.248 -> Smart Thermostat
+2026-01-14 00:40:46 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2326 | success
+2026-01-14 00:40:46 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 10.161.184.248 | decided
+2026-01-14 00:40:49 | INFO     | core.deception_engine | Deployed honeypot HP-0005 (telnet:2327)
+2026-01-14 00:40:49 | INFO     | core.deception_engine | Telnet honeypot HP-0005 listening on port 2327
+2026-01-14 00:40:49 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2327 | success
+2026-01-14 00:42:33 | INFO     | core.deception_engine | Deployed honeypot HP-0006 (telnet:2328)
+2026-01-14 00:42:33 | INFO     | core.deception_engine | Telnet honeypot HP-0006 listening on port 2328
+2026-01-14 00:42:33 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2328 | success
+2026-01-14 00:42:35 | WARNING  | core.network_scanner | Device isolated: 192.168.1.101
+2026-01-14 00:42:35 | INFO     | core.threat_logger | ACTION: isolate_device | 192.168.1.101 | success
+2026-01-14 00:42:39 | INFO     | __main__ | Processing threat: brute_force from 10.116.212.27
+2026-01-14 00:42:39 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-14 00:42:39 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-14 00:42:39 | INFO     | core.deception_engine | Engaging attacker from 10.116.212.27
+2026-01-14 00:42:39 | INFO     | core.deception_engine | Deployed honeypot HP-0007 (telnet:2329)
+2026-01-14 00:42:39 | INFO     | core.deception_engine | Telnet honeypot HP-0007 listening on port 2329
+2026-01-14 00:42:39 | WARNING  | core.threat_logger | THREAT: brute_force | high | 10.116.212.27 -> Smart Lock
+2026-01-14 00:42:39 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2329 | success
+2026-01-14 00:42:39 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.116.212.27 | decided
+2026-01-14 00:42:39 | WARNING  | core.threat_logger | THREAT: suspicious_traffic | low | 10.244.141.19 -> Router
+2026-01-14 00:42:39 | WARNING  | core.threat_logger | THREAT: exploit_attempt | critical | 10.203.163.221 -> Smart Speaker
+2026-01-14 00:42:40 | INFO     | __main__ | Processing threat: suspicious_traffic from 10.244.141.19
+2026-01-14 00:42:40 | INFO     | __main__ | KAAL decided: MONITOR
+2026-01-14 00:42:40 | INFO     | core.threat_logger | ACTION: MONITOR | 10.244.141.19 | decided
+2026-01-14 00:42:40 | INFO     | __main__ | Processing threat: exploit_attempt from 10.203.163.221
+2026-01-14 00:42:40 | INFO     | __main__ | KAAL decided: ISOLATE_DEVICE
+2026-01-14 00:42:40 | WARNING  | __main__ | Action: Isolating device Smart Speaker
+2026-01-14 00:42:40 | INFO     | core.threat_logger | ACTION: ISOLATE_DEVICE | 10.203.163.221 | decided
+2026-01-14 00:42:40 | INFO     | __main__ | Processing threat: port_scan from 10.120.87.148
+2026-01-14 00:42:40 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 00:42:40 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 00:42:40 | INFO     | core.deception_engine | Deployed honeypot HP-0008 (telnet:2330)
+2026-01-14 00:42:40 | INFO     | core.deception_engine | Telnet honeypot HP-0008 listening on port 2330
+2026-01-14 00:42:40 | WARNING  | core.threat_logger | THREAT: port_scan | medium | 10.120.87.148 -> Smart TV
+2026-01-14 00:42:40 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2330 | success
+2026-01-14 00:42:40 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 10.120.87.148 | decided
+2026-01-14 00:42:40 | INFO     | __main__ | Processing threat: dos_attack from 10.38.199.248
+2026-01-14 00:42:40 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 00:42:40 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 00:42:40 | INFO     | core.deception_engine | Deployed honeypot HP-0009 (telnet:2331)
+2026-01-14 00:42:40 | INFO     | core.deception_engine | Telnet honeypot HP-0009 listening on port 2331
+2026-01-14 00:42:40 | WARNING  | core.threat_logger | THREAT: dos_attack | high | 10.38.199.248 -> Smart Speaker
+2026-01-14 00:42:40 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2331 | success
+2026-01-14 00:42:40 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 10.38.199.248 | decided
+2026-01-14 00:42:40 | INFO     | __main__ | Processing threat: dos_attack from 10.142.249.70
+2026-01-14 00:42:40 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 00:42:40 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 00:42:40 | INFO     | core.deception_engine | Deployed honeypot HP-0010 (telnet:2332)
+2026-01-14 00:42:40 | INFO     | core.deception_engine | Telnet honeypot HP-0010 listening on port 2332
+2026-01-14 00:42:40 | WARNING  | core.threat_logger | THREAT: dos_attack | high | 10.142.249.70 -> Smart Bulb
+2026-01-14 00:42:40 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2332 | success
+2026-01-14 00:42:40 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 10.142.249.70 | decided
+2026-01-14 00:42:40 | INFO     | __main__ | Processing threat: port_scan from 10.196.52.230
+2026-01-14 00:42:40 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 00:42:40 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 00:42:40 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:42:40 | WARNING  | core.threat_logger | THREAT: port_scan | medium | 10.196.52.230 -> Smart Speaker
+2026-01-14 00:42:40 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 10.196.52.230 | decided
+2026-01-14 00:42:42 | WARNING  | core.threat_logger | THREAT: dos_attack | high | 10.138.106.186 -> Smart Bulb
+2026-01-14 00:42:42 | INFO     | __main__ | Processing threat: dos_attack from 10.138.106.186
+2026-01-14 00:42:42 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 00:42:42 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 00:42:42 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:42:42 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 10.138.106.186 | decided
+2026-01-14 00:42:42 | INFO     | __main__ | Processing threat: dos_attack from 10.80.34.225
+2026-01-14 00:42:42 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 00:42:42 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 00:42:42 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:42:42 | WARNING  | core.threat_logger | THREAT: dos_attack | high | 10.80.34.225 -> Smart Thermostat
+2026-01-14 00:42:42 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 10.80.34.225 | decided
+2026-01-14 00:42:43 | INFO     | __main__ | Processing threat: dos_attack from 10.253.218.29
+2026-01-14 00:42:43 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 00:42:43 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 00:42:43 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:42:43 | WARNING  | core.threat_logger | THREAT: dos_attack | high | 10.253.218.29 -> Smart TV
+2026-01-14 00:42:43 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 10.253.218.29 | decided
+2026-01-14 00:42:43 | INFO     | __main__ | Processing threat: dos_attack from 10.101.147.181
+2026-01-14 00:42:43 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 00:42:43 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 00:42:43 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:42:43 | WARNING  | core.threat_logger | THREAT: dos_attack | high | 10.101.147.181 -> Gaming Console
+2026-01-14 00:42:43 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 10.101.147.181 | decided
+2026-01-14 00:42:43 | INFO     | __main__ | Processing threat: exploit_attempt from 10.17.20.31
+2026-01-14 00:42:43 | INFO     | __main__ | KAAL decided: ISOLATE_DEVICE
+2026-01-14 00:42:43 | WARNING  | __main__ | Action: Isolating device Smart Bulb
+2026-01-14 00:42:43 | WARNING  | core.threat_logger | THREAT: exploit_attempt | critical | 10.17.20.31 -> Smart Bulb
+2026-01-14 00:42:43 | INFO     | core.threat_logger | ACTION: ISOLATE_DEVICE | 10.17.20.31 | decided
+2026-01-14 00:42:43 | INFO     | __main__ | Processing threat: suspicious_traffic from 10.208.13.145
+2026-01-14 00:42:43 | INFO     | __main__ | KAAL decided: MONITOR
+2026-01-14 00:42:43 | WARNING  | core.threat_logger | THREAT: suspicious_traffic | low | 10.208.13.145 -> Router
+2026-01-14 00:42:43 | INFO     | core.threat_logger | ACTION: MONITOR | 10.208.13.145 | decided
+2026-01-14 00:42:43 | INFO     | __main__ | Processing threat: exploit_attempt from 10.150.250.192
+2026-01-14 00:42:43 | INFO     | __main__ | KAAL decided: ISOLATE_DEVICE
+2026-01-14 00:42:43 | WARNING  | __main__ | Action: Isolating device IP Camera
+2026-01-14 00:42:43 | WARNING  | core.threat_logger | THREAT: exploit_attempt | critical | 10.150.250.192 -> IP Camera
+2026-01-14 00:42:43 | INFO     | core.threat_logger | ACTION: ISOLATE_DEVICE | 10.150.250.192 | decided
+2026-01-14 00:42:44 | INFO     | __main__ | Processing threat: dos_attack from 10.20.69.98
+2026-01-14 00:42:44 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 00:42:44 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 00:42:44 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:42:44 | WARNING  | core.threat_logger | THREAT: dos_attack | high | 10.20.69.98 -> Smart Lock
+2026-01-14 00:42:44 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 10.20.69.98 | decided
+2026-01-14 00:42:44 | INFO     | __main__ | Processing threat: port_scan from 10.90.53.16
+2026-01-14 00:42:44 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 00:42:44 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 00:42:44 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:42:44 | WARNING  | core.threat_logger | THREAT: port_scan | medium | 10.90.53.16 -> Router
+2026-01-14 00:42:44 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 10.90.53.16 | decided
+2026-01-14 00:42:44 | INFO     | __main__ | Processing threat: brute_force from 10.65.33.63
+2026-01-14 00:42:44 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-14 00:42:44 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-14 00:42:44 | INFO     | core.deception_engine | Engaging attacker from 10.65.33.63
+2026-01-14 00:42:44 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:42:44 | WARNING  | core.threat_logger | THREAT: brute_force | high | 10.65.33.63 -> Smart Thermostat
+2026-01-14 00:42:44 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.65.33.63 | decided
+2026-01-14 00:42:44 | INFO     | __main__ | Processing threat: exploit_attempt from 10.79.68.234
+2026-01-14 00:42:44 | INFO     | __main__ | KAAL decided: ISOLATE_DEVICE
+2026-01-14 00:42:44 | WARNING  | __main__ | Action: Isolating device Router
+2026-01-14 00:42:44 | WARNING  | core.threat_logger | THREAT: exploit_attempt | critical | 10.79.68.234 -> Router
+2026-01-14 00:42:44 | INFO     | core.threat_logger | ACTION: ISOLATE_DEVICE | 10.79.68.234 | decided
+2026-01-14 00:42:44 | INFO     | __main__ | Processing threat: exploit_attempt from 10.175.242.138
+2026-01-14 00:42:44 | INFO     | __main__ | KAAL decided: ISOLATE_DEVICE
+2026-01-14 00:42:44 | WARNING  | __main__ | Action: Isolating device IP Camera
+2026-01-14 00:42:44 | WARNING  | core.threat_logger | THREAT: exploit_attempt | critical | 10.175.242.138 -> IP Camera
+2026-01-14 00:42:44 | INFO     | core.threat_logger | ACTION: ISOLATE_DEVICE | 10.175.242.138 | decided
+2026-01-14 00:42:44 | INFO     | __main__ | Processing threat: dos_attack from 10.96.123.235
+2026-01-14 00:42:44 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 00:42:44 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 00:42:44 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:42:44 | WARNING  | core.threat_logger | THREAT: dos_attack | high | 10.96.123.235 -> Router
+2026-01-14 00:42:44 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 10.96.123.235 | decided
+2026-01-14 00:42:51 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:42:52 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-14 00:52:48 | WARNING  | core.network_scanner | Device isolated: 192.168.1.102
+2026-01-14 00:52:48 | INFO     | core.threat_logger | ACTION: isolate_device | 192.168.1.102 | success
+2026-01-14 00:52:57 | WARNING  | core.network_scanner | Device isolated: 192.168.1.104
+2026-01-14 00:52:57 | INFO     | core.threat_logger | ACTION: isolate_device | 192.168.1.104 | success
+2026-01-14 00:57:18 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-14 00:57:18 | INFO     | core.deception_engine | Stopped all honeypots
+2026-01-14 00:57:18 | INFO     | __main__ | RAKSHAK stopped
+2026-01-14 00:57:28 | INFO     | __main__ | Initializing RAKSHAK components...
+2026-01-14 00:57:28 | INFO     | core.threat_logger | ThreatLogger initialized
+2026-01-14 00:57:28 | INFO     | core.network_scanner | Using fallback interface: wlo1
+2026-01-14 00:57:28 | INFO     | core.network_scanner | Auto-detected network range: 10.48.227.0/24
+2026-01-14 00:58:14 | INFO     | __main__ | Initializing RAKSHAK components...
+2026-01-14 00:58:14 | INFO     | core.threat_logger | ThreatLogger initialized
+2026-01-14 00:58:14 | INFO     | core.network_scanner | Using fallback interface: wlo1
+2026-01-14 00:58:14 | INFO     | core.network_scanner | Auto-detected network range: 10.48.227.0/24
+2026-01-14 00:58:14 | WARNING  | core.network_scanner | nmap binary not found: 'nmap program was not found in path. PATH is : /home/sajal/Desktop/Hackathons/e-raksha/venv/bin:/home/sajal/.local/bin:/home/sajal/development/flutter/bin:/home/sajal/.config/Code/User/globalStorage/github.copilot-chat/debugCommand:/home/sajal/.config/Code/User/globalStorage/github.copilot-chat/copilotCli:/home/sajal/.local/bin:/home/sajal/.local/bin:/home/sajal/development/flutter/bin:/home/sajal/.nvm/versions/node/v24.12.0/bin:/home/sajal/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin:/home/sajal/.pub-cache/bin:/home/sajal/.foundry/bin:/home/sajal/.pub-cache/bin:/home/sajal/.foundry/bin'
+2026-01-14 00:58:14 | INFO     | core.network_scanner | Loaded 8 simulated devices
+2026-01-14 00:58:14 | INFO     | core.network_scanner | NetworkScanner initialized (simulation=True)
+2026-01-14 00:58:14 | WARNING  | core.agentic_defender | PyTorch not available, using rule-based decision making
+2026-01-14 00:58:14 | INFO     | core.agentic_defender | AgenticDefender initialized (rule-based mode)
+2026-01-14 00:58:14 | WARNING  | core.llm_honeypot | Running in template mode (no LLM)
+2026-01-14 00:58:14 | INFO     | core.llm_honeypot | LLMHoneypot initialized (LLM available: False, backend: None)
+2026-01-14 00:58:14 | INFO     | core.deception_engine | DeceptionEngine initialized (enabled=True)
+2026-01-14 00:58:14 | INFO     | api.app | Flask app created successfully
+2026-01-14 00:58:14 | INFO     | __main__ | RAKSHAK components initialized successfully
+2026-01-14 00:58:14 | INFO     | __main__ | Starting RAKSHAK in SIMULATION mode...
+2026-01-14 00:58:44 | WARNING  | core.threat_logger | THREAT: port_scan | medium | 10.119.185.102 -> IP Camera
+2026-01-14 00:58:44 | INFO     | __main__ | Processing threat: port_scan from 10.119.185.102
+2026-01-14 00:58:44 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 00:58:44 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 00:58:44 | INFO     | core.deception_engine | Deployed honeypot HP-0001 (telnet:2323)
+2026-01-14 00:58:44 | INFO     | core.deception_engine | Telnet honeypot HP-0001 listening on port 2323
+2026-01-14 00:58:44 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2323 | success
+2026-01-14 00:58:44 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 10.119.185.102 | decided
+2026-01-14 01:24:35 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-14 01:24:35 | INFO     | core.deception_engine | Stopped all honeypots
+2026-01-14 01:24:35 | INFO     | __main__ | RAKSHAK stopped
+2026-01-14 01:24:45 | INFO     | __main__ | Initializing RAKSHAK components...
+2026-01-14 01:24:45 | INFO     | core.threat_logger | ThreatLogger initialized
+2026-01-14 01:24:45 | INFO     | core.network_scanner | Using fallback interface: wlo1
+2026-01-14 01:24:45 | INFO     | core.network_scanner | Auto-detected network range: 10.48.227.0/24
+2026-01-14 01:24:45 | INFO     | core.network_scanner | Loaded 8 simulated devices
+2026-01-14 01:24:45 | INFO     | core.network_scanner | NetworkScanner initialized (simulation=True)
+2026-01-14 01:24:45 | WARNING  | core.agentic_defender | PyTorch not available, using rule-based decision making
+2026-01-14 01:24:45 | INFO     | core.agentic_defender | AgenticDefender initialized (rule-based mode)
+2026-01-14 01:24:45 | INFO     | core.llm_honeypot | Ollama initialized with model: mistral:7b
+2026-01-14 01:24:45 | INFO     | core.llm_honeypot | LLMHoneypot initialized (LLM available: True, backend: ollama)
+2026-01-14 01:24:45 | INFO     | core.deception_engine | DeceptionEngine initialized (enabled=True)
+2026-01-14 01:24:45 | INFO     | api.app | Flask app created successfully
+2026-01-14 01:24:45 | INFO     | __main__ | RAKSHAK components initialized successfully
+2026-01-14 01:24:45 | INFO     | __main__ | Starting RAKSHAK in SIMULATION mode...
+2026-01-14 01:26:21 | WARNING  | core.threat_logger | THREAT: dos_attack | high | 10.46.172.103 -> Smart Bulb
+2026-01-14 01:26:21 | INFO     | __main__ | Processing threat: dos_attack from 10.46.172.103
+2026-01-14 01:26:21 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 01:26:21 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 01:26:22 | INFO     | core.deception_engine | Deployed honeypot HP-0001 (telnet:2323)
+2026-01-14 01:26:22 | INFO     | core.deception_engine | Telnet honeypot HP-0001 listening on port 2323
+2026-01-14 01:26:22 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2323 | success
+2026-01-14 01:26:22 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 10.46.172.103 | decided
+2026-01-14 01:26:44 | INFO     | core.deception_engine | Deployed honeypot HP-0002 (telnet:2324)
+2026-01-14 01:26:44 | INFO     | core.deception_engine | Telnet honeypot HP-0002 listening on port 2324
+2026-01-14 01:26:44 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2324 | success
+2026-01-14 01:27:01 | INFO     | core.deception_engine | New telnet connection from 127.0.0.1:56516
+2026-01-14 01:27:01 | INFO     | __main__ | Processing threat: honeypot_connection from 127.0.0.1
+2026-01-14 01:27:01 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 01:27:01 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 01:27:01 | INFO     | core.deception_engine | Deployed honeypot HP-0003 (telnet:2325)
+2026-01-14 01:27:01 | INFO     | core.deception_engine | Telnet honeypot HP-0003 listening on port 2325
+2026-01-14 01:27:01 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 127.0.0.1 -> Honeypot HP-0001
+2026-01-14 01:27:01 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2325 | success
+2026-01-14 01:27:01 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 127.0.0.1 | decided
+2026-01-14 01:29:00 | INFO     | core.deception_engine | Login attempt: admin:admin
+2026-01-14 01:29:00 | INFO     | core.llm_honeypot | Login attempt: admin:admin
+2026-01-14 01:29:16 | INFO     | core.deception_engine | Honeypot command: cat
+2026-01-14 01:29:28 | INFO     | core.deception_engine | New telnet connection from 127.0.0.1:54598
+2026-01-14 01:29:28 | INFO     | __main__ | Processing threat: honeypot_connection from 127.0.0.1
+2026-01-14 01:29:28 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 01:29:28 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 01:29:28 | INFO     | core.deception_engine | Deployed honeypot HP-0004 (telnet:2326)
+2026-01-14 01:29:28 | INFO     | core.deception_engine | Telnet honeypot HP-0004 listening on port 2326
+2026-01-14 01:29:28 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 127.0.0.1 -> Honeypot HP-0001
+2026-01-14 01:29:28 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2326 | success
+2026-01-14 01:29:28 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 127.0.0.1 | decided
+2026-01-14 01:29:35 | INFO     | core.deception_engine | Login attempt: admin:admin
+2026-01-14 01:29:35 | INFO     | core.llm_honeypot | Login attempt: admin:admin
+2026-01-14 01:29:40 | INFO     | core.deception_engine | Honeypot command: ls
+2026-01-14 01:29:46 | WARNING  | core.llm_honeypot | Ollama request timed out, falling back to template
+2026-01-14 01:29:46 | INFO     | core.deception_engine | Session SES-127001-56516 ended: 1 commands, 164.9s duration
+2026-01-14 01:29:53 | INFO     | core.deception_engine | Honeypot command: whoami
+2026-01-14 01:31:42 | INFO     | core.deception_engine | Deployed honeypot HP-0005 (telnet:2327)
+2026-01-14 01:31:42 | INFO     | core.deception_engine | Telnet honeypot HP-0005 listening on port 2327
+2026-01-14 01:31:42 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2327 | success
+2026-01-14 01:32:29 | INFO     | core.deception_engine | Session SES-127001-54598 ended: 2 commands, 181.0s duration
+2026-01-14 01:32:48 | INFO     | core.deception_engine | New telnet connection from 127.0.0.1:51122
+2026-01-14 01:32:48 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 127.0.0.1 -> Honeypot HP-0001
+2026-01-14 01:32:48 | INFO     | __main__ | Processing threat: honeypot_connection from 127.0.0.1
+2026-01-14 01:32:48 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 01:32:48 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 01:32:48 | INFO     | core.deception_engine | Deployed honeypot HP-0006 (telnet:2328)
+2026-01-14 01:32:48 | INFO     | core.deception_engine | Telnet honeypot HP-0006 listening on port 2328
+2026-01-14 01:32:48 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2328 | success
+2026-01-14 01:32:48 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 127.0.0.1 | decided
+2026-01-14 01:33:01 | INFO     | core.deception_engine | Login attempt: admin:admin
+2026-01-14 01:33:01 | INFO     | core.llm_honeypot | Login attempt: admin:admin
+2026-01-14 01:33:14 | INFO     | core.deception_engine | Honeypot command: whoami
+2026-01-14 01:33:21 | INFO     | core.deception_engine | Honeypot command: ls -la
+2026-01-14 01:33:34 | INFO     | core.deception_engine | Honeypot command: cat /etc/passwd
+2026-01-14 01:33:43 | INFO     | core.deception_engine | Honeypot command: uname -a
+2026-01-14 01:34:14 | INFO     | core.deception_engine | Honeypot command: ifconfig
+2026-01-14 01:34:26 | INFO     | core.deception_engine | Honeypot command: ps aux
+2026-01-14 01:35:21 | INFO     | core.deception_engine | Honeypot command: exit
+2026-01-14 01:35:21 | INFO     | core.deception_engine | Session SES-127001-51122 ended: 7 commands, 152.8s duration
+2026-01-14 01:41:49 | INFO     | core.deception_engine | New telnet connection from 127.0.0.1:45838
+2026-01-14 01:41:49 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 127.0.0.1 -> Honeypot HP-0001
+2026-01-14 01:41:49 | INFO     | __main__ | Processing threat: honeypot_connection from 127.0.0.1
+2026-01-14 01:41:49 | INFO     | __main__ | KAAL decided: DEPLOY_HONEYPOT
+2026-01-14 01:41:49 | INFO     | __main__ | Action: Deploying honeypot
+2026-01-14 01:41:49 | INFO     | core.deception_engine | Deployed honeypot HP-0007 (telnet:2329)
+2026-01-14 01:41:49 | INFO     | core.deception_engine | Telnet honeypot HP-0007 listening on port 2329
+2026-01-14 01:41:49 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2329 | success
+2026-01-14 01:41:49 | INFO     | core.threat_logger | ACTION: DEPLOY_HONEYPOT | 127.0.0.1 | decided
+2026-01-14 01:41:54 | INFO     | core.deception_engine | Login attempt: admin:admin
+2026-01-14 01:41:54 | INFO     | core.llm_honeypot | Login attempt: admin:admin
+2026-01-14 01:41:56 | INFO     | core.deception_engine | Honeypot command: ls
+2026-01-14 01:41:59 | INFO     | core.deception_engine | Honeypot command: cd ho
+2026-01-14 01:42:07 | INFO     | core.deception_engine | Honeypot command: me
+2026-01-14 01:42:22 | INFO     | core.deception_engine | Honeypot command: excicd home
+2026-01-14 01:42:27 | INFO     | core.deception_engine | Honeypot command: ls
+2026-01-14 01:42:35 | INFO     | core.deception_engine | Honeypot command: cd ,/home
+2026-01-14 01:42:48 | INFO     | core.deception_engine | Honeypot command: cd ./home
+2026-01-14 01:42:54 | INFO     | core.deception_engine | Honeypot command: ls
+2026-01-14 01:44:06 | INFO     | core.deception_engine | Honeypot command: cd ..
+2026-01-14 01:44:11 | INFO     | core.deception_engine | Honeypot command: ls
+2026-01-14 04:51:57 | INFO     | core.deception_engine | Session SES-127001-45838 ended: 10 commands, 11408.0s duration
+2026-01-14 04:52:09 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-14 04:52:09 | INFO     | core.deception_engine | Stopped all honeypots
+2026-01-14 04:52:09 | INFO     | __main__ | RAKSHAK stopped
+2026-01-14 16:01:03 | INFO     | __main__ | Initializing RAKSHAK components...
+2026-01-14 16:01:03 | INFO     | core.threat_logger | ThreatLogger initialized
+2026-01-14 16:01:03 | INFO     | core.network_scanner | Using fallback interface: wlo1
+2026-01-14 16:01:03 | INFO     | core.network_scanner | Auto-detected network range: 10.48.227.0/24
+2026-01-14 16:01:03 | INFO     | core.network_scanner | NetworkScanner initialized (simulation=False)
+2026-01-14 16:01:03 | WARNING  | core.agentic_defender | PyTorch not available, using rule-based decision making
+2026-01-14 16:01:03 | INFO     | core.agentic_defender | AgenticDefender initialized (rule-based mode)
+2026-01-14 16:01:03 | INFO     | core.llm_honeypot | Ollama initialized with model: mistral:7b
+2026-01-14 16:01:03 | INFO     | core.llm_honeypot | LLMHoneypot initialized (LLM available: True, backend: ollama)
+2026-01-14 16:01:03 | INFO     | core.deception_engine | DeceptionEngine initialized (enabled=True)
+2026-01-14 16:01:03 | INFO     | api.app | Flask app created successfully
+2026-01-14 16:01:03 | INFO     | __main__ | RAKSHAK components initialized successfully
+2026-01-14 16:01:03 | INFO     | __main__ | Starting RAKSHAK in LIVE mode...
+2026-01-14 16:01:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:01:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:02:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:02:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:03:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:03:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:03:50 | INFO     | core.deception_engine | Deployed honeypot HP-0001 (telnet:2323)
+2026-01-14 16:03:50 | INFO     | core.deception_engine | Telnet honeypot HP-0001 listening on port 2323
+2026-01-14 16:03:50 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2323 | success
+2026-01-14 16:04:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:04:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:05:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:05:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:06:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:06:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:07:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:07:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:08:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:08:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:09:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:09:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:10:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:10:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:11:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:11:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:12:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:12:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:13:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:13:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:14:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:14:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:15:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:15:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:16:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:16:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:17:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:17:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:18:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:18:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:19:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:19:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:20:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:20:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:21:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:21:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:22:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:22:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:23:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:23:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:24:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:24:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:25:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:25:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:26:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:26:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:27:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:27:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:28:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:28:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:29:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:29:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:30:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:30:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:31:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:31:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:32:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:32:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:33:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:33:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:34:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:34:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:35:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:35:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:36:03 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:36:03 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:37:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:37:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:38:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:38:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:39:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:39:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:40:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:40:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:41:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:41:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:42:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:42:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:43:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:43:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:44:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:44:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:45:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:45:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:46:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:46:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:47:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:47:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:48:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:48:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:49:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:49:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:50:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:50:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:51:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:51:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:52:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:52:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:53:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:53:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:54:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:54:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:55:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:55:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:56:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:56:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:57:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:57:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:58:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:58:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 16:59:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 16:59:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:00:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:00:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:01:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:01:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:02:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:02:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:03:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:03:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:04:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:04:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:05:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:05:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:06:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:06:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:07:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:07:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:08:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:08:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:09:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:09:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:10:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:10:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:11:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:11:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:12:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:12:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:13:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:13:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:14:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:14:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:15:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:15:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:16:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:16:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:17:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:17:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:18:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:18:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:19:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:19:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:20:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:20:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:21:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:21:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:22:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:22:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:23:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:23:04 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:24:04 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:24:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:25:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:25:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:26:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:26:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:27:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:27:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:28:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:28:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:29:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:29:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:30:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:30:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:31:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:31:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:32:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:32:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:33:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:33:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:34:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:34:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:35:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:35:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:36:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:36:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:37:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:37:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:38:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:38:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:39:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:39:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:40:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:40:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:41:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:41:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:42:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:42:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:43:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:43:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:44:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:44:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:45:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:45:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:46:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:46:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:47:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:47:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:48:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:48:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:49:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:49:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:50:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:50:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:51:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:51:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:52:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:52:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:53:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:53:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:54:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:54:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:55:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:55:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:56:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:56:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:57:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:57:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:58:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:58:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 17:59:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 17:59:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:00:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:00:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:01:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:01:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:02:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:02:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:03:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:03:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:04:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:04:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:05:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:05:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:06:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:06:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:07:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:07:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:08:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:08:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:09:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:09:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:10:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:10:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:11:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:11:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:12:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:12:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:13:05 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:13:05 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:14:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:14:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:15:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:15:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:16:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:16:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:17:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:17:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:18:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:18:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:19:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:19:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:20:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:20:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:21:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:21:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:22:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:22:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:23:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:23:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:24:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:24:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:25:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:25:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:26:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:26:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:27:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:27:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:28:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:28:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:29:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:29:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:30:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:30:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:31:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:31:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:32:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:32:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:33:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:33:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:34:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:34:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:35:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:35:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:36:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:36:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:37:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:37:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:38:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:38:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:39:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:39:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:40:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:40:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:41:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:41:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:42:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:42:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:43:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:43:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:44:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:44:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:45:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:45:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:46:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:46:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:47:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:47:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:48:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:48:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:49:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:49:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:50:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:50:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:51:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:51:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:52:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:52:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:53:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:53:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:54:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:54:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:55:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:55:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:56:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:56:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:57:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:57:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:58:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:58:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 18:59:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 18:59:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:00:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:00:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:01:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:01:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:02:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:02:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:03:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:03:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:04:06 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:04:06 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:05:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:05:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:06:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:06:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:07:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:07:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:08:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:08:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:09:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:09:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:10:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:10:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:11:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:11:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:12:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:12:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:13:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:13:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:14:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:14:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:15:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:15:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:16:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:16:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:17:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:17:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:18:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:18:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:19:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:19:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:20:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:20:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:21:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:21:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:22:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:22:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:23:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:23:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:24:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:24:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:25:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:25:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:26:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:26:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:27:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:27:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:28:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:28:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:29:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:29:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:30:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:30:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:31:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:31:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:32:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:32:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:33:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:33:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:34:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:34:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:35:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:35:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:36:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:36:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:37:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:37:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:38:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:38:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:39:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:39:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:40:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:40:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:41:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:41:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:42:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:42:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:43:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:43:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:44:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:44:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:45:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:45:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:46:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:46:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:47:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:47:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:48:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:48:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:49:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:49:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:50:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:50:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:51:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:51:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:52:07 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:52:07 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:53:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:53:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:54:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:54:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:55:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:55:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:56:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:56:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:57:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:57:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:58:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:58:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 19:59:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 19:59:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:00:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:00:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:01:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:01:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:02:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:02:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:03:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:03:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:04:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:04:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:05:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:05:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:06:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:06:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:07:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:07:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:08:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:08:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:09:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:09:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:10:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:10:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:11:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:11:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:12:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:12:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:13:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:13:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:14:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:14:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:15:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:15:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:16:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:16:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:17:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:17:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:18:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:18:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:19:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:19:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:20:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:20:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:21:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:21:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:22:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:22:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:23:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:23:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:24:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:24:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:25:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:25:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:26:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:26:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:27:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:27:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:28:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:28:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:29:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:29:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:30:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:30:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:31:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:31:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:32:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:32:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:33:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:33:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:34:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:34:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:35:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:35:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:36:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:36:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:37:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:37:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:38:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:38:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:39:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:39:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:40:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:40:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:41:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:41:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:42:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:42:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:43:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:43:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:44:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:44:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:45:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:45:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:46:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:46:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:47:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:47:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:48:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:48:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:49:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:49:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:50:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:50:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:51:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:51:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:52:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:52:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:53:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:53:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:54:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:54:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:55:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:55:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:56:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:56:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:57:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:57:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:58:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:58:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 20:59:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 20:59:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:00:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:00:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:01:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:01:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:02:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:02:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:03:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:03:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:04:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:04:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:05:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:05:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:06:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:06:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:07:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:07:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:08:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:08:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:09:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:09:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:10:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:10:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:11:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:11:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:12:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:12:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:13:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:13:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:14:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:14:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:15:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:15:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:16:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:16:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:17:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:17:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:18:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:18:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:19:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:19:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:20:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:20:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:21:08 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:21:08 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:22:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:22:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:23:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:23:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:24:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:24:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:25:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:25:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:26:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:26:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:27:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:27:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:28:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:28:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:29:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:29:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:30:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:30:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:31:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:31:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:32:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:32:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:33:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:33:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:34:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:34:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:35:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:35:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:36:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:36:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:37:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:37:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:38:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:38:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:39:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:39:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:40:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:40:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:41:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:41:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:42:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:42:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:43:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:43:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:44:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:44:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:45:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:45:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:46:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:46:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:47:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:47:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:48:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:48:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:49:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:49:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:50:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:50:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:51:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:51:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:52:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:52:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:53:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:53:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:54:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:54:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:55:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:55:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:56:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:56:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:57:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:57:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:58:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:58:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 21:59:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 21:59:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:00:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:00:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:01:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:01:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:02:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:02:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:03:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:03:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:04:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:04:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:05:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:05:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:06:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:06:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:07:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:07:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:08:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:08:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:09:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:09:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:10:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:10:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:11:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:11:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:12:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:12:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:13:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:13:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:14:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:14:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:15:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:15:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:16:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:16:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:17:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:17:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:18:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:18:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:19:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:19:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:20:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:20:09 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:21:09 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:21:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:22:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:22:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:23:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:23:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:24:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:24:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:25:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:25:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:26:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:26:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:27:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:27:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:28:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:28:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:29:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:29:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:30:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:30:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:31:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:31:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:32:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:32:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:33:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:33:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:34:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:34:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:35:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:35:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:36:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:36:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:37:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:37:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:38:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:38:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:39:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:39:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:40:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:40:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:41:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:41:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:42:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:42:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:43:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:43:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:44:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:44:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:45:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:45:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:46:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:46:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:47:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:47:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:48:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:48:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:49:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:49:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:50:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:50:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:51:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:51:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-14 22:52:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
+2026-01-14 22:52:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges

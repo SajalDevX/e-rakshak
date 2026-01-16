@@ -1,0 +1,442 @@
+# =============================================================================
+# RAKSHAK Configuration
+# India's First Agentic AI Cyber Guardian for Home IoT
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# General Settings
+# -----------------------------------------------------------------------------
+general:
+  app_name: "RAKSHAK"
+  version: "1.0.0"
+  debug: true
+  log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  language: "en"     # en, hi (English, Hindi)
+
+# -----------------------------------------------------------------------------
+# Simulation Mode (for testing without real network)
+# -----------------------------------------------------------------------------
+simulation:
+  enabled: false     # Set to true for simulation, false for real network scanning
+  num_fake_devices: 8
+  attack_interval: 30  # seconds between simulated attacks
+  fake_devices:
+    - name: "Smart TV"
+      ip: "192.168.1.101"
+      mac: "AA:BB:CC:DD:EE:01"
+      device_type: "samsung_tv"
+      risk_score: 45
+    - name: "IP Camera"
+      ip: "192.168.1.102"
+      mac: "AA:BB:CC:DD:EE:02"
+      device_type: "wyze_cam"
+      risk_score: 75
+    - name: "Smart Speaker"
+      ip: "192.168.1.103"
+      mac: "AA:BB:CC:DD:EE:03"
+      device_type: "alexa"
+      risk_score: 30
+    - name: "Smart Bulb"
+      ip: "192.168.1.104"
+      mac: "AA:BB:CC:DD:EE:04"
+      device_type: "philips_hue"
+      risk_score: 20
+    - name: "Router"
+      ip: "192.168.1.1"
+      mac: "AA:BB:CC:DD:EE:05"
+      device_type: "tp_link"
+      risk_score: 60
+    - name: "Smart Thermostat"
+      ip: "192.168.1.105"
+      mac: "AA:BB:CC:DD:EE:06"
+      device_type: "nest"
+      risk_score: 35
+    - name: "Gaming Console"
+      ip: "192.168.1.106"
+      mac: "AA:BB:CC:DD:EE:07"
+      device_type: "playstation"
+      risk_score: 25
+    - name: "Smart Lock"
+      ip: "192.168.1.107"
+      mac: "AA:BB:CC:DD:EE:08"
+      device_type: "august_lock"
+      risk_score: 85
+
+# -----------------------------------------------------------------------------
+# Network Scanner (MAYA) Settings
+# -----------------------------------------------------------------------------
+network:
+  interface: "auto"          # "auto" to auto-detect, or specify: eth0, wlan0, enp0s3
+  scan_network: "auto"       # "auto" to auto-detect, or specify: 192.168.1.0/24
+  scan_interval: 60          # seconds between network scans
+  arp_timeout: 5             # seconds to wait for ARP responses
+  nmap_arguments: "-sV -O --osscan-guess"
+  whitelist_ips:             # IPs to never flag as threats
+    - "192.168.1.1"          # Router
+  risky_services:
+    - "telnet"
+    - "ftp"
+    - "http"
+    - "upnp"
+    - "mqtt"
+    - "rtsp"
+
+# -----------------------------------------------------------------------------
+# Agentic Defender (KAAL) Settings
+# -----------------------------------------------------------------------------
+agent:
+  model_path: "models/dqn_model.pth"
+  state_size: 10
+  action_size: 5
+  actions:
+    0: "MONITOR"
+    1: "DEPLOY_HONEYPOT"
+    2: "ISOLATE_DEVICE"
+    3: "ENGAGE_ATTACKER"
+    4: "ALERT_USER"
+
+  # Dueling DQN Hyperparameters
+  learning_rate: 0.001
+  gamma: 0.99              # Discount factor
+  epsilon_start: 1.0       # Initial exploration rate
+  epsilon_end: 0.01        # Minimum exploration rate
+  epsilon_decay: 0.995     # Decay rate per episode
+  batch_size: 64
+  memory_size: 10000       # Experience replay buffer size
+  target_update: 10        # Update target network every N episodes
+
+  # Network architecture
+  hidden_layers:
+    - 128
+    - 128
+
+  # Threat severity thresholds
+  severity_thresholds:
+    low: 30
+    medium: 60
+    high: 80
+    critical: 95
+
+# -----------------------------------------------------------------------------
+# LLM Honeypot (PRAHARI) Settings
+# -----------------------------------------------------------------------------
+llm:
+  # Ollama settings (preferred - local LLM server)
+  ollama_enabled: true
+  ollama_url: "http://localhost:11434"
+  ollama_model: "mistral:7b"   # or llama2:7b, phi3:mini
+
+  # Transformers settings (fallback if Ollama unavailable)
+  model_name: "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+  model_path: "models/tinyllama"
+  quantization: "int8"     # int8, int4, or none
+  max_new_tokens: 256
+  temperature: 0.7
+  do_sample: true
+  auto_download: true      # Download model on first run
+
+  # Device personas for honeypot
+  personas:
+    wyze_cam:
+      name: "Wyze Cam v2"
+      firmware: "4.9.8.1002"
+      os: "Linux 3.4.35"
+      banner: "Wyze Camera v2 - RTSP Server"
+    tp_link:
+      name: "TP-Link Archer C7"
+      firmware: "3.15.3"
+      os: "Linux 2.6.36"
+      banner: "TP-Link HTTP Server"
+    samsung_tv:
+      name: "Samsung Smart TV"
+      firmware: "T-KTMAKUC"
+      os: "Tizen 5.5"
+      banner: "Samsung TV Web Service"
+    alexa:
+      name: "Amazon Echo Dot"
+      firmware: "642480520"
+      os: "Fire OS 7.2"
+      banner: "Amazon Device Service"
+    nest:
+      name: "Nest Thermostat"
+      firmware: "5.9.3-7"
+      os: "Linux 4.4"
+      banner: "Nest Home Device"
+
+# -----------------------------------------------------------------------------
+# Deception Engine (CHAKRAVYUH) Settings
+# -----------------------------------------------------------------------------
+deception:
+  enabled: true
+  max_honeypots: 10
+  honeypot_ports:
+    telnet: 2323
+    ssh: 2222
+    http: 8080
+    mqtt: 1883
+    rtsp: 5540
+
+  # Multi-layer trap configuration
+  layers:
+    detection:
+      enabled: true
+      log_all_connections: true
+    decoy:
+      enabled: true
+      deploy_fake_devices: true
+    trap:
+      enabled: true
+      engage_attackers: true
+    intelligence:
+      enabled: true
+      capture_ttps: true
+      export_format: "cctns"  # cctns, json, stix
+
+# -----------------------------------------------------------------------------
+# Flask API & Dashboard (DRISHTI) Settings
+# -----------------------------------------------------------------------------
+api:
+  host: "0.0.0.0"
+  port: 5000
+  secret_key: "rakshak-secret-key-change-in-production"
+  cors_origins: "*"
+
+  # WebSocket settings
+  websocket:
+    enabled: true
+    ping_interval: 25
+    ping_timeout: 120
+
+dashboard:
+  title: "RAKSHAK Dashboard"
+  refresh_interval: 5000   # milliseconds
+  max_events_display: 100
+  themes:
+    default: "dark"
+    available:
+      - "dark"
+      - "light"
+
+  # Notification settings
+  notifications:
+    enabled: true
+    sound: true
+    languages:
+      - "en"
+      - "hi"
+
+# -----------------------------------------------------------------------------
+# Database Settings
+# -----------------------------------------------------------------------------
+database:
+  type: "sqlite"
+  path: "data/rakshak.db"
+
+  # Redis (optional, for caching)
+  redis:
+    enabled: false
+    host: "localhost"
+    port: 6379
+    db: 0
+
+# -----------------------------------------------------------------------------
+# Logging Settings
+# -----------------------------------------------------------------------------
+logging:
+  format: "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
+  file: "data/logs/rakshak.log"
+  max_size: 10485760       # 10 MB
+  backup_count: 5
+
+  # Threat logging
+  threats:
+    file: "data/threats/threats.json"
+    export_cctns: true
+
+# =============================================================================
+# INLINE SECURITY GATEWAY CONFIGURATION (MANDATORY)
+# =============================================================================
+# RAKSHAK operates as an inline security gateway. This is NOT optional.
+# All traffic flows through Jetson Xavier NX for inspection and control.
+#
+# Network Topology:
+#   Internet → Modem → [Jetson eth0] ←→ [Jetson eth1] → Router (AP) → IoT
+#
+# =============================================================================
+
+gateway:
+  # ---------------------------------------------------------------------------
+  # Core Settings (MANDATORY - DO NOT DISABLE)
+  # ---------------------------------------------------------------------------
+  enabled: true                     # Gateway mode is always enabled
+  mode: "inline"                    # "inline" = mandatory gateway mode
+                                    # "standalone" = legacy passive mode (testing only)
+
+  # ---------------------------------------------------------------------------
+  # Network Interface Configuration
+  # ---------------------------------------------------------------------------
+  # WAN Interface: Connected to modem/ISP (gets public IP via DHCP)
+  wan_interface: "eth0"             # Built-in ethernet on Jetson
+
+  # LAN Interface: Connected to router in AP mode (static IP)
+  lan_interface: "eth1"             # USB-to-Ethernet adapter
+                                    # Can also be "auto" for auto-detection
+
+  # Auto-detection settings
+  auto_detect_interfaces: true      # Automatically find USB ethernet
+  usb_ethernet_patterns:            # Patterns to match USB ethernet
+    - "eth1"
+    - "enx*"                        # Standard USB ethernet naming
+    - "enp*s*u*"                    # USB ethernet alternative naming
+
+  # ---------------------------------------------------------------------------
+  # LAN Network Configuration
+  # ---------------------------------------------------------------------------
+  lan_ip: "192.168.100.1"           # Gateway IP address
+  lan_netmask: "255.255.255.0"      # Subnet mask
+  lan_network: "192.168.100.0/24"   # Network CIDR
+
+  # ---------------------------------------------------------------------------
+  # DHCP Server Configuration (dnsmasq)
+  # ---------------------------------------------------------------------------
+  dhcp:
+    enabled: true
+    range_start: "192.168.100.10"   # First IP to assign
+    range_end: "192.168.100.250"    # Last IP to assign
+    lease_time: "24h"               # Lease duration
+
+    # Static IP assignments for known devices (optional)
+    static_leases: []
+    # Example:
+    # static_leases:
+    #   - mac: "AA:BB:CC:DD:EE:FF"
+    #     ip: "192.168.100.100"
+    #     hostname: "smart-tv"
+
+  # Backward compatibility aliases
+  dhcp_enabled: true
+  dhcp_range_start: "192.168.100.10"
+  dhcp_range_end: "192.168.100.250"
+  dhcp_lease_time: "24h"
+
+  # ---------------------------------------------------------------------------
+  # DNS Server Configuration (dnsmasq)
+  # ---------------------------------------------------------------------------
+  dns:
+    servers:
+      - "8.8.8.8"                   # Google DNS
+      - "1.1.1.1"                   # Cloudflare DNS
+
+    # DNS-based blocking (sinkhole)
+    blocklist_enabled: true
+    blocklist_file: "data/dns_blocklist.txt"
+
+    # Local domain
+    local_domain: "rakshak.local"
+
+  # Backward compatibility alias
+  dns_servers:
+    - "8.8.8.8"
+    - "1.1.1.1"
+
+  # ---------------------------------------------------------------------------
+  # Firewall Configuration (iptables)
+  # ---------------------------------------------------------------------------
+  firewall:
+    enabled: true
+    default_forward_policy: "ACCEPT"  # Default policy for FORWARD chain
+    log_dropped: true                 # Log dropped packets to syslog
+
+    # Ports to block by default (known malicious)
+    blocked_ports:
+      - port: 4444
+        protocol: "tcp"
+        reason: "Metasploit default"
+      - port: 5555
+        protocol: "tcp"
+        reason: "Android ADB"
+      - port: 6667
+        protocol: "tcp"
+        reason: "IRC botnet"
+      - port: 31337
+        protocol: "tcp"
+        reason: "Elite backdoor"
+
+    # Backward compatibility
+    block_malicious_ports: true
+    malicious_ports:
+      - 4444
+      - 5555
+      - 6667
+      - 31337
+
+  # ---------------------------------------------------------------------------
+  # Deep Packet Inspection (nfqueue)
+  # ---------------------------------------------------------------------------
+  dpi:
+    enabled: true
+    nfqueue_num: 1                  # NFQUEUE number for packet inspection
+    inspect_payload: true           # Inspect packet payload for threats
+    max_packet_size: 65535          # Maximum packet size to inspect
+
+    # Suspicious patterns to detect in payloads
+    suspicious_patterns:
+      - "/bin/sh"
+      - "/bin/bash"
+      - "wget "
+      - "curl "
+      - "nc -e"
+      - "chmod 777"
+      - "rm -rf"
+
+  # ---------------------------------------------------------------------------
+  # Traffic Control
+  # ---------------------------------------------------------------------------
+  traffic_control:
+    enable_rate_limiting: true
+    default_rate_limit: "1000/sec"  # Default rate limit per device
+    burst_limit: 2000               # Burst allowance
+    enable_qos: false
+
+  # ---------------------------------------------------------------------------
+  # Honeypot Network Integration
+  # ---------------------------------------------------------------------------
+  honeypot_integration:
+    enabled: true
+    auto_redirect_attackers: true   # Automatically redirect detected attackers
+    honeypot_ports:
+      telnet: 2323
+      ssh: 2222
+      http: 8080
+
+  # ---------------------------------------------------------------------------
+  # Jetson Xavier NX Specific Settings
+  # ---------------------------------------------------------------------------
+  jetson:
+    is_jetson_platform: true        # Running on Jetson
+    optimize_for_jetson: true       # Enable Jetson optimizations
+    use_gpu_for_ml: false           # Use GPU for ML inference (if available)
+    power_mode: "MAXN"              # Jetson power mode
+
+  # ---------------------------------------------------------------------------
+  # Persistence and Recovery
+  # ---------------------------------------------------------------------------
+  persistence:
+    save_rules_on_shutdown: true    # Save iptables rules on shutdown
+    restore_rules_on_startup: true  # Restore rules on startup
+    rules_backup_path: "/etc/iptables/rakshak.rules"
+
+# -----------------------------------------------------------------------------
+# Alert Messages (Hindi/English)
+# -----------------------------------------------------------------------------
+alerts:
+  en:
+    threat_detected: "Threat detected on {device}! RAKSHAK is protecting your network."
+    device_isolated: "Device {device} has been isolated for security."
+    honeypot_deployed: "Honeypot deployed to trap attacker from {ip}."
+    attack_blocked: "Attack from {ip} blocked successfully."
+  hi:
+    threat_detected: "आपके {device} पर खतरा पाया गया! राक्षक आपके नेटवर्क की रक्षा कर रहा है।"
+    device_isolated: "सुरक्षा के लिए {device} को अलग कर दिया गया है।"
+    honeypot_deployed: "{ip} से हमलावर को फंसाने के लिए हनीपॉट तैनात किया गया।"
+    attack_blocked: "{ip} से हमला सफलतापूर्वक रोक दिया गया।"

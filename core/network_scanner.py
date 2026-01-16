@@ -1,0 +1,786 @@
+#!/usr/bin/env python3
+"""
+RAKSHAK Network Scanner - MAYA
+==============================
+
+Morphing Adaptive Yielding Architecture
+
+Features:
+- ARP-based device discovery
+- Nmap service fingerprinting
+- Risk score calculation
+- Device morphing for honeypot creation
+- Simulation mode support
+
+Author: Team RAKSHAK
+"""
+
+import os
+import json
+import threading
+import time
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Optional, Any
+from dataclasses import dataclass, asdict, field
+
+from loguru import logger
+
+# Conditional imports for network scanning
+try:
+    from scapy.all import ARP, Ether, srp, conf
+    SCAPY_AVAILABLE = True
+except ImportError:
+    SCAPY_AVAILABLE = False
+    logger.warning("Scapy not available - real network scanning disabled")
+
+try:
+    import nmap
+    NMAP_AVAILABLE = True
+except ImportError:
+    NMAP_AVAILABLE = False
+    logger.warning("python-nmap not available - service fingerprinting disabled")
+
+try:
+    import netifaces
+    NETIFACES_AVAILABLE = True
+except ImportError:
+    NETIFACES_AVAILABLE = False
+    logger.warning("netifaces not available - auto-detection disabled")
+
+
+@dataclass
+class Device:
+    """Represents a discovered network device."""
+    id: str
+    ip: str
+    mac: str
+    hostname: str = ""
+    device_type: str = "unknown"
+    manufacturer: str = "unknown"
+    os: str = "unknown"
+    os_version: str = ""
+    firmware: str = ""
+    services: List[Dict] = field(default_factory=list)
+    open_ports: List[int] = field(default_factory=list)
+    risk_score: int = 0
+    risk_factors: List[str] = field(default_factory=list)
+    first_seen: str = ""
+    last_seen: str = ""
+    status: str = "active"  # active, isolated, honeypot
+    is_honeypot: bool = False
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+class NetworkScanner:
+    """
+    MAYA - Morphing Adaptive Yielding Architecture
+
+    Responsible for:
+    - Discovering devices on the network
+    - Fingerprinting devices (OS, services)
+    - Calculating risk scores
+    - Providing device profiles for honeypot cloning
+    """
+
+    # Known risky services and their base risk scores
+    RISKY_SERVICES = {
+        "telnet": 30,       # Unencrypted, easily exploitable
+        "ftp": 25,          # Unencrypted file transfer
+        "http": 15,         # Unencrypted web
+        "upnp": 20,         # Often misconfigured
+        "mqtt": 25,         # IoT protocol, often unsecured
+        "rtsp": 20,         # Video streaming, privacy risk
+        "ssh": 10,          # If on default port
+        "smb": 25,          # Windows file sharing
+        "vnc": 30,          # Remote desktop
+        "rdp": 25,          # Windows remote desktop
+    }
+
+    # MAC OUI prefixes for device identification
+    MAC_PREFIXES = {
+        "00:17:88": ("Philips", "smart_bulb"),
+        "B4:E6:2D": ("TP-Link", "router"),
+        "44:07:0B": ("Google", "smart_speaker"),
+        "F0:27:2D": ("Amazon", "alexa"),
+        "50:C7:BF": ("TP-Link", "smart_plug"),
+        "D8:6C:63": ("Samsung", "smart_tv"),
+        "2C:AA:8E": ("Wyze", "camera"),
+        "18:B4:30": ("Nest", "thermostat"),
+        "AC:CC:8E": ("Roku", "streaming"),
+    }
+
+    def __init__(self, config: dict, threat_logger=None, gateway=None):
+        """
+        Initialize the network scanner.
+
+        Args:
+            config: Configuration dictionary
+            threat_logger: ThreatLogger instance
+            gateway: RakshakGateway instance (for DHCP-based discovery in gateway mode)
+        """
+        self.config = config
+        self.threat_logger = threat_logger
+        self.gateway = gateway  # Gateway reference for DHCP-based discovery
+        self.network_config = config.get("network", {})
+        self.simulation_config = config.get("simulation", {})
+
+        # Device storage
+        self.devices: Dict[str, Device] = {}
+        self._devices_lock = threading.Lock()
+
+        # Simulation mode
+        self.simulation_mode = self.simulation_config.get("enabled", True)
+
+        # Network interface (auto-detect if "auto" or not specified)
+        configured_interface = self.network_config.get("interface", "auto")
+        if configured_interface == "auto":
+            self.interface = self._detect_network_interface()
+        else:
+            self.interface = configured_interface
+
+        # Network range (auto-detect if "auto" or not specified)
+        configured_network = self.network_config.get("scan_network", "auto")
+        if configured_network == "auto":
+            self.scan_network = self._detect_network_range()
+        else:
+            self.scan_network = configured_network
+
+        self.whitelist_ips = set(self.network_config.get("whitelist_ips", []))
+
+        # Nmap scanner
+        self.nm = None
+        if NMAP_AVAILABLE:
+            try:
+                self.nm = nmap.PortScanner()
+            except Exception as e:
+                logger.warning(f"nmap binary not found: {e}")
+                self.nm = None
+
+        # Device ID counter
+        self._device_counter = 0
+
+        # Load simulated devices if in simulation mode
+        if self.simulation_mode:
+            self._load_simulated_devices()
+
+        logger.info(f"NetworkScanner initialized (simulation={self.simulation_mode})")
+
+    def _generate_device_id(self) -> str:
+        """Generate unique device ID."""
+        self._device_counter += 1
+        return f"DEV-{self._device_counter:04d}"
+
+    def _detect_network_interface(self) -> str:
+        """Auto-detect the best network interface."""
+        if not NETIFACES_AVAILABLE:
+            logger.warning("netifaces not available, using default eth0")
+            return self.network_config.get("interface", "eth0")
+
+        try:
+            interfaces = netifaces.interfaces()
+
+            # Priority order for interface names
+            priority_prefixes = ['eth', 'enp', 'ens', 'wlan', 'wlp', 'eno', 'em']
+
+            for prefix in priority_prefixes:
+                for iface in interfaces:
+                    if iface.startswith(prefix):
+                        # Check if interface has IPv4 address
+                        addrs = netifaces.ifaddresses(iface)
+                        if netifaces.AF_INET in addrs:
+                            ipv4 = addrs[netifaces.AF_INET][0]
+                            if 'addr' in ipv4 and not ipv4['addr'].startswith('127.'):
+                                logger.info(f"Auto-detected network interface: {iface}")
+                                return iface
+
+            # Fallback: find any interface with IPv4 (except loopback)
+            for iface in interfaces:
+                if iface != 'lo':
+                    addrs = netifaces.ifaddresses(iface)
+                    if netifaces.AF_INET in addrs:
+                        logger.info(f"Using fallback interface: {iface}")
+                        return iface
+
+        except Exception as e:
+            logger.error(f"Failed to auto-detect interface: {e}")
+
+        return "eth0"
+
+    def _detect_network_range(self) -> str:
+        """Auto-detect the network range from interface."""
+        if not NETIFACES_AVAILABLE:
+            logger.warning("netifaces not available, using default 192.168.1.0/24")
+            return "192.168.1.0/24"
+
+        try:
+            addrs = netifaces.ifaddresses(self.interface)
+
+            if netifaces.AF_INET in addrs:
+                ipv4 = addrs[netifaces.AF_INET][0]
+                ip = ipv4.get('addr', '')
+                netmask = ipv4.get('netmask', '255.255.255.0')
+
+                # Calculate network range using ipaddress module
+                from ipaddress import IPv4Network
+                network = IPv4Network(f"{ip}/{netmask}", strict=False)
+                network_range = str(network)
+                logger.info(f"Auto-detected network range: {network_range}")
+                return network_range
+
+        except Exception as e:
+            logger.error(f"Failed to auto-detect network range: {e}")
+
+        return "192.168.1.0/24"
+
+    def _load_simulated_devices(self):
+        """Load simulated devices from config."""
+        fake_devices = self.simulation_config.get("fake_devices", [])
+
+        for dev_config in fake_devices:
+            device = Device(
+                id=self._generate_device_id(),
+                ip=dev_config.get("ip", "192.168.1.100"),
+                mac=dev_config.get("mac", "AA:BB:CC:DD:EE:FF"),
+                hostname=dev_config.get("name", "Unknown Device"),
+                device_type=dev_config.get("device_type", "unknown"),
+                risk_score=dev_config.get("risk_score", 50),
+                first_seen=datetime.now().isoformat(),
+                last_seen=datetime.now().isoformat(),
+                status="active"
+            )
+
+            # Add realistic details based on device type
+            self._enrich_simulated_device(device)
+
+            self.devices[device.ip] = device
+            logger.debug(f"Loaded simulated device: {device.hostname} ({device.ip})")
+
+        logger.info(f"Loaded {len(self.devices)} simulated devices")
+
+    def _enrich_simulated_device(self, device: Device):
+        """Add realistic details to simulated device."""
+        device_profiles = {
+            "samsung_tv": {
+                "manufacturer": "Samsung",
+                "os": "Tizen 5.5",
+                "services": [
+                    {"name": "http", "port": 8080, "version": "Samsung TV Web"},
+                    {"name": "upnp", "port": 1900, "version": "DLNA"}
+                ],
+                "open_ports": [8080, 1900, 8001, 8002],
+                "risk_factors": ["UPnP enabled", "Web interface exposed"]
+            },
+            "wyze_cam": {
+                "manufacturer": "Wyze Labs",
+                "os": "Linux 3.4.35",
+                "firmware": "4.9.8.1002",
+                "services": [
+                    {"name": "rtsp", "port": 554, "version": "RTSP 1.0"},
+                    {"name": "http", "port": 80, "version": "lighttpd"}
+                ],
+                "open_ports": [80, 554, 8080],
+                "risk_factors": ["RTSP exposed", "Default credentials common"]
+            },
+            "alexa": {
+                "manufacturer": "Amazon",
+                "os": "Fire OS 7.2",
+                "services": [
+                    {"name": "https", "port": 443, "version": "Amazon Device"}
+                ],
+                "open_ports": [443],
+                "risk_factors": []
+            },
+            "tp_link": {
+                "manufacturer": "TP-Link",
+                "os": "Linux 2.6.36",
+                "firmware": "3.15.3",
+                "services": [
+                    {"name": "http", "port": 80, "version": "TP-Link HTTP"},
+                    {"name": "telnet", "port": 23, "version": "BusyBox"}
+                ],
+                "open_ports": [80, 23, 53],
+                "risk_factors": ["Telnet enabled", "Admin interface exposed"]
+            },
+            "philips_hue": {
+                "manufacturer": "Philips",
+                "os": "Embedded Linux",
+                "services": [
+                    {"name": "http", "port": 80, "version": "Hue Bridge"}
+                ],
+                "open_ports": [80, 443],
+                "risk_factors": []
+            },
+            "nest": {
+                "manufacturer": "Google/Nest",
+                "os": "Linux 4.4",
+                "firmware": "5.9.3-7",
+                "services": [
+                    {"name": "https", "port": 443, "version": "Nest Device"}
+                ],
+                "open_ports": [443, 9543],
+                "risk_factors": []
+            },
+            "august_lock": {
+                "manufacturer": "August Home",
+                "os": "Embedded",
+                "services": [
+                    {"name": "bluetooth", "port": 0, "version": "BLE 4.2"},
+                    {"name": "https", "port": 443, "version": "August API"}
+                ],
+                "open_ports": [443],
+                "risk_factors": ["Physical security device", "WiFi bridge"]
+            },
+            "playstation": {
+                "manufacturer": "Sony",
+                "os": "Orbis OS",
+                "services": [
+                    {"name": "http", "port": 80, "version": "PlayStation"},
+                    {"name": "upnp", "port": 1900, "version": "DLNA"}
+                ],
+                "open_ports": [80, 1900, 9295, 9296],
+                "risk_factors": ["UPnP enabled"]
+            }
+        }
+
+        profile = device_profiles.get(device.device_type, {})
+        device.manufacturer = profile.get("manufacturer", device.manufacturer)
+        device.os = profile.get("os", device.os)
+        device.firmware = profile.get("firmware", device.firmware)
+        device.services = profile.get("services", [])
+        device.open_ports = profile.get("open_ports", [])
+        device.risk_factors = profile.get("risk_factors", [])
+
+        # Recalculate risk score based on services
+        if not device.risk_score:
+            device.risk_score = self._calculate_risk_score(device)
+
+    def discover_devices(self, network: str = None) -> List[Device]:
+        """
+        Discover devices on the network using ARP scan.
+
+        Args:
+            network: Network range to scan (e.g., "192.168.1.0/24")
+
+        Returns:
+            List of discovered Device objects
+        """
+        if self.simulation_mode:
+            return self.get_simulated_devices()
+
+        if not SCAPY_AVAILABLE:
+            logger.error("Scapy not available for network scanning")
+            return []
+
+        network = network or self.scan_network
+        logger.info(f"Scanning network: {network}")
+
+        try:
+            # Suppress Scapy warnings
+            conf.verb = 0
+
+            # Create ARP request
+            arp = ARP(pdst=network)
+            ether = Ether(dst="ff:ff:ff:ff:ff:ff")
+            packet = ether / arp
+
+            # Send packet and receive responses
+            timeout = self.network_config.get("arp_timeout", 3)
+            result = srp(packet, timeout=timeout, verbose=0)[0]
+
+            discovered = []
+            for sent, received in result:
+                ip = received.psrc
+                mac = received.hwsrc
+
+                # Skip whitelisted IPs
+                if ip in self.whitelist_ips:
+                    continue
+
+                # Check if device already exists
+                if ip in self.devices:
+                    device = self.devices[ip]
+                    device.last_seen = datetime.now().isoformat()
+                else:
+                    device = Device(
+                        id=self._generate_device_id(),
+                        ip=ip,
+                        mac=mac,
+                        first_seen=datetime.now().isoformat(),
+                        last_seen=datetime.now().isoformat()
+                    )
+                    # Try to identify device
+                    self._identify_device(device)
+
+                discovered.append(device)
+
+            logger.info(f"Discovered {len(discovered)} devices")
+            return discovered
+
+        except PermissionError:
+            logger.error("Permission denied - network scanning requires root privileges")
+            return []
+        except Exception as e:
+            logger.error(f"Network scan failed: {e}")
+            return []
+
+    def discover_devices_from_dhcp(self) -> List[Device]:
+        """
+        Discover devices from DHCP leases (gateway mode).
+
+        This is more reliable than ARP scanning when RAKSHAK is the gateway,
+        as we have authoritative information about all connected devices.
+
+        Returns:
+            List of Device objects from DHCP leases
+        """
+        if not self.gateway or not self.gateway.is_gateway_mode:
+            logger.warning("DHCP discovery requires gateway mode")
+            return self.discover_devices()  # Fall back to ARP scan
+
+        devices = []
+        leases = self.gateway.refresh_dhcp_leases()
+
+        for mac, lease in leases.items():
+            # Check if device already exists
+            if lease.ip_address in self.devices:
+                device = self.devices[lease.ip_address]
+                device.last_seen = datetime.now().isoformat()
+                device.hostname = lease.hostname if lease.hostname != "unknown" else device.hostname
+            else:
+                # Create new device from lease
+                device = Device(
+                    id=self._generate_device_id(),
+                    ip=lease.ip_address,
+                    mac=lease.mac_address,
+                    hostname=lease.hostname,
+                    device_type=self._guess_device_type(lease.mac_address, lease.hostname),
+                    first_seen=lease.lease_start.isoformat() if hasattr(lease.lease_start, 'isoformat') else str(lease.lease_start),
+                    last_seen=datetime.now().isoformat(),
+                    status="active" if lease.is_active else "inactive"
+                )
+
+                # Try to identify device from MAC
+                self._identify_device(device)
+
+                # Calculate risk score
+                device.risk_score = self._calculate_risk_score(device)
+
+            # Check if device is isolated
+            if lease.ip_address in self.gateway.isolated_devices:
+                device.status = "isolated"
+
+            devices.append(device)
+
+            # Update internal tracking
+            self.devices[device.ip] = device
+
+        logger.debug(f"Discovered {len(devices)} devices from DHCP leases")
+        return devices
+
+    def _guess_device_type(self, mac: str, hostname: str) -> str:
+        """Guess device type from MAC address and hostname."""
+        # Check MAC OUI prefix
+        if mac:
+            mac_prefix = mac[:8].upper()
+            if mac_prefix in self.MAC_PREFIXES:
+                return self.MAC_PREFIXES[mac_prefix][1]
+
+        # Check hostname hints
+        hostname_lower = hostname.lower() if hostname else ""
+        type_hints = {
+            "camera": "camera",
+            "cam": "camera",
+            "wyze": "wyze_cam",
+            "alexa": "alexa",
+            "echo": "alexa",
+            "tv": "samsung_tv",
+            "samsung": "samsung_tv",
+            "roku": "streaming",
+            "fire": "streaming",
+            "nest": "thermostat",
+            "hue": "smart_bulb",
+            "philips": "smart_bulb",
+            "tp-link": "tp_link",
+            "router": "router",
+            "switch": "network_switch",
+            "playstation": "playstation",
+            "xbox": "gaming_console",
+            "iphone": "mobile",
+            "android": "mobile",
+            "macbook": "laptop",
+            "laptop": "laptop",
+            "desktop": "desktop",
+        }
+
+        for hint, dev_type in type_hints.items():
+            if hint in hostname_lower:
+                return dev_type
+
+        return "unknown"
+
+    def _identify_device(self, device: Device):
+        """Identify device type from MAC address and fingerprint."""
+        # Check MAC OUI prefix
+        mac_prefix = device.mac[:8].upper()
+        if mac_prefix in self.MAC_PREFIXES:
+            manufacturer, device_type = self.MAC_PREFIXES[mac_prefix]
+            device.manufacturer = manufacturer
+            device.device_type = device_type
+
+        # Run nmap fingerprint if available
+        if NMAP_AVAILABLE and self.nm:
+            self._fingerprint_device(device)
+
+    def _fingerprint_device(self, device: Device):
+        """Run nmap scan to fingerprint device."""
+        try:
+            arguments = self.network_config.get("nmap_arguments", "-sV -O --osscan-guess")
+            self.nm.scan(device.ip, arguments=arguments)
+
+            if device.ip in self.nm.all_hosts():
+                host = self.nm[device.ip]
+
+                # Extract hostname
+                device.hostname = host.hostname() or device.hostname
+
+                # Extract OS info
+                if "osmatch" in host and host["osmatch"]:
+                    os_match = host["osmatch"][0]
+                    device.os = os_match.get("name", device.os)
+
+                # Extract services
+                for proto in host.all_protocols():
+                    for port in host[proto].keys():
+                        service = host[proto][port]
+                        device.services.append({
+                            "name": service.get("name", "unknown"),
+                            "port": port,
+                            "version": service.get("version", ""),
+                            "product": service.get("product", "")
+                        })
+                        device.open_ports.append(port)
+
+                # Calculate risk score
+                device.risk_score = self._calculate_risk_score(device)
+
+        except Exception as e:
+            logger.warning(f"Fingerprinting failed for {device.ip}: {e}")
+
+    def _calculate_risk_score(self, device: Device) -> int:
+        """
+        Calculate risk score (0-100) based on device characteristics.
+
+        Factors:
+        - Open risky services
+        - Known vulnerable devices
+        - Outdated firmware
+        - Default credentials likely
+        """
+        score = 0
+        risk_factors = []
+
+        # Check services
+        for service in device.services:
+            service_name = service.get("name", "").lower()
+            if service_name in self.RISKY_SERVICES:
+                score += self.RISKY_SERVICES[service_name]
+                risk_factors.append(f"{service_name.upper()} service exposed")
+
+        # High-risk device types
+        high_risk_types = ["camera", "wyze_cam", "router", "tp_link"]
+        if device.device_type in high_risk_types:
+            score += 15
+            risk_factors.append("High-risk device type")
+
+        # Check for default ports
+        default_dangerous_ports = [23, 21, 5900, 3389]  # telnet, ftp, vnc, rdp
+        for port in device.open_ports:
+            if port in default_dangerous_ports:
+                score += 10
+                risk_factors.append(f"Dangerous port {port} open")
+
+        # Cap at 100
+        score = min(score, 100)
+        device.risk_factors = risk_factors
+
+        return score
+
+    def get_simulated_devices(self) -> List[Device]:
+        """Get list of simulated devices."""
+        with self._devices_lock:
+            return list(self.devices.values())
+
+    def get_device(self, ip: str) -> Optional[Device]:
+        """Get device by IP address."""
+        return self.devices.get(ip)
+
+    def get_all_devices(self) -> List[Device]:
+        """Get all known devices."""
+        with self._devices_lock:
+            return list(self.devices.values())
+
+    def update_device(self, device: Device):
+        """Update or add a device."""
+        with self._devices_lock:
+            device.last_seen = datetime.now().isoformat()
+            self.devices[device.ip] = device
+
+    def isolate_device(self, device_ip: str) -> bool:
+        """
+        Isolate a device from the network.
+
+        In gateway mode: Uses iptables rules (REAL isolation)
+        In standalone mode: Just updates status (SIMULATED)
+
+        Args:
+            device_ip: IP address of device to isolate
+
+        Returns:
+            True if isolation successful
+        """
+        if device_ip not in self.devices:
+            logger.warning(f"Device {device_ip} not found in device list")
+            return False
+
+        # Gateway mode: real isolation via iptables
+        if self.gateway and self.gateway.is_gateway_mode:
+            try:
+                from core.gateway import IsolationLevel
+                success = self.gateway.isolate_device(
+                    ip_address=device_ip,
+                    level=IsolationLevel.FULL,
+                    reason="Isolated via NetworkScanner"
+                )
+                if success:
+                    self.devices[device_ip].status = "isolated"
+                    logger.warning(f"Device {device_ip} ISOLATED via gateway (REAL)")
+
+                    if self.threat_logger:
+                        self.threat_logger.log_action(
+                            threat_id="manual",
+                            action="isolate_device",
+                            target=device_ip,
+                            status="success",
+                            details={"method": "iptables_block", "real_action": True}
+                        )
+                    return True
+                else:
+                    logger.error(f"Failed to isolate {device_ip} via gateway")
+                    return False
+            except Exception as e:
+                logger.error(f"Gateway isolation error: {e}")
+                return False
+
+        # Standalone mode: simulated isolation (just update status)
+        else:
+            self.devices[device_ip].status = "isolated"
+            logger.warning(f"Device {device_ip} marked as isolated (SIMULATED - no real traffic control)")
+
+            if self.threat_logger:
+                self.threat_logger.log_action(
+                    threat_id="manual",
+                    action="isolate_device",
+                    target=device_ip,
+                    status="success",
+                    details={"method": "status_update", "real_action": False}
+                )
+            return True
+
+    def unisolate_device(self, device_ip: str) -> bool:
+        """
+        Remove isolation from a device.
+
+        Args:
+            device_ip: IP address of device to unisolate
+
+        Returns:
+            True if successful
+        """
+        if device_ip not in self.devices:
+            logger.warning(f"Device {device_ip} not found")
+            return False
+
+        # Gateway mode: real unisolation
+        if self.gateway and self.gateway.is_gateway_mode:
+            success = self.gateway.unisolate_device(device_ip)
+            if success:
+                self.devices[device_ip].status = "active"
+                logger.info(f"Device {device_ip} unisolated via gateway")
+                return True
+            return False
+
+        # Standalone mode
+        self.devices[device_ip].status = "active"
+        logger.info(f"Device {device_ip} marked as active (SIMULATED)")
+        return True
+
+    def get_device_for_morphing(self, device_type: str = None) -> Optional[Dict]:
+        """
+        Get device profile for honeypot morphing.
+
+        Returns device characteristics that can be used to create
+        a convincing honeypot clone.
+        """
+        if device_type:
+            for device in self.devices.values():
+                if device.device_type == device_type:
+                    return self._create_morph_profile(device)
+
+        # Return random high-risk device
+        high_risk = [d for d in self.devices.values() if d.risk_score > 50]
+        if high_risk:
+            device = high_risk[0]
+            return self._create_morph_profile(device)
+
+        return None
+
+    def _create_morph_profile(self, device: Device) -> Dict:
+        """Create a morphing profile from a real device."""
+        return {
+            "device_type": device.device_type,
+            "manufacturer": device.manufacturer,
+            "os": device.os,
+            "firmware": device.firmware,
+            "services": device.services,
+            "open_ports": device.open_ports,
+            "mac_prefix": device.mac[:8] if device.mac else "AA:BB:CC",
+            "banner_templates": self._get_banner_templates(device.device_type)
+        }
+
+    def _get_banner_templates(self, device_type: str) -> Dict[str, str]:
+        """Get service banner templates for device type."""
+        templates = {
+            "wyze_cam": {
+                "http": "HTTP/1.1 200 OK\r\nServer: lighttpd/1.4.35\r\n",
+                "rtsp": "RTSP/1.0 200 OK\r\nServer: Wyze-RTSP/1.0\r\n",
+                "telnet": "Wyze Cam v2\r\nLogin: "
+            },
+            "tp_link": {
+                "http": "HTTP/1.1 200 OK\r\nServer: TP-Link HTTP Server\r\n",
+                "telnet": "\r\nTP-LINK Wireless Router WR940N\r\nLogin: "
+            },
+            "samsung_tv": {
+                "http": "HTTP/1.1 200 OK\r\nServer: Samsung TV Web\r\n",
+                "upnp": "HTTP/1.1 200 OK\r\nST: upnp:rootdevice\r\n"
+            }
+        }
+        return templates.get(device_type, {})
+
+    def get_high_risk_devices(self, threshold: int = 60) -> List[Device]:
+        """Get devices with risk score above threshold."""
+        return [d for d in self.devices.values() if d.risk_score >= threshold]
+
+    def get_statistics(self) -> Dict:
+        """Get network statistics."""
+        devices = list(self.devices.values())
+        return {
+            "total_devices": len(devices),
+            "active_devices": len([d for d in devices if d.status == "active"]),
+            "isolated_devices": len([d for d in devices if d.status == "isolated"]),
+            "high_risk_count": len([d for d in devices if d.risk_score >= 60]),
+            "average_risk_score": sum(d.risk_score for d in devices) / len(devices) if devices else 0,
+            "device_types": list(set(d.device_type for d in devices))
+        }

@@ -1,0 +1,559 @@
+#!/usr/bin/env python3
+"""
+RAKSHAK Threat Logger
+=====================
+
+Central logging and threat management system.
+
+Features:
+- Thread-safe threat queue for async processing
+- Event logging with structured format
+- CCTNS export for law enforcement
+- JSON and SQLite storage
+
+Author: Team RAKSHAK
+"""
+
+import json
+import sqlite3
+import threading
+from datetime import datetime
+from pathlib import Path
+from queue import Queue, Empty
+from typing import Dict, List, Optional, Any
+from dataclasses import dataclass, asdict
+from enum import Enum
+
+from loguru import logger
+
+
+class ThreatSeverity(Enum):
+    """Threat severity levels."""
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+
+class ThreatType(Enum):
+    """Types of threats detected."""
+    PORT_SCAN = "port_scan"
+    BRUTE_FORCE = "brute_force"
+    EXPLOIT_ATTEMPT = "exploit_attempt"
+    DOS_ATTACK = "dos_attack"
+    MALWARE = "malware"
+    DATA_EXFILTRATION = "data_exfiltration"
+    UNAUTHORIZED_ACCESS = "unauthorized_access"
+    SUSPICIOUS_TRAFFIC = "suspicious_traffic"
+
+
+class ActionType(Enum):
+    """Actions taken by KAAL agent."""
+    MONITOR = "monitor"
+    DEPLOY_HONEYPOT = "deploy_honeypot"
+    ISOLATE_DEVICE = "isolate_device"
+    ENGAGE_ATTACKER = "engage_attacker"
+    ALERT_USER = "alert_user"
+
+
+@dataclass
+class ThreatEvent:
+    """Structured threat event."""
+    id: str
+    timestamp: str
+    type: str
+    severity: str
+    source_ip: str
+    source_port: int
+    target_ip: str
+    target_port: int
+    target_device: str
+    protocol: str
+    payload: str
+    packets_count: int
+    duration_seconds: float
+    detected_by: str
+    raw_data: dict
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+@dataclass
+class ActionEvent:
+    """Structured action event."""
+    id: str
+    timestamp: str
+    threat_id: str
+    action: str
+    target: str
+    status: str
+    details: dict
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+class ThreatLogger:
+    """
+    Central threat logging and management system.
+
+    Provides:
+    - Thread-safe threat queue
+    - Event logging
+    - Database storage
+    - CCTNS export
+    """
+
+    def __init__(self, config: dict):
+        """Initialize the threat logger."""
+        self.config = config
+        self.logging_config = config.get("logging", {})
+
+        # Thread-safe queues
+        self.threat_queue: Queue[ThreatEvent] = Queue()
+        self.action_queue: Queue[ActionEvent] = Queue()
+
+        # In-memory storage for recent events
+        self.recent_threats: List[ThreatEvent] = []
+        self.recent_actions: List[ActionEvent] = []
+        self.max_recent = 1000
+
+        # Locks for thread safety
+        self._threats_lock = threading.Lock()
+        self._actions_lock = threading.Lock()
+
+        # Statistics
+        self.stats = {
+            "total_threats": 0,
+            "total_actions": 0,
+            "threats_by_type": {},
+            "threats_by_severity": {},
+            "actions_by_type": {}
+        }
+
+        # Initialize database
+        self._init_database()
+
+        # Event ID counter
+        self._event_counter = 0
+        self._counter_lock = threading.Lock()
+
+        logger.info("ThreatLogger initialized")
+
+    def _init_database(self):
+        """Initialize SQLite database for persistent storage."""
+        db_config = self.config.get("database", {})
+        db_path = Path(db_config.get("path", "data/rakshak.db"))
+        db_path.parent.mkdir(parents=True, exist_ok=True)
+
+        self.db_path = db_path
+        conn = sqlite3.connect(str(db_path))
+        cursor = conn.cursor()
+
+        # Create threats table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS threats (
+                id TEXT PRIMARY KEY,
+                timestamp TEXT NOT NULL,
+                type TEXT NOT NULL,
+                severity TEXT NOT NULL,
+                source_ip TEXT,
+                source_port INTEGER,
+                target_ip TEXT,
+                target_port INTEGER,
+                target_device TEXT,
+                protocol TEXT,
+                payload TEXT,
+                packets_count INTEGER,
+                duration_seconds REAL,
+                detected_by TEXT,
+                raw_data TEXT
+            )
+        """)
+
+        # Create actions table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS actions (
+                id TEXT PRIMARY KEY,
+                timestamp TEXT NOT NULL,
+                threat_id TEXT,
+                action TEXT NOT NULL,
+                target TEXT,
+                status TEXT,
+                details TEXT,
+                FOREIGN KEY (threat_id) REFERENCES threats(id)
+            )
+        """)
+
+        # Create devices table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS devices (
+                id TEXT PRIMARY KEY,
+                ip TEXT NOT NULL,
+                mac TEXT,
+                hostname TEXT,
+                device_type TEXT,
+                os TEXT,
+                risk_score INTEGER,
+                first_seen TEXT,
+                last_seen TEXT,
+                status TEXT
+            )
+        """)
+
+        conn.commit()
+        conn.close()
+        logger.debug(f"Database initialized at {db_path}")
+
+    def _generate_id(self, prefix: str = "EVT") -> str:
+        """Generate unique event ID."""
+        with self._counter_lock:
+            self._event_counter += 1
+            timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+            return f"{prefix}-{timestamp}-{self._event_counter:06d}"
+
+    def log_threat(
+        self,
+        threat_type: str,
+        severity: str,
+        source_ip: str,
+        target_ip: str,
+        target_device: str = "unknown",
+        source_port: int = 0,
+        target_port: int = 0,
+        protocol: str = "tcp",
+        payload: str = "",
+        packets_count: int = 1,
+        duration_seconds: float = 0.0,
+        detected_by: str = "network_scanner",
+        raw_data: dict = None
+    ) -> ThreatEvent:
+        """
+        Log a new threat event.
+
+        Args:
+            threat_type: Type of threat (port_scan, brute_force, etc.)
+            severity: Severity level (low, medium, high, critical)
+            source_ip: Attacker IP address
+            target_ip: Target device IP
+            target_device: Target device name
+            source_port: Source port
+            target_port: Target port
+            protocol: Network protocol
+            payload: Captured payload (truncated)
+            packets_count: Number of packets
+            duration_seconds: Attack duration
+            detected_by: Detection module name
+            raw_data: Additional raw data
+
+        Returns:
+            ThreatEvent object
+        """
+        event = ThreatEvent(
+            id=self._generate_id("THR"),
+            timestamp=datetime.now().isoformat(),
+            type=threat_type,
+            severity=severity,
+            source_ip=source_ip,
+            source_port=source_port,
+            target_ip=target_ip,
+            target_port=target_port,
+            target_device=target_device,
+            protocol=protocol,
+            payload=payload[:500] if payload else "",  # Truncate payload
+            packets_count=packets_count,
+            duration_seconds=duration_seconds,
+            detected_by=detected_by,
+            raw_data=raw_data or {}
+        )
+
+        # Add to queue for async processing
+        self.threat_queue.put(event)
+
+        # Add to recent list
+        with self._threats_lock:
+            self.recent_threats.append(event)
+            if len(self.recent_threats) > self.max_recent:
+                self.recent_threats.pop(0)
+
+        # Update statistics
+        self.stats["total_threats"] += 1
+        self.stats["threats_by_type"][threat_type] = \
+            self.stats["threats_by_type"].get(threat_type, 0) + 1
+        self.stats["threats_by_severity"][severity] = \
+            self.stats["threats_by_severity"].get(severity, 0) + 1
+
+        # Save to database
+        self._save_threat_to_db(event)
+
+        logger.warning(
+            f"THREAT: {threat_type} | {severity} | {source_ip} -> {target_device}"
+        )
+
+        return event
+
+    def log_action(
+        self,
+        threat_id: str,
+        action: str,
+        target: str,
+        status: str = "executed",
+        details: dict = None
+    ) -> ActionEvent:
+        """
+        Log an action taken in response to a threat.
+
+        Args:
+            threat_id: ID of the threat this action responds to
+            action: Action type (monitor, deploy_honeypot, etc.)
+            target: Target of the action
+            status: Action status
+            details: Additional details
+
+        Returns:
+            ActionEvent object
+        """
+        event = ActionEvent(
+            id=self._generate_id("ACT"),
+            timestamp=datetime.now().isoformat(),
+            threat_id=threat_id,
+            action=action,
+            target=target,
+            status=status,
+            details=details or {}
+        )
+
+        # Add to queue
+        self.action_queue.put(event)
+
+        # Add to recent list
+        with self._actions_lock:
+            self.recent_actions.append(event)
+            if len(self.recent_actions) > self.max_recent:
+                self.recent_actions.pop(0)
+
+        # Update statistics
+        self.stats["total_actions"] += 1
+        self.stats["actions_by_type"][action] = \
+            self.stats["actions_by_type"].get(action, 0) + 1
+
+        # Save to database
+        self._save_action_to_db(event)
+
+        logger.info(f"ACTION: {action} | {target} | {status}")
+
+        return event
+
+    def log_decision(self, threat: dict, action: dict):
+        """Log a decision made by KAAL agent."""
+        return self.log_action(
+            threat_id=threat.get("id", "unknown"),
+            action=action.get("action", "unknown"),
+            target=action.get("target", "unknown"),
+            status=action.get("status", "executed"),
+            details={
+                "confidence": action.get("confidence", 0),
+                "q_value": action.get("q_value", 0),
+                "threat_severity": threat.get("severity", "unknown")
+            }
+        )
+
+    def _save_threat_to_db(self, event: ThreatEvent):
+        """Save threat event to database."""
+        try:
+            conn = sqlite3.connect(str(self.db_path))
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO threats
+                (id, timestamp, type, severity, source_ip, source_port,
+                 target_ip, target_port, target_device, protocol, payload,
+                 packets_count, duration_seconds, detected_by, raw_data)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                event.id, event.timestamp, event.type, event.severity,
+                event.source_ip, event.source_port, event.target_ip,
+                event.target_port, event.target_device, event.protocol,
+                event.payload, event.packets_count, event.duration_seconds,
+                event.detected_by, json.dumps(event.raw_data)
+            ))
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            logger.error(f"Failed to save threat to DB: {e}")
+
+    def _save_action_to_db(self, event: ActionEvent):
+        """Save action event to database."""
+        try:
+            conn = sqlite3.connect(str(self.db_path))
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO actions
+                (id, timestamp, threat_id, action, target, status, details)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (
+                event.id, event.timestamp, event.threat_id,
+                event.action, event.target, event.status,
+                json.dumps(event.details)
+            ))
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            logger.error(f"Failed to save action to DB: {e}")
+
+    def get_next_threat(self, timeout: float = 0.5) -> Optional[dict]:
+        """Get next threat from queue for processing."""
+        try:
+            event = self.threat_queue.get(timeout=timeout)
+            return event.to_dict()
+        except Empty:
+            return None
+
+    def get_recent_threats(self, limit: int = 50) -> List[dict]:
+        """Get recent threat events."""
+        with self._threats_lock:
+            threats = self.recent_threats[-limit:]
+            return [t.to_dict() for t in threats]
+
+    def get_recent_actions(self, limit: int = 50) -> List[dict]:
+        """Get recent action events."""
+        with self._actions_lock:
+            actions = self.recent_actions[-limit:]
+            return [a.to_dict() for a in actions]
+
+    def get_threat_count(self) -> int:
+        """Get total threat count."""
+        return self.stats["total_threats"]
+
+    def get_statistics(self) -> dict:
+        """Get threat and action statistics."""
+        return self.stats.copy()
+
+    def export_cctns(self, filepath: str = None) -> str:
+        """
+        Export threats to CCTNS (Crime and Criminal Tracking Network & Systems) format.
+
+        This format is used by Indian law enforcement for cyber crime reporting.
+        """
+        if filepath is None:
+            filepath = f"data/threats/cctns_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+
+        Path(filepath).parent.mkdir(parents=True, exist_ok=True)
+
+        # CCTNS format structure
+        cctns_data = {
+            "report_type": "CYBER_INCIDENT",
+            "report_date": datetime.now().isoformat(),
+            "reporting_agency": "RAKSHAK IoT Security System",
+            "incidents": []
+        }
+
+        # Convert threats to CCTNS incident format
+        with self._threats_lock:
+            for threat in self.recent_threats:
+                incident = {
+                    "incident_id": threat.id,
+                    "incident_date": threat.timestamp,
+                    "incident_type": self._map_to_cctns_type(threat.type),
+                    "severity": threat.severity.upper(),
+                    "source_details": {
+                        "ip_address": threat.source_ip,
+                        "port": threat.source_port
+                    },
+                    "target_details": {
+                        "ip_address": threat.target_ip,
+                        "port": threat.target_port,
+                        "device_name": threat.target_device
+                    },
+                    "attack_details": {
+                        "protocol": threat.protocol,
+                        "packet_count": threat.packets_count,
+                        "duration_seconds": threat.duration_seconds,
+                        "payload_sample": threat.payload[:100] if threat.payload else ""
+                    },
+                    "detection_method": threat.detected_by,
+                    "status": "DETECTED_AND_MITIGATED"
+                }
+                cctns_data["incidents"].append(incident)
+
+        # Save to file
+        with open(filepath, "w") as f:
+            json.dump(cctns_data, f, indent=2)
+
+        logger.info(f"CCTNS export saved to {filepath}")
+        return filepath
+
+    def _map_to_cctns_type(self, threat_type: str) -> str:
+        """Map internal threat type to CCTNS incident type."""
+        mapping = {
+            "port_scan": "NETWORK_SCANNING",
+            "brute_force": "UNAUTHORIZED_ACCESS_ATTEMPT",
+            "exploit_attempt": "SYSTEM_EXPLOITATION",
+            "dos_attack": "DENIAL_OF_SERVICE",
+            "malware": "MALWARE_ATTACK",
+            "data_exfiltration": "DATA_THEFT",
+            "unauthorized_access": "UNAUTHORIZED_ACCESS",
+            "suspicious_traffic": "SUSPICIOUS_ACTIVITY"
+        }
+        return mapping.get(threat_type, "OTHER_CYBER_INCIDENT")
+
+    def export_json(self, filepath: str = None) -> str:
+        """Export all threats to JSON format."""
+        if filepath is None:
+            filepath = f"data/threats/threats_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+
+        Path(filepath).parent.mkdir(parents=True, exist_ok=True)
+
+        data = {
+            "export_date": datetime.now().isoformat(),
+            "statistics": self.stats,
+            "threats": [t.to_dict() for t in self.recent_threats],
+            "actions": [a.to_dict() for a in self.recent_actions]
+        }
+
+        with open(filepath, "w") as f:
+            json.dump(data, f, indent=2)
+
+        logger.info(f"JSON export saved to {filepath}")
+        return filepath
+
+
+# Simulated threat generator for testing
+class SimulatedThreatGenerator:
+    """Generate simulated threats for testing."""
+
+    ATTACK_TYPES = [
+        ("port_scan", "medium", "Network port scanning detected"),
+        ("brute_force", "high", "SSH brute force attack"),
+        ("exploit_attempt", "critical", "Known CVE exploit attempt"),
+        ("dos_attack", "high", "Denial of service attack"),
+        ("suspicious_traffic", "low", "Unusual traffic pattern")
+    ]
+
+    def __init__(self, config: dict):
+        self.config = config
+        self.fake_devices = config.get("simulation", {}).get("fake_devices", [])
+
+    def generate_threat(self) -> dict:
+        """Generate a random simulated threat."""
+        import random
+
+        attack = random.choice(self.ATTACK_TYPES)
+        target = random.choice(self.fake_devices) if self.fake_devices else {
+            "name": "Unknown Device",
+            "ip": "192.168.1.100"
+        }
+
+        return {
+            "type": attack[0],
+            "severity": attack[1],
+            "description": attack[2],
+            "source_ip": f"10.{random.randint(0,255)}.{random.randint(0,255)}.{random.randint(1,254)}",
+            "source_port": random.randint(1024, 65535),
+            "target_ip": target.get("ip", "192.168.1.100"),
+            "target_device": target.get("name", "Unknown Device"),
+            "target_port": random.choice([22, 23, 80, 443, 8080, 1883, 5540]),
+            "protocol": random.choice(["tcp", "udp"]),
+            "packets_count": random.randint(10, 1000),
+            "duration_seconds": random.uniform(0.5, 30.0)
+        }

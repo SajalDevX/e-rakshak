@@ -1,0 +1,744 @@
+#!/usr/bin/env python3
+"""
+RAKSHAK - India's First Agentic AI Cyber Guardian for Home IoT
+===============================================================
+
+Main entry point for the RAKSHAK system.
+
+INLINE SECURITY GATEWAY MODE (DEFAULT):
+  RAKSHAK operates as the network gateway between your modem and router.
+  This provides full traffic control including:
+  - Real device isolation via iptables
+  - Traffic blocking and rate limiting
+  - Honeypot redirection via NAT
+  - Deep packet inspection
+
+Network Topology:
+  Internet -> Modem -> [RAKSHAK/Jetson] -> Router (AP mode) -> IoT Devices
+
+STANDALONE MODE (--standalone):
+  Legacy passive monitoring mode. For testing only.
+  Does NOT provide real traffic control.
+
+Features:
+- MAYA: Network scanning and device discovery
+- KAAL: Agentic AI defender using Dueling DQN
+- PRAHARI: LLM-powered honeypot responses
+- CHAKRAVYUH: Multi-layer deception engine
+- DRISHTI: Real-time dashboard
+
+Usage:
+    sudo python main.py              # Start in gateway mode (default)
+    python main.py --standalone      # Run in standalone mode (limited)
+    python main.py --simulate        # Run in simulation mode
+    python main.py --debug           # Enable debug logging
+
+Author: Team RAKSHAK
+License: MIT
+"""
+
+import os
+import sys
+import signal
+import platform
+import subprocess
+import json
+import threading
+from pathlib import Path
+from typing import Tuple, List
+
+import yaml
+import click
+from loguru import logger
+from rich.console import Console
+from rich.panel import Panel
+from rich.text import Text
+
+# Add project root to path
+PROJECT_ROOT = Path(__file__).parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+# Import RAKSHAK modules
+from core.network_scanner import NetworkScanner
+from core.agentic_defender import AgenticDefender
+from core.llm_honeypot import LLMHoneypot
+from core.deception_engine import DeceptionEngine
+from core.threat_logger import ThreatLogger
+from api.app import create_app
+
+# Gateway modules (for inline security gateway mode)
+try:
+    from core.gateway import RakshakGateway, GatewayConfig, create_gateway_from_config, IsolationLevel
+    from core.packet_filter import PacketFilter
+    GATEWAY_AVAILABLE = True
+except ImportError as e:
+    GATEWAY_AVAILABLE = False
+    logger.warning(f"Gateway modules not available: {e}")
+
+# Rich console for pretty output
+console = Console()
+
+
+def load_config(config_path: str = "config/config.yaml") -> dict:
+    """Load configuration from YAML file."""
+    config_file = PROJECT_ROOT / config_path
+    if not config_file.exists():
+        logger.error(f"Config file not found: {config_file}")
+        sys.exit(1)
+
+    with open(config_file, "r") as f:
+        config = yaml.safe_load(f)
+
+    return config
+
+
+def setup_logging(config: dict) -> None:
+    """Configure logging based on config."""
+    log_config = config.get("logging", {})
+    log_level = config.get("general", {}).get("log_level", "INFO")
+    log_file = PROJECT_ROOT / log_config.get("file", "data/logs/rakshak.log")
+
+    # Ensure log directory exists
+    log_file.parent.mkdir(parents=True, exist_ok=True)
+
+    # Remove default logger and add custom configuration
+    logger.remove()
+    logger.add(
+        sys.stderr,
+        level=log_level,
+        format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan> | <level>{message}</level>"
+    )
+    logger.add(
+        str(log_file),
+        level=log_level,
+        rotation=log_config.get("max_size", "10 MB"),
+        retention=log_config.get("backup_count", 5),
+        format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name} | {message}"
+    )
+
+
+def print_banner():
+    """Print RAKSHAK ASCII banner."""
+    banner = """
+    ██████╗  █████╗ ██╗  ██╗███████╗██╗  ██╗ █████╗ ██╗  ██╗
+    ██╔══██╗██╔══██╗██║ ██╔╝██╔════╝██║  ██║██╔══██╗██║ ██╔╝
+    ██████╔╝███████║█████╔╝ ███████╗███████║███████║█████╔╝
+    ██╔══██╗██╔══██║██╔═██╗ ╚════██║██╔══██║██╔══██║██╔═██╗
+    ██║  ██║██║  ██║██║  ██╗███████║██║  ██║██║  ██║██║  ██╗
+    ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝
+                    रक्षक - Cyber Guardian
+    """
+
+    console.print(Panel(
+        Text(banner, style="bold cyan"),
+        title="[bold white]India's First Agentic AI Cyber Guardian for Home IoT[/bold white]",
+        subtitle="[dim]Har Ghar Ki Cyber Suraksha[/dim]",
+        border_style="cyan"
+    ))
+
+
+def check_gateway_prerequisites() -> Tuple[bool, List[str]]:
+    """
+    Check if system meets gateway requirements.
+    Returns (success, list_of_issues).
+    """
+    issues = []
+
+    # 1. Check root privileges
+    if os.geteuid() != 0:
+        issues.append("Must run as root (sudo python main.py)")
+
+    # 2. Detect platform
+    is_jetson = os.path.exists("/etc/nv_tegra_release")
+    if is_jetson:
+        logger.info("Jetson platform detected")
+
+    # 3. Check for required tools
+    required_tools = ["iptables", "dnsmasq", "ip", "sysctl"]
+    for tool in required_tools:
+        result = subprocess.run(["which", tool], capture_output=True)
+        if result.returncode != 0:
+            issues.append(f"Missing required tool: {tool}")
+
+    # 4. Check for two network interfaces
+    try:
+        result = subprocess.run(
+            ["ip", "-j", "link", "show"],
+            capture_output=True, text=True
+        )
+        if result.returncode == 0:
+            links = json.loads(result.stdout)
+
+            # Filter to ethernet interfaces (not lo, docker, veth, etc.)
+            eth_interfaces = []
+            for link in links:
+                name = link.get("ifname", "")
+                if name.startswith(("eth", "enp", "enx", "ens")) and name != "lo":
+                    eth_interfaces.append(name)
+
+            if len(eth_interfaces) < 2:
+                issues.append(f"Need 2 ethernet interfaces, found: {eth_interfaces}")
+                issues.append("Connect a USB-to-Ethernet adapter for the second interface")
+    except Exception as e:
+        issues.append(f"Failed to detect network interfaces: {e}")
+
+    # 5. Check IP forwarding capability
+    try:
+        with open("/proc/sys/net/ipv4/ip_forward", "r") as f:
+            current = f.read().strip()
+            logger.debug(f"Current IP forwarding: {current}")
+    except Exception as e:
+        issues.append(f"Cannot check IP forwarding: {e}")
+
+    return len(issues) == 0, issues
+
+
+def detect_network_interfaces() -> Tuple[str, str]:
+    """
+    Auto-detect WAN and LAN interfaces.
+    Returns (wan_interface, lan_interface).
+    """
+    try:
+        result = subprocess.run(
+            ["ip", "-j", "link", "show"],
+            capture_output=True, text=True
+        )
+        if result.returncode != 0:
+            return None, None
+
+        links = json.loads(result.stdout)
+
+        interfaces = []
+        for link in links:
+            name = link.get("ifname", "")
+            if name.startswith(("eth", "enp", "enx", "ens")) and name != "lo":
+                interfaces.append(name)
+
+        if len(interfaces) >= 2:
+            # Assume eth0 is WAN (built-in), eth1/enx* is LAN (USB)
+            wan = "eth0" if "eth0" in interfaces else interfaces[0]
+            lan = [i for i in interfaces if i != wan][0]
+            return wan, lan
+        elif len(interfaces) == 1:
+            return interfaces[0], None
+        else:
+            return None, None
+
+    except Exception as e:
+        logger.error(f"Failed to detect interfaces: {e}")
+        return None, None
+
+
+class RakshakOrchestrator:
+    """
+    Main orchestrator that coordinates all RAKSHAK components.
+
+    In GATEWAY MODE (default):
+    - Gateway is mandatory and initialized first
+    - All traffic flows through Jetson
+    - Real device isolation via iptables
+    - Real honeypot redirection via NAT
+
+    In STANDALONE MODE:
+    - Gateway is not used
+    - Passive monitoring only
+    - Actions are logged but not enforced
+
+    Components:
+    - NetworkScanner (MAYA): Device discovery and monitoring
+    - AgenticDefender (KAAL): RL-based autonomous decisions
+    - LLMHoneypot (PRAHARI): Dynamic response generation
+    - DeceptionEngine (CHAKRAVYUH): Honeypot deployment
+    - ThreatLogger: Event logging and export
+    - RakshakGateway: Inline security gateway
+    - PacketFilter: Traffic control and inspection
+    """
+
+    def __init__(self, config: dict, gateway_mode: bool = True):
+        self.config = config
+        self.running = False
+        self.simulation_mode = config.get("simulation", {}).get("enabled", False)
+        self.gateway_mode = gateway_mode
+
+        logger.info("Initializing RAKSHAK components...")
+
+        # Initialize gateway FIRST if in gateway mode
+        self.gateway = None
+        self.packet_filter = None
+
+        if gateway_mode:
+            if not GATEWAY_AVAILABLE:
+                logger.error("Gateway modules not available! Install: pip install netfilterqueue")
+                raise RuntimeError("Gateway modules required but not available")
+
+            self._init_gateway_mode()
+
+        # Initialize other components
+        self.threat_logger = ThreatLogger(config)
+        self.llm_honeypot = LLMHoneypot(config)
+
+        # Pass gateway reference to components that need it
+        self.network_scanner = NetworkScanner(config, self.threat_logger, gateway=self.gateway)
+        self.deception_engine = DeceptionEngine(
+            config,
+            self.llm_honeypot,
+            self.threat_logger,
+            gateway=self.gateway
+        )
+        self.agentic_defender = AgenticDefender(config, self.threat_logger)
+
+        # Connect gateway to agentic defender
+        if self.gateway:
+            self.agentic_defender.set_gateway(self.gateway)
+        if self.packet_filter:
+            self.agentic_defender.set_packet_filter(self.packet_filter)
+
+        # Flask app for dashboard
+        self.app = create_app(config, self)
+
+        logger.info("RAKSHAK components initialized successfully")
+
+    def _init_gateway_mode(self):
+        """Initialize gateway mode components."""
+        logger.info("Initializing GATEWAY MODE...")
+
+        try:
+            # Create gateway from config
+            self.gateway = create_gateway_from_config(self.config)
+
+            # Create packet filter
+            lan_interface = self.config.get("gateway", {}).get("lan_interface", "eth1")
+            self.packet_filter = PacketFilter(lan_interface=lan_interface)
+
+            logger.info("Gateway mode components initialized")
+
+        except Exception as e:
+            logger.error(f"Failed to initialize gateway mode: {e}")
+            raise
+
+    def start(self):
+        """Start all RAKSHAK components."""
+        self.running = True
+
+        mode = "SIMULATION" if self.simulation_mode else "LIVE"
+        if self.gateway_mode:
+            mode = "GATEWAY"
+
+        logger.info(f"Starting RAKSHAK in {mode} mode...")
+
+        # Start gateway if in gateway mode
+        if self.gateway_mode and self.gateway:
+            logger.info("Starting gateway...")
+            if not self.gateway.start_gateway():
+                logger.error("Failed to start gateway!")
+                console.print("[bold red]ERROR: Failed to start gateway mode![/bold red]")
+                console.print("[dim]Check prerequisites with: sudo ./scripts/setup_gateway.sh --check[/dim]")
+                raise RuntimeError("Gateway startup failed")
+
+            console.print("\n[bold cyan]" + "=" * 60 + "[/bold cyan]")
+            console.print("[bold cyan]       RAKSHAK GATEWAY MODE ACTIVE[/bold cyan]")
+            console.print("[bold cyan]" + "=" * 60 + "[/bold cyan]\n")
+            console.print(f"  WAN Interface: {self.gateway.config.wan_interface}")
+            console.print(f"  LAN Interface: {self.gateway.config.lan_interface}")
+            console.print(f"  Gateway IP:    {self.gateway.config.lan_ip}")
+            console.print(f"  Jetson:        {self.gateway.is_jetson}")
+            console.print("")
+
+        console.print(f"[bold green]RAKSHAK Started in {mode} mode[/bold green]")
+        console.print(f"[dim]Dashboard: http://localhost:{self.config['api']['port']}[/dim]\n")
+
+        # Start components in threads
+        threads = []
+
+        # Network scanner thread
+        scanner_thread = threading.Thread(
+            target=self._run_scanner_loop,
+            daemon=True,
+            name="NetworkScanner"
+        )
+        threads.append(scanner_thread)
+
+        # Threat processor thread
+        processor_thread = threading.Thread(
+            target=self._run_threat_processor,
+            daemon=True,
+            name="ThreatProcessor"
+        )
+        threads.append(processor_thread)
+
+        # Start all threads
+        for thread in threads:
+            thread.start()
+            logger.debug(f"Started thread: {thread.name}")
+
+        # Run Flask app in main thread
+        self._run_flask_app()
+
+    def stop(self):
+        """Stop all RAKSHAK components."""
+        logger.info("Stopping RAKSHAK...")
+        self.running = False
+        self.deception_engine.stop_all_honeypots()
+
+        # Stop gateway if active
+        if self.gateway_mode and self.gateway:
+            logger.info("Stopping gateway...")
+            self.gateway.stop_gateway()
+
+        # Stop packet filter if active
+        if self.packet_filter:
+            self.packet_filter.stop()
+
+        logger.info("RAKSHAK stopped")
+
+    def _run_scanner_loop(self):
+        """Background loop for network scanning."""
+        scan_interval = self.config.get("network", {}).get("scan_interval", 60)
+
+        while self.running:
+            try:
+                if self.simulation_mode:
+                    devices = self.network_scanner.get_simulated_devices()
+                elif self.gateway_mode and self.gateway:
+                    # In gateway mode, use DHCP leases for device discovery
+                    devices = self.network_scanner.discover_devices_from_dhcp()
+                else:
+                    devices = self.network_scanner.discover_devices()
+
+                logger.debug(f"Discovered {len(devices)} devices")
+
+                # Check for new devices or changes
+                for device in devices:
+                    self.network_scanner.update_device(device)
+
+            except Exception as e:
+                logger.error(f"Scanner error: {e}")
+
+            # Wait for next scan
+            for _ in range(scan_interval):
+                if not self.running:
+                    break
+                import time
+                time.sleep(1)
+
+    def _run_threat_processor(self):
+        """Background loop for processing threats."""
+        while self.running:
+            try:
+                # Get pending threats from logger
+                threat = self.threat_logger.get_next_threat()
+
+                if threat:
+                    self._process_threat(threat)
+                else:
+                    import time
+                    time.sleep(0.5)
+
+            except Exception as e:
+                logger.error(f"Threat processor error: {e}")
+
+    def _process_threat(self, threat: dict):
+        """Process a detected threat using the agentic defender."""
+        logger.info(f"Processing threat: {threat.get('type')} from {threat.get('source_ip')}")
+
+        # Emit threat_detected event to dashboard
+        self._emit_event('threat_detected', {
+            'threat': threat,
+            'message': f"Threat detected: {threat.get('type')} from {threat.get('source_ip')}"
+        })
+
+        # Get AI decision
+        action = self.agentic_defender.decide(threat)
+        logger.info(f"KAAL decided: {action['action']}")
+
+        # Execute action
+        self._execute_action(action, threat)
+
+        # Log the decision
+        self.threat_logger.log_decision(threat, action)
+
+        # Emit action_taken event
+        self._emit_event('action_taken', {
+            'action': action['action'],
+            'threat_type': threat.get('type'),
+            'target': threat.get('target_device'),
+            'message': f"KAAL action: {action['action']}",
+            'gateway_mode': self.gateway_mode
+        })
+
+        # Emit status update
+        self._emit_event('status_update', self.get_status())
+
+    def _execute_action(self, action: dict, threat: dict):
+        """Execute the action decided by KAAL."""
+        action_type = action.get("action")
+
+        # Use the integrated execute_action method from agentic_defender
+        # This provides real traffic control when in gateway mode
+        result = self.agentic_defender.execute_action(
+            decision=action,
+            threat_info=threat,
+            deception_engine=self.deception_engine
+        )
+
+        # Log whether real action was taken
+        if result.get('real_action_taken'):
+            logger.warning(f"REAL ACTION TAKEN: {action_type}")
+        else:
+            logger.info(f"Action logged (no gateway): {action_type}")
+
+        # Emit events based on action type
+        if action_type == "MONITOR":
+            logger.debug("Action: Continue monitoring")
+
+        elif action_type == "DEPLOY_HONEYPOT":
+            logger.info("Action: Deploying honeypot")
+            if result.get("honeypot_id"):
+                self._emit_event('honeypot_deployed', {
+                    'honeypot_id': result.get('honeypot_id'),
+                    'message': result.get('message', 'Honeypot deployed'),
+                    'real_action': result.get('real_action_taken', False)
+                })
+
+        elif action_type == "ISOLATE_DEVICE":
+            logger.warning(f"Action: Isolating device {threat.get('target_device')}")
+            self._emit_event('device_isolated', {
+                'device': threat.get('target_device'),
+                'ip': threat.get('source_ip'),
+                'message': result.get('message', 'Device isolated'),
+                'real_action': result.get('real_action_taken', False)
+            })
+
+        elif action_type == "ENGAGE_ATTACKER":
+            logger.info("Action: Engaging attacker with honeypot")
+            self._emit_event('attacker_engaged', {
+                'target': threat.get('source_ip'),
+                'message': result.get('message', 'Attacker engaged'),
+                'real_action': result.get('real_action_taken', False)
+            })
+
+        elif action_type == "ALERT_USER":
+            logger.info("Action: Alerting user")
+            self._send_alert(threat)
+
+        return result
+
+    def _emit_event(self, event_name: str, data: dict):
+        """Emit a WebSocket event to the dashboard."""
+        if hasattr(self, 'socketio') and self.socketio:
+            try:
+                self.socketio.emit(event_name, data)
+            except Exception as e:
+                logger.debug(f"Failed to emit {event_name}: {e}")
+
+    def _send_alert(self, threat: dict):
+        """Send alert to user via dashboard."""
+        lang = self.config.get("general", {}).get("language", "en")
+        alerts = self.config.get("alerts", {}).get(lang, {})
+
+        message = alerts.get("threat_detected", "Threat detected!").format(
+            device=threat.get("target_device", "unknown device"),
+            ip=threat.get("source_ip", "unknown")
+        )
+
+        # Emit via WebSocket (handled by Flask-SocketIO)
+        if hasattr(self, 'socketio'):
+            self.socketio.emit('alert', {
+                'message': message,
+                'threat': threat,
+                'severity': threat.get('severity', 'medium')
+            })
+
+        console.print(f"[bold red]ALERT:[/bold red] {message}")
+
+    def _run_flask_app(self):
+        """Run the Flask dashboard application."""
+        from api.app import socketio
+
+        self.socketio = socketio
+
+        host = self.config.get("api", {}).get("host", "0.0.0.0")
+        port = self.config.get("api", {}).get("port", 5000)
+        debug = self.config.get("general", {}).get("debug", False)
+
+        socketio.run(
+            self.app,
+            host=host,
+            port=port,
+            debug=debug,
+            use_reloader=False,
+            log_output=False
+        )
+
+    def get_status(self) -> dict:
+        """Get current system status."""
+        status = {
+            "running": self.running,
+            "mode": "gateway" if self.gateway_mode else ("simulation" if self.simulation_mode else "standalone"),
+            "devices_count": len(self.network_scanner.devices),
+            "threats_count": self.threat_logger.get_threat_count(),
+            "honeypots_active": self.deception_engine.get_active_count(),
+            "ai_model_loaded": self.agentic_defender.model_loaded,
+            "gateway_mode": self.gateway_mode
+        }
+
+        # Add gateway-specific status if in gateway mode
+        if self.gateway_mode and self.gateway:
+            status["gateway_status"] = self.gateway.get_status()
+            status["connected_devices"] = self.gateway.get_connected_devices()
+            status["isolated_devices"] = len(self.gateway.isolated_devices)
+            status["active_redirections"] = len(self.gateway.redirection_rules)
+
+        # Add packet filter stats if available
+        if self.packet_filter:
+            status["traffic_stats"] = self.packet_filter.get_traffic_stats()
+            status["blocked_ips"] = self.packet_filter.get_blocked_ips()
+
+        return status
+
+
+@click.command()
+@click.option("--config", "-c", default="config/config.yaml", help="Path to config file")
+@click.option("--standalone", is_flag=True, help="Run in standalone mode (passive monitoring, for testing only)")
+@click.option("--simulate", "-s", is_flag=True, help="Run with simulated devices (testing only)")
+@click.option("--debug", "-d", is_flag=True, help="Enable debug logging")
+@click.option("--port", "-p", default=5000, help="Dashboard port")
+@click.option("--skip-checks", is_flag=True, help="Skip prerequisite checks (dangerous)")
+def main(config: str, standalone: bool, simulate: bool, debug: bool, port: int, skip_checks: bool):
+    """
+    RAKSHAK - Agentic AI Cyber Guardian for Home IoT
+
+    INLINE SECURITY GATEWAY MODE (DEFAULT):
+      RAKSHAK operates as the network gateway between your modem and router.
+      This provides full traffic control including:
+      - Real device isolation via iptables
+      - Traffic blocking and rate limiting
+      - Honeypot redirection via NAT
+      - Deep packet inspection
+
+    Network Topology:
+      Internet -> Modem -> [RAKSHAK/Jetson] -> Router (AP mode) -> IoT Devices
+
+    STANDALONE MODE (--standalone):
+      Legacy passive monitoring mode. For testing only.
+      Does NOT provide real traffic control.
+
+    Requirements for Gateway Mode:
+      - Root privileges (sudo)
+      - Two network interfaces (eth0 for WAN, eth1 for LAN)
+      - USB-to-Ethernet adapter if Jetson has single NIC
+    """
+    # Print banner
+    print_banner()
+
+    # Load configuration
+    cfg = load_config(config)
+
+    # Override config with CLI options
+    if simulate:
+        cfg["simulation"]["enabled"] = True
+        console.print("[yellow]SIMULATION MODE - Using fake devices[/yellow]")
+    if debug:
+        cfg["general"]["debug"] = True
+        cfg["general"]["log_level"] = "DEBUG"
+    if port != 5000:
+        cfg["api"]["port"] = port
+
+    # Determine mode
+    gateway_mode = not standalone
+
+    if gateway_mode:
+        # =====================================================================
+        # GATEWAY MODE (DEFAULT)
+        # =====================================================================
+        console.print("\n[bold cyan]" + "=" * 60 + "[/bold cyan]")
+        console.print("[bold cyan]       RAKSHAK INLINE SECURITY GATEWAY MODE[/bold cyan]")
+        console.print("[bold cyan]" + "=" * 60 + "[/bold cyan]\n")
+
+        if not skip_checks:
+            # Check prerequisites
+            console.print("[dim]Checking gateway prerequisites...[/dim]")
+            ready, issues = check_gateway_prerequisites()
+
+            if not ready:
+                console.print("\n[bold red]GATEWAY PREREQUISITES NOT MET:[/bold red]")
+                for issue in issues:
+                    console.print(f"  [red]x[/red] {issue}")
+                console.print("\n[yellow]Options:[/yellow]")
+                console.print("  1. Fix the issues above and retry")
+                console.print("  2. Run with --standalone for passive monitoring (limited functionality)")
+                console.print("  3. Run with --skip-checks to bypass (dangerous, may not work)")
+                sys.exit(1)
+            else:
+                console.print("[green]All prerequisites met[/green]\n")
+
+        # Auto-detect interfaces if needed
+        wan_iface = cfg.get("gateway", {}).get("wan_interface", "eth0")
+        lan_iface = cfg.get("gateway", {}).get("lan_interface", "eth1")
+
+        if cfg.get("gateway", {}).get("auto_detect_interfaces", True):
+            detected_wan, detected_lan = detect_network_interfaces()
+            if detected_wan and detected_lan:
+                wan_iface = detected_wan
+                lan_iface = detected_lan
+                console.print(f"[dim]Auto-detected interfaces: WAN={wan_iface}, LAN={lan_iface}[/dim]")
+
+        # Update config with detected interfaces
+        cfg["gateway"]["wan_interface"] = wan_iface
+        cfg["gateway"]["lan_interface"] = lan_iface
+        cfg["gateway"]["enabled"] = True
+
+        console.print(f"[cyan]Network Topology:[/cyan]")
+        console.print(f"  Internet -> Modem -> [{wan_iface}] JETSON [{lan_iface}] -> Router (AP) -> IoT")
+        console.print(f"  Gateway IP: {cfg['gateway']['lan_ip']}")
+
+        dhcp_start = cfg.get("gateway", {}).get("dhcp", {}).get("range_start", cfg.get("gateway", {}).get("dhcp_range_start", "192.168.100.10"))
+        dhcp_end = cfg.get("gateway", {}).get("dhcp", {}).get("range_end", cfg.get("gateway", {}).get("dhcp_range_end", "192.168.100.250"))
+        console.print(f"  DHCP Range: {dhcp_start} - {dhcp_end}")
+        console.print("")
+
+    else:
+        # =====================================================================
+        # STANDALONE MODE (Legacy/Testing)
+        # =====================================================================
+        console.print("\n[bold yellow]" + "=" * 60 + "[/bold yellow]")
+        console.print("[bold yellow]       RAKSHAK STANDALONE MODE (LIMITED)[/bold yellow]")
+        console.print("[bold yellow]" + "=" * 60 + "[/bold yellow]\n")
+        console.print("[yellow]WARNING: Standalone mode does NOT provide real traffic control.[/yellow]")
+        console.print("[yellow]Device isolation and honeypot redirection are SIMULATED ONLY.[/yellow]")
+        console.print("[yellow]Use gateway mode for real autonomous defense.[/yellow]\n")
+        cfg["gateway"]["enabled"] = False
+
+    # Setup logging
+    setup_logging(cfg)
+
+    # Create orchestrator
+    try:
+        orchestrator = RakshakOrchestrator(cfg, gateway_mode=gateway_mode)
+    except RuntimeError as e:
+        console.print(f"[bold red]ERROR: {e}[/bold red]")
+        console.print("[dim]Run with --standalone for passive monitoring mode[/dim]")
+        sys.exit(1)
+
+    # Handle shutdown signals
+    def signal_handler(signum, frame):
+        console.print("\n[yellow]Shutting down RAKSHAK...[/yellow]")
+        orchestrator.stop()
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+
+    # Start the system
+    try:
+        orchestrator.start()
+    except KeyboardInterrupt:
+        orchestrator.stop()
+    except Exception as e:
+        logger.exception(f"Fatal error: {e}")
+        orchestrator.stop()
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
