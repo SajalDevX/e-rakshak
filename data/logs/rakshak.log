@@ -1382,3 +1382,267 @@
 2026-01-14 22:51:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
 2026-01-14 22:52:10 | INFO     | core.network_scanner | Scanning network: 10.48.227.0/24
 2026-01-14 22:52:10 | ERROR    | core.network_scanner | Permission denied - network scanning requires root privileges
+2026-01-17 04:30:32 | INFO     | __main__ | Initializing RAKSHAK components...
+2026-01-17 04:30:32 | INFO     | __main__ | Initializing GATEWAY MODE...
+2026-01-17 04:30:32 | INFO     | core.gateway | RakshakGateway initialized
+2026-01-17 04:30:32 | INFO     | core.packet_filter | PacketFilter initialized
+2026-01-17 04:30:32 | INFO     | __main__ | Gateway mode components initialized
+2026-01-17 04:30:32 | INFO     | core.threat_logger | ThreatLogger initialized
+2026-01-17 04:30:32 | INFO     | core.llm_honeypot | Ollama initialized with model: mistral:7b
+2026-01-17 04:30:32 | INFO     | core.llm_honeypot | LLMHoneypot initialized (LLM available: True, backend: ollama)
+2026-01-17 04:30:32 | WARNING  | core.ids_classifier | IDS Classifier disabled - joblib not available
+2026-01-17 04:30:32 | WARNING  | __main__ | IDS classifier not loaded - using rule-based detection only
+2026-01-17 04:30:32 | INFO     | core.network_scanner | Using fallback interface: br-4d548e8a4c39
+2026-01-17 04:30:32 | INFO     | core.network_scanner | Auto-detected network range: 172.18.0.0/16
+2026-01-17 04:30:32 | INFO     | core.network_scanner | NetworkScanner initialized (simulation=False)
+2026-01-17 04:30:32 | INFO     | core.deception_engine | DeceptionEngine initialized (enabled=True)
+2026-01-17 04:30:32 | INFO     | core.event_store | Auto-export started: every 3600s to data/events/
+2026-01-17 04:30:32 | INFO     | core.event_store | MemoryEventStore initialized (max_size=10000)
+2026-01-17 04:30:32 | INFO     | core.event_bus | LocalEventPublisher initialized
+2026-01-17 04:30:32 | INFO     | core.event_bus | AsyncEventPublisher initialized (queue_size=1000)
+2026-01-17 04:30:32 | INFO     | core.agentic_defender | Event publisher initialized for offline RL
+2026-01-17 04:30:32 | WARNING  | core.agentic_defender | PyTorch not available, using rule-based decision making
+2026-01-17 04:30:32 | INFO     | core.agentic_defender | AgenticDefender initialized (rule-based mode)
+2026-01-17 04:30:32 | INFO     | core.agentic_defender | Gateway integration enabled for real device isolation
+2026-01-17 04:30:32 | INFO     | core.agentic_defender | Packet filter integration enabled
+2026-01-17 04:30:33 | INFO     | api.app | Flask app created successfully
+2026-01-17 04:30:33 | INFO     | __main__ | RAKSHAK components initialized successfully
+2026-01-17 04:30:33 | INFO     | __main__ | Starting RAKSHAK in GATEWAY mode...
+2026-01-17 04:30:33 | INFO     | __main__ | Starting gateway...
+2026-01-17 04:30:33 | INFO     | core.gateway | ============================================================
+2026-01-17 04:30:33 | INFO     | core.gateway | Starting RAKSHAK Inline Security Gateway
+2026-01-17 04:30:33 | INFO     | core.gateway | ============================================================
+2026-01-17 04:30:33 | INFO     | core.gateway | Detected interfaces: ['eno1', 'wlo1', 'br-4d548e8a4c39', 'enx207bd51a6a7d', 'enx000000000004']
+2026-01-17 04:30:33 | INFO     | core.gateway | Non-Jetson platform (standard Linux)
+2026-01-17 04:30:33 | INFO     | core.gateway | Enabling IP forwarding...
+2026-01-17 04:30:33 | INFO     | core.gateway | IP forwarding enabled
+2026-01-17 04:30:33 | INFO     | core.gateway | Configuring LAN interface enx207bd51a6a7d...
+2026-01-17 04:30:33 | ERROR    | core.gateway | Failed to configure LAN interface: Command '['ip', 'addr', 'add', '10.42.0.1/24', 'dev', 'enx207bd51a6a7d']' returned non-zero exit status 2.
+2026-01-17 04:30:33 | ERROR    | __main__ | Failed to start gateway!
+2026-01-17 04:30:33 | ERROR    | __main__ | Fatal error: Gateway startup failed
+Traceback (most recent call last):
+
+  File "/home/sajal/Desktop/Hackathons/e-raksha/main.py", line 792, in <module>
+    main()
+    └ <Command main>
+
+  File "/home/sajal/Desktop/Hackathons/e-raksha/venv/lib/python3.12/site-packages/click/core.py", line 1485, in __call__
+    return self.main(*args, **kwargs)
+           │    │     │       └ {}
+           │    │     └ ()
+           │    └ <function Command.main at 0x71e9b2cac220>
+           └ <Command main>
+  File "/home/sajal/Desktop/Hackathons/e-raksha/venv/lib/python3.12/site-packages/click/core.py", line 1406, in main
+    rv = self.invoke(ctx)
+         │    │      └ <click.core.Context object at 0x71e98ccc9df0>
+         │    └ <function Command.invoke at 0x71e9b2ca3ec0>
+         └ <Command main>
+  File "/home/sajal/Desktop/Hackathons/e-raksha/venv/lib/python3.12/site-packages/click/core.py", line 1269, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           │   │      │    │           │   └ {'config': 'config/config.yaml', 'standalone': False, 'simulate': False, 'debug': False, 'port': 5000, 'skip_checks': False}
+           │   │      │    │           └ <click.core.Context object at 0x71e98ccc9df0>
+           │   │      │    └ <function main at 0x71e98c964ae0>
+           │   │      └ <Command main>
+           │   └ <function Context.invoke at 0x71e9b2ca3100>
+           └ <click.core.Context object at 0x71e98ccc9df0>
+  File "/home/sajal/Desktop/Hackathons/e-raksha/venv/lib/python3.12/site-packages/click/core.py", line 824, in invoke
+    return callback(*args, **kwargs)
+           │         │       └ {'config': 'config/config.yaml', 'standalone': False, 'simulate': False, 'debug': False, 'port': 5000, 'skip_checks': False}
+           │         └ ()
+           └ <function main at 0x71e98c964ae0>
+
+> File "/home/sajal/Desktop/Hackathons/e-raksha/main.py", line 782, in main
+    orchestrator.start()
+    │            └ <function RakshakOrchestrator.start at 0x71e98c95ff60>
+    └ <__main__.RakshakOrchestrator object at 0x71e98c956a80>
+
+  File "/home/sajal/Desktop/Hackathons/e-raksha/main.py", line 346, in start
+    raise RuntimeError("Gateway startup failed")
+
+RuntimeError: Gateway startup failed
+2026-01-17 04:30:33 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 04:30:33 | INFO     | core.deception_engine | Stopped all honeypots and removed NAT redirections
+2026-01-17 04:30:33 | INFO     | __main__ | Stopping gateway...
+2026-01-17 04:30:33 | INFO     | core.gateway | Stopping RAKSHAK Gateway...
+2026-01-17 04:30:33 | INFO     | core.gateway | RAKSHAK firewall chains removed
+2026-01-17 04:30:33 | INFO     | core.gateway | RAKSHAK Gateway stopped successfully
+2026-01-17 04:30:33 | INFO     | core.packet_filter | PacketFilter stopped
+2026-01-17 04:30:33 | INFO     | __main__ | RAKSHAK stopped
+2026-01-17 04:40:53 | INFO     | __main__ | Initializing RAKSHAK components...
+2026-01-17 04:40:53 | INFO     | __main__ | Initializing GATEWAY MODE...
+2026-01-17 04:40:53 | INFO     | core.gateway | RakshakGateway initialized
+2026-01-17 04:40:53 | INFO     | core.packet_filter | PacketFilter initialized
+2026-01-17 04:40:53 | INFO     | __main__ | Gateway mode components initialized
+2026-01-17 04:40:53 | INFO     | core.threat_logger | ThreatLogger initialized
+2026-01-17 04:40:53 | INFO     | core.llm_honeypot | Ollama initialized with model: mistral:7b
+2026-01-17 04:40:53 | INFO     | core.llm_honeypot | LLMHoneypot initialized (LLM available: True, backend: ollama)
+2026-01-17 04:40:53 | WARNING  | core.ids_classifier | IDS Classifier disabled - joblib not available
+2026-01-17 04:40:53 | WARNING  | __main__ | IDS classifier not loaded - using rule-based detection only
+2026-01-17 04:40:53 | INFO     | core.network_scanner | Using fallback interface: br-4d548e8a4c39
+2026-01-17 04:40:53 | INFO     | core.network_scanner | Auto-detected network range: 172.18.0.0/16
+2026-01-17 04:40:53 | INFO     | core.network_scanner | NetworkScanner initialized (simulation=False)
+2026-01-17 04:40:53 | INFO     | core.deception_engine | DeceptionEngine initialized (enabled=True)
+2026-01-17 04:40:53 | INFO     | core.event_store | Auto-export started: every 3600s to data/events/
+2026-01-17 04:40:53 | INFO     | core.event_store | MemoryEventStore initialized (max_size=10000)
+2026-01-17 04:40:53 | INFO     | core.event_bus | LocalEventPublisher initialized
+2026-01-17 04:40:53 | INFO     | core.event_bus | AsyncEventPublisher initialized (queue_size=1000)
+2026-01-17 04:40:53 | INFO     | core.agentic_defender | Event publisher initialized for offline RL
+2026-01-17 04:40:53 | WARNING  | core.agentic_defender | PyTorch not available, using rule-based decision making
+2026-01-17 04:40:53 | INFO     | core.agentic_defender | AgenticDefender initialized (rule-based mode)
+2026-01-17 04:40:53 | INFO     | core.agentic_defender | Gateway integration enabled for real device isolation
+2026-01-17 04:40:53 | INFO     | core.agentic_defender | Packet filter integration enabled
+2026-01-17 04:40:53 | INFO     | api.app | Flask app created successfully
+2026-01-17 04:40:53 | INFO     | __main__ | RAKSHAK components initialized successfully
+2026-01-17 04:40:53 | INFO     | __main__ | Starting RAKSHAK in GATEWAY mode...
+2026-01-17 04:40:53 | INFO     | __main__ | Starting gateway...
+2026-01-17 04:40:53 | INFO     | core.gateway | ============================================================
+2026-01-17 04:40:53 | INFO     | core.gateway | Starting RAKSHAK Inline Security Gateway
+2026-01-17 04:40:53 | INFO     | core.gateway | ============================================================
+2026-01-17 04:40:53 | INFO     | core.gateway | Detected interfaces: ['eno1', 'wlo1', 'br-4d548e8a4c39', 'enx207bd51a6a7d', 'enx000000000004']
+2026-01-17 04:40:53 | INFO     | core.gateway | Non-Jetson platform (standard Linux)
+2026-01-17 04:40:53 | INFO     | core.gateway | Enabling IP forwarding...
+2026-01-17 04:40:53 | INFO     | core.gateway | IP forwarding enabled
+2026-01-17 04:40:53 | INFO     | core.gateway | Configuring LAN interface enx207bd51a6a7d...
+2026-01-17 04:40:53 | INFO     | core.gateway | LAN interface enx207bd51a6a7d configured with IP 10.42.0.1/24
+2026-01-17 04:40:53 | INFO     | core.gateway | Setting up firewall chains...
+2026-01-17 04:40:53 | INFO     | core.gateway | RAKSHAK firewall chains configured
+2026-01-17 04:40:53 | INFO     | core.gateway | Setting up NAT rules...
+2026-01-17 04:40:53 | INFO     | core.gateway | NAT rules configured
+2026-01-17 04:40:53 | INFO     | core.gateway | Configuring DHCP server...
+2026-01-17 04:40:54 | ERROR    | core.gateway | dnsmasq failed to start
+2026-01-17 04:40:54 | ERROR    | __main__ | Failed to start gateway!
+2026-01-17 04:40:54 | ERROR    | __main__ | Fatal error: Gateway startup failed
+Traceback (most recent call last):
+
+  File "/home/sajal/Desktop/Hackathons/e-raksha/main.py", line 792, in <module>
+    main()
+    └ <Command main>
+
+  File "/home/sajal/Desktop/Hackathons/e-raksha/venv/lib/python3.12/site-packages/click/core.py", line 1485, in __call__
+    return self.main(*args, **kwargs)
+           │    │     │       └ {}
+           │    │     └ ()
+           │    └ <function Command.main at 0x7ba051c30220>
+           └ <Command main>
+  File "/home/sajal/Desktop/Hackathons/e-raksha/venv/lib/python3.12/site-packages/click/core.py", line 1406, in main
+    rv = self.invoke(ctx)
+         │    │      └ <click.core.Context object at 0x7ba02bdf66c0>
+         │    └ <function Command.invoke at 0x7ba051c27ec0>
+         └ <Command main>
+  File "/home/sajal/Desktop/Hackathons/e-raksha/venv/lib/python3.12/site-packages/click/core.py", line 1269, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           │   │      │    │           │   └ {'config': 'config/config.yaml', 'standalone': False, 'simulate': False, 'debug': False, 'port': 5000, 'skip_checks': False}
+           │   │      │    │           └ <click.core.Context object at 0x7ba02bdf66c0>
+           │   │      │    └ <function main at 0x7ba02b958ae0>
+           │   │      └ <Command main>
+           │   └ <function Context.invoke at 0x7ba051c27100>
+           └ <click.core.Context object at 0x7ba02bdf66c0>
+  File "/home/sajal/Desktop/Hackathons/e-raksha/venv/lib/python3.12/site-packages/click/core.py", line 824, in invoke
+    return callback(*args, **kwargs)
+           │         │       └ {'config': 'config/config.yaml', 'standalone': False, 'simulate': False, 'debug': False, 'port': 5000, 'skip_checks': False}
+           │         └ ()
+           └ <function main at 0x7ba02b958ae0>
+
+> File "/home/sajal/Desktop/Hackathons/e-raksha/main.py", line 782, in main
+    orchestrator.start()
+    │            └ <function RakshakOrchestrator.start at 0x7ba02b953f60>
+    └ <__main__.RakshakOrchestrator object at 0x7ba02b94afc0>
+
+  File "/home/sajal/Desktop/Hackathons/e-raksha/main.py", line 346, in start
+    raise RuntimeError("Gateway startup failed")
+
+RuntimeError: Gateway startup failed
+2026-01-17 04:40:54 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 04:40:54 | INFO     | core.deception_engine | Stopped all honeypots and removed NAT redirections
+2026-01-17 04:40:54 | INFO     | __main__ | Stopping gateway...
+2026-01-17 04:40:54 | INFO     | core.gateway | Stopping RAKSHAK Gateway...
+2026-01-17 04:40:54 | INFO     | core.gateway | RAKSHAK firewall chains removed
+2026-01-17 04:40:54 | INFO     | core.gateway | RAKSHAK Gateway stopped successfully
+2026-01-17 04:40:54 | INFO     | core.packet_filter | PacketFilter stopped
+2026-01-17 04:40:54 | INFO     | __main__ | RAKSHAK stopped
+2026-01-17 04:48:10 | INFO     | __main__ | Initializing RAKSHAK components...
+2026-01-17 04:48:10 | INFO     | __main__ | Initializing GATEWAY MODE...
+2026-01-17 04:48:10 | INFO     | core.gateway | RakshakGateway initialized
+2026-01-17 04:48:10 | INFO     | core.packet_filter | PacketFilter initialized
+2026-01-17 04:48:10 | INFO     | __main__ | Gateway mode components initialized
+2026-01-17 04:48:10 | INFO     | core.threat_logger | ThreatLogger initialized
+2026-01-17 04:48:10 | INFO     | core.llm_honeypot | Ollama initialized with model: mistral:7b
+2026-01-17 04:48:10 | INFO     | core.llm_honeypot | LLMHoneypot initialized (LLM available: True, backend: ollama)
+2026-01-17 04:48:10 | WARNING  | core.ids_classifier | IDS Classifier disabled - joblib not available
+2026-01-17 04:48:10 | WARNING  | __main__ | IDS classifier not loaded - using rule-based detection only
+2026-01-17 04:48:10 | INFO     | core.network_scanner | Using fallback interface: wlo1
+2026-01-17 04:48:10 | INFO     | core.network_scanner | Auto-detected network range: 10.194.192.0/19
+2026-01-17 04:48:10 | INFO     | core.network_scanner | NetworkScanner initialized (simulation=False)
+2026-01-17 04:48:10 | INFO     | core.deception_engine | DeceptionEngine initialized (enabled=True)
+2026-01-17 04:48:10 | INFO     | core.event_store | Auto-export started: every 3600s to data/events/
+2026-01-17 04:48:10 | INFO     | core.event_store | MemoryEventStore initialized (max_size=10000)
+2026-01-17 04:48:10 | INFO     | core.event_bus | LocalEventPublisher initialized
+2026-01-17 04:48:10 | INFO     | core.event_bus | AsyncEventPublisher initialized (queue_size=1000)
+2026-01-17 04:48:10 | INFO     | core.agentic_defender | Event publisher initialized for offline RL
+2026-01-17 04:48:10 | WARNING  | core.agentic_defender | PyTorch not available, using rule-based decision making
+2026-01-17 04:48:10 | INFO     | core.agentic_defender | AgenticDefender initialized (rule-based mode)
+2026-01-17 04:48:10 | INFO     | core.agentic_defender | Gateway integration enabled for real device isolation
+2026-01-17 04:48:10 | INFO     | core.agentic_defender | Packet filter integration enabled
+2026-01-17 04:48:11 | INFO     | api.app | Flask app created successfully
+2026-01-17 04:48:11 | INFO     | __main__ | RAKSHAK components initialized successfully
+2026-01-17 04:48:11 | INFO     | __main__ | Starting RAKSHAK in GATEWAY mode...
+2026-01-17 04:48:11 | INFO     | __main__ | Starting gateway...
+2026-01-17 04:48:11 | INFO     | core.gateway | ============================================================
+2026-01-17 04:48:11 | INFO     | core.gateway | Starting RAKSHAK Inline Security Gateway
+2026-01-17 04:48:11 | INFO     | core.gateway | ============================================================
+2026-01-17 04:48:11 | INFO     | core.gateway | Detected interfaces: ['eno1', 'wlo1', 'br-4d548e8a4c39', 'enx207bd51a6a7d', 'enx000000000004']
+2026-01-17 04:48:11 | INFO     | core.gateway | Non-Jetson platform (standard Linux)
+2026-01-17 04:48:11 | INFO     | core.gateway | Enabling IP forwarding...
+2026-01-17 04:48:11 | INFO     | core.gateway | IP forwarding enabled
+2026-01-17 04:48:11 | INFO     | core.gateway | Configuring LAN interface enx207bd51a6a7d...
+2026-01-17 04:48:11 | ERROR    | core.gateway | Failed to configure LAN interface: Command '['ip', 'addr', 'add', '10.42.0.1/24', 'dev', 'enx207bd51a6a7d']' returned non-zero exit status 2.
+2026-01-17 04:48:11 | ERROR    | __main__ | Failed to start gateway!
+2026-01-17 04:48:11 | ERROR    | __main__ | Fatal error: Gateway startup failed
+Traceback (most recent call last):
+
+  File "/home/sajal/Desktop/Hackathons/e-raksha/main.py", line 792, in <module>
+    main()
+    └ <Command main>
+
+  File "/home/sajal/Desktop/Hackathons/e-raksha/venv/lib/python3.12/site-packages/click/core.py", line 1485, in __call__
+    return self.main(*args, **kwargs)
+           │    │     │       └ {}
+           │    │     └ ()
+           │    └ <function Command.main at 0x7fbcdb3d4220>
+           └ <Command main>
+  File "/home/sajal/Desktop/Hackathons/e-raksha/venv/lib/python3.12/site-packages/click/core.py", line 1406, in main
+    rv = self.invoke(ctx)
+         │    │      └ <click.core.Context object at 0x7fbcb5590cb0>
+         │    └ <function Command.invoke at 0x7fbcdb3cbec0>
+         └ <Command main>
+  File "/home/sajal/Desktop/Hackathons/e-raksha/venv/lib/python3.12/site-packages/click/core.py", line 1269, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           │   │      │    │           │   └ {'config': 'config/config.yaml', 'standalone': False, 'simulate': False, 'debug': False, 'port': 5000, 'skip_checks': False}
+           │   │      │    │           └ <click.core.Context object at 0x7fbcb5590cb0>
+           │   │      │    └ <function main at 0x7fbcb5034ae0>
+           │   │      └ <Command main>
+           │   └ <function Context.invoke at 0x7fbcdb3cb100>
+           └ <click.core.Context object at 0x7fbcb5590cb0>
+  File "/home/sajal/Desktop/Hackathons/e-raksha/venv/lib/python3.12/site-packages/click/core.py", line 824, in invoke
+    return callback(*args, **kwargs)
+           │         │       └ {'config': 'config/config.yaml', 'standalone': False, 'simulate': False, 'debug': False, 'port': 5000, 'skip_checks': False}
+           │         └ ()
+           └ <function main at 0x7fbcb5034ae0>
+
+> File "/home/sajal/Desktop/Hackathons/e-raksha/main.py", line 782, in main
+    orchestrator.start()
+    │            └ <function RakshakOrchestrator.start at 0x7fbcb502ff60>
+    └ <__main__.RakshakOrchestrator object at 0x7fbcb5023440>
+
+  File "/home/sajal/Desktop/Hackathons/e-raksha/main.py", line 346, in start
+    raise RuntimeError("Gateway startup failed")
+
+RuntimeError: Gateway startup failed
+2026-01-17 04:48:11 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 04:48:11 | INFO     | core.deception_engine | Stopped all honeypots and removed NAT redirections
+2026-01-17 04:48:11 | INFO     | __main__ | Stopping gateway...
+2026-01-17 04:48:11 | INFO     | core.gateway | Stopping RAKSHAK Gateway...
+2026-01-17 04:48:11 | INFO     | core.gateway | RAKSHAK firewall chains removed
+2026-01-17 04:48:11 | INFO     | core.gateway | RAKSHAK Gateway stopped successfully
+2026-01-17 04:48:11 | INFO     | core.packet_filter | PacketFilter stopped
+2026-01-17 04:48:11 | INFO     | __main__ | RAKSHAK stopped
