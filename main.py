@@ -64,6 +64,7 @@ from core.agentic_defender import AgenticDefender
 from core.llm_honeypot import LLMHoneypot
 from core.deception_engine import DeceptionEngine
 from core.threat_logger import ThreatLogger
+from core.ids_classifier import IDSClassifier
 from api.app import create_app
 
 # Gateway modules (for inline security gateway mode)
@@ -277,6 +278,13 @@ class RakshakOrchestrator:
         self.threat_logger = ThreatLogger(config)
         self.llm_honeypot = LLMHoneypot(config)
 
+        # Initialize IDS classifier
+        self.ids_classifier = IDSClassifier(model_dir="models/ids")
+        if self.ids_classifier.is_loaded:
+            logger.info("IDS classifier loaded successfully")
+        else:
+            logger.warning("IDS classifier not loaded - using rule-based detection only")
+
         # Pass gateway reference to components that need it
         self.network_scanner = NetworkScanner(config, self.threat_logger, gateway=self.gateway)
         self.deception_engine = DeceptionEngine(
@@ -292,6 +300,8 @@ class RakshakOrchestrator:
             self.agentic_defender.set_gateway(self.gateway)
         if self.packet_filter:
             self.agentic_defender.set_packet_filter(self.packet_filter)
+            # Connect IDS classifier callback to packet filter
+            self.packet_filter.on_threat_detected = self._on_packet_inspected
 
         # Flask app for dashboard
         self.app = create_app(config, self)
@@ -551,6 +561,40 @@ class RakshakOrchestrator:
 
         console.print(f"[bold red]ALERT:[/bold red] {message}")
 
+    def _classify_flow(self, flow_data: dict):
+        """Classify network flow using IDS and create threat if malicious."""
+        if not hasattr(self, 'ids_classifier') or not self.ids_classifier.is_loaded:
+            return None
+
+        # Get KAAL-compatible threat info (returns None if BENIGN)
+        threat_info = self.ids_classifier.get_threat_info(flow_data)
+
+        if threat_info:
+            logger.info(f"IDS detected: {threat_info.get('ids_attack_type')} "
+                       f"from {threat_info.get('source_ip')}")
+
+        return threat_info
+
+    def _on_packet_inspected(self, packet_info: dict):
+        """Callback when packet filter detects suspicious traffic."""
+        from core.ids_classifier import create_flow_from_packet
+
+        # Convert packet to flow format for IDS classification
+        flow_data = create_flow_from_packet(packet_info)
+
+        # Classify using IDS
+        threat_info = self._classify_flow(flow_data)
+
+        if threat_info:
+            # Add device info if available
+            target_ip = threat_info.get('target_ip', '')
+            threat_info['target_device'] = self.network_scanner.get_device_name(
+                target_ip
+            ) if hasattr(self.network_scanner, 'get_device_name') else 'Unknown Device'
+
+            # Queue threat for processing by KAAL
+            self.threat_logger.log_threat(threat_info)
+
     def _run_flask_app(self):
         """Run the Flask dashboard application."""
         from api.app import socketio
@@ -593,6 +637,10 @@ class RakshakOrchestrator:
         if self.packet_filter:
             status["traffic_stats"] = self.packet_filter.get_traffic_stats()
             status["blocked_ips"] = self.packet_filter.get_blocked_ips()
+
+        # Add IDS classifier stats
+        if hasattr(self, 'ids_classifier'):
+            status["ids"] = self.ids_classifier.get_statistics()
 
         return status
 

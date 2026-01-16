@@ -85,7 +85,7 @@ network:
 # Agentic Defender (KAAL) Settings
 # -----------------------------------------------------------------------------
 agent:
-  model_path: "models/dqn_model.pth"
+  model_path: "models/kaal_policy.pth"
   state_size: 10
   action_size: 5
   actions:

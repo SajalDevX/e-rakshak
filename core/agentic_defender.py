@@ -334,7 +334,8 @@ class AgenticDefender:
             try:
                 checkpoint = torch.load(model_path, map_location=self.device)
                 self.policy_net.load_state_dict(checkpoint["policy_state_dict"])
-                self.target_net.load_state_dict(checkpoint["target_state_dict"])
+                if self.target_net is not None:
+                    self.target_net.load_state_dict(checkpoint["target_state_dict"])
                 self.epsilon = checkpoint.get("epsilon", self.epsilon_end)
                 self.steps_done = checkpoint.get("steps_done", 0)
                 self.model_loaded = True
@@ -355,8 +356,8 @@ class AgenticDefender:
 
         checkpoint = {
             "policy_state_dict": self.policy_net.state_dict(),
-            "target_state_dict": self.target_net.state_dict(),
-            "optimizer_state_dict": self.optimizer.state_dict(),
+            "target_state_dict": self.target_net.state_dict() if self.target_net is not None else None,
+            "optimizer_state_dict": self.optimizer.state_dict() if self.optimizer is not None else None,
             "epsilon": self.epsilon,
             "steps_done": self.steps_done,
             "episodes_done": self.episodes_done
