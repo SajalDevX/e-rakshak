@@ -118,6 +118,38 @@ agent:
     critical: 95
 
 # -----------------------------------------------------------------------------
+# KAAL Offline RL Configuration
+# -----------------------------------------------------------------------------
+# KAAL (Knowledge-Augmented Autonomous Learner) runs in two modes:
+# - Inference-Only (default): For Jetson deployment - no training, deterministic
+# - Training: For offline learning from events (separate training machine)
+# -----------------------------------------------------------------------------
+kaal:
+  # Inference mode (recommended for Jetson deployment)
+  inference_only: true              # No inline training, pure greedy decisions
+  model_path: "models/kaal_policy.pth"  # Pre-trained policy checkpoint
+
+  # Event publishing for offline RL
+  event_publishing:
+    enabled: true                   # Publish events for offline training
+    publisher_type: "local"         # "local" (Redis/Memory) or "kafka"
+    async_publish: true             # Non-blocking event publishing
+    queue_size: 1000                # Max pending events in async queue
+
+    # Kafka settings (if publisher_type: "kafka")
+    kafka_bootstrap_servers: "localhost:9092"
+    kafka_topic: "rakshak-attack-events"
+
+  # Event store configuration
+  event_store:
+    backend: "memory"               # "redis" or "memory"
+    redis_url: "redis://localhost:6379"
+    redis_key: "rakshak:attack_events"
+    memory_max_size: 10000          # Max events in memory store
+    auto_export_interval: 3600      # Export to JSON every N seconds (0 to disable)
+    export_path: "data/events/"     # Path for JSON exports
+
+# -----------------------------------------------------------------------------
 # LLM Honeypot (PRAHARI) Settings
 # -----------------------------------------------------------------------------
 llm:

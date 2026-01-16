@@ -10,9 +10,14 @@ decides defensive actions against cyber threats.
 
 Features:
 - Dueling DQN architecture for better action selection
-- Experience replay for stable learning
+- INFERENCE-ONLY MODE for Jetson deployment (no inline training)
+- Event publishing for offline RL training
 - Autonomous decision-making without human intervention
 - Threat severity-based reward shaping
+
+DEPLOYMENT MODES:
+- Inference-Only (default): No training, deterministic decisions, publishes events
+- Training Mode: Online learning with experience replay (for development only)
 
 Author: Team RAKSHAK
 """
@@ -22,8 +27,9 @@ import random
 import numpy as np
 from pathlib import Path
 from collections import deque
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Any
 from dataclasses import dataclass
+from datetime import datetime
 
 from loguru import logger
 
@@ -178,10 +184,27 @@ class AgenticDefender:
     }
 
     def __init__(self, config: dict, threat_logger=None):
-        """Initialize the agentic defender."""
+        """
+        Initialize the agentic defender.
+
+        Args:
+            config: Configuration dictionary
+            threat_logger: ThreatLogger instance for action logging
+        """
         self.config = config
         self.threat_logger = threat_logger
         self.agent_config = config.get("agent", {})
+        self.kaal_config = config.get("kaal", {})
+
+        # =================================================================
+        # INFERENCE MODE (Default for Jetson deployment)
+        # =================================================================
+        # In inference mode:
+        # - No training (no backprop, no replay buffer)
+        # - Deterministic decisions (epsilon = 0)
+        # - Events published for offline RL training
+        # =================================================================
+        self.inference_only = self.kaal_config.get("inference_only", True)
 
         # Network parameters
         self.state_size = self.agent_config.get("state_size", 10)
@@ -189,14 +212,19 @@ class AgenticDefender:
         hidden_layers = self.agent_config.get("hidden_layers", [128, 128])
         self.hidden_size = hidden_layers[0] if hidden_layers else 128
 
-        # Training parameters
+        # Training parameters (only used if inference_only=False)
         self.learning_rate = self.agent_config.get("learning_rate", 0.001)
         self.gamma = self.agent_config.get("gamma", 0.99)
-        self.epsilon = self.agent_config.get("epsilon_start", 1.0)
         self.epsilon_end = self.agent_config.get("epsilon_end", 0.01)
         self.epsilon_decay = self.agent_config.get("epsilon_decay", 0.995)
         self.batch_size = self.agent_config.get("batch_size", 64)
         self.target_update = self.agent_config.get("target_update", 10)
+
+        # Epsilon: 0.0 in inference mode (pure greedy), configurable in training
+        if self.inference_only:
+            self.epsilon = 0.0  # Deterministic decisions
+        else:
+            self.epsilon = self.agent_config.get("epsilon_start", 1.0)
 
         # Severity thresholds
         self.severity_thresholds = self.agent_config.get("severity_thresholds", {
@@ -209,43 +237,91 @@ class AgenticDefender:
         # Initialize model
         self.model_loaded = False
 
+        # Event publisher for offline RL (initialized later if enabled)
+        self.event_publisher = None
+        self._init_event_publisher()
+
         if TORCH_AVAILABLE:
             self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
             self._init_networks()
-            logger.info(f"AgenticDefender initialized (device={self.device})")
+            mode = "INFERENCE-ONLY" if self.inference_only else "TRAINING"
+            logger.info(f"AgenticDefender initialized (mode={mode}, device={self.device})")
         else:
             self.device = None
             logger.warning("PyTorch not available, using rule-based decision making")
             logger.info("AgenticDefender initialized (rule-based mode)")
 
+    def _init_event_publisher(self):
+        """Initialize event publisher for offline RL."""
+        pub_config = self.kaal_config.get("event_publishing", {})
+
+        if not pub_config.get("enabled", True):
+            logger.debug("Event publishing disabled")
+            return
+
+        try:
+            from .event_bus import get_event_publisher
+            from .event_store import get_event_store
+
+            event_store = get_event_store(self.config)
+            self.event_publisher = get_event_publisher(self.config, event_store)
+            logger.info("Event publisher initialized for offline RL")
+
+        except Exception as e:
+            logger.warning(f"Failed to initialize event publisher: {e}")
+            self.event_publisher = None
+
     def _init_networks(self):
-        """Initialize neural networks."""
-        # Policy network (trained)
+        """
+        Initialize neural networks.
+
+        In INFERENCE mode:
+        - Only policy network loaded (in eval mode)
+        - No target network, optimizer, or replay buffer
+        - Minimal memory footprint
+
+        In TRAINING mode:
+        - Full DQN setup with target network
+        - Optimizer and replay buffer initialized
+        """
+        # Policy network (always needed)
         self.policy_net = DuelingDQN(
             self.state_size,
             self.action_size,
             self.hidden_size
         ).to(self.device)
 
-        # Target network (for stable training)
-        self.target_net = DuelingDQN(
-            self.state_size,
-            self.action_size,
-            self.hidden_size
-        ).to(self.device)
-        self.target_net.load_state_dict(self.policy_net.state_dict())
-        self.target_net.eval()
+        if self.inference_only:
+            # INFERENCE MODE: Minimal setup
+            self.policy_net.eval()  # Set to evaluation mode
+            self.target_net = None
+            self.optimizer = None
+            self.memory = None
+            self.steps_done = 0
+            self.episodes_done = 0
+            logger.debug("Networks initialized in INFERENCE mode (no training components)")
+        else:
+            # TRAINING MODE: Full DQN setup
+            # Target network (for stable training)
+            self.target_net = DuelingDQN(
+                self.state_size,
+                self.action_size,
+                self.hidden_size
+            ).to(self.device)
+            self.target_net.load_state_dict(self.policy_net.state_dict())
+            self.target_net.eval()
 
-        # Optimizer
-        self.optimizer = optim.Adam(self.policy_net.parameters(), lr=self.learning_rate)
+            # Optimizer
+            self.optimizer = optim.Adam(self.policy_net.parameters(), lr=self.learning_rate)
 
-        # Experience replay
-        memory_size = self.agent_config.get("memory_size", 10000)
-        self.memory = ReplayBuffer(capacity=memory_size)
+            # Experience replay
+            memory_size = self.agent_config.get("memory_size", 10000)
+            self.memory = ReplayBuffer(capacity=memory_size)
 
-        # Training step counter
-        self.steps_done = 0
-        self.episodes_done = 0
+            # Training step counter
+            self.steps_done = 0
+            self.episodes_done = 0
+            logger.debug("Networks initialized in TRAINING mode")
 
         # Try to load pre-trained model
         self._load_model()
@@ -361,31 +437,96 @@ class AgenticDefender:
             return self._rule_based_decide(threat_info)
 
     def _dqn_decide(self, threat_info: dict) -> dict:
-        """Make decision using Dueling DQN."""
-        state = self.encode_state(threat_info)
+        """
+        Make decision using Dueling DQN.
 
-        # Epsilon-greedy action selection
-        if random.random() <= self.epsilon:
+        In INFERENCE mode:
+        - Pure greedy (epsilon = 0)
+        - No random exploration
+        - Publishes event for offline RL
+
+        In TRAINING mode:
+        - Epsilon-greedy exploration
+        - Random actions with probability epsilon
+        """
+        state = self.encode_state(threat_info)
+        state_tensor = torch.FloatTensor(state).unsqueeze(0).to(self.device)
+
+        # Get Q-values (always needed for event publishing)
+        with torch.no_grad():
+            q_values = self.policy_net(state_tensor)
+            q_values_list = q_values[0].cpu().tolist()
+
+        # Action selection
+        if self.inference_only or self.epsilon == 0:
+            # INFERENCE MODE: Pure greedy (deterministic)
+            action = q_values.argmax().item()
+            q_value = q_values[0][action].item()
+        elif random.random() <= self.epsilon:
+            # TRAINING MODE: Random exploration
             action = random.randint(0, self.action_size - 1)
-            q_value = 0.0
+            q_value = q_values[0][action].item()
         else:
-            state_tensor = torch.FloatTensor(state).unsqueeze(0).to(self.device)
-            with torch.no_grad():
-                q_values = self.policy_net(state_tensor)
-                action = q_values.argmax().item()
-                q_value = q_values[0][action].item()
+            # TRAINING MODE: Greedy selection
+            action = q_values.argmax().item()
+            q_value = q_values[0][action].item()
 
         # Get action name
         action_name = self.ACTIONS.get(action, "MONITOR")
 
-        return {
+        decision = {
             "action": action_name,
             "action_id": action,
             "target": threat_info.get("source_ip", "unknown"),
-            "confidence": 1.0 - self.epsilon,
+            "confidence": 1.0 if self.inference_only else (1.0 - self.epsilon),
             "q_value": q_value,
-            "status": "decided"
+            "q_values": q_values_list,  # All Q-values for analysis
+            "status": "decided",
+            "inference_mode": self.inference_only
         }
+
+        # Store state for event publishing
+        self._last_state = state.tolist()
+        self._last_threat_info = threat_info
+        self._last_decision = decision
+
+        return decision
+
+    def _publish_decision_event(self, threat_info: dict, state: list,
+                                 decision: dict, outcome: str = "monitored",
+                                 outcome_success: bool = True,
+                                 gateway_mode: bool = False):
+        """
+        Publish decision event for offline RL training.
+
+        Args:
+            threat_info: Original threat information
+            state: State vector used for decision
+            decision: Decision dictionary
+            outcome: Action outcome (monitored, blocked, etc.)
+            outcome_success: Whether action succeeded
+            gateway_mode: Whether in gateway mode
+        """
+        if not self.event_publisher:
+            return
+
+        try:
+            from .event_schema import create_attack_event
+
+            event = create_attack_event(
+                threat_info=threat_info,
+                state_vector=state,
+                decision=decision,
+                outcome=outcome,
+                outcome_success=outcome_success,
+                gateway_mode=gateway_mode
+            )
+
+            self.event_publisher.publish(event)
+            logger.debug(f"Published decision event: {event.event_id}")
+
+        except Exception as e:
+            logger.warning(f"Failed to publish decision event: {e}")
 
     def _rule_based_decide(self, threat_info: dict) -> dict:
         """Fallback rule-based decision making."""
@@ -429,6 +570,9 @@ class AgenticDefender:
         """
         Perform one training step.
 
+        NOTE: This method is DISABLED in inference-only mode.
+        For Jetson deployment, all training happens offline.
+
         Args:
             state: Current state
             action: Action taken
@@ -436,7 +580,18 @@ class AgenticDefender:
             next_state: Next state
             done: Episode ended
         """
+        # =================================================================
+        # GUARD: No training in inference mode
+        # =================================================================
+        if self.inference_only:
+            logger.debug("train_step called in inference mode - skipping")
+            return
+
         if not TORCH_AVAILABLE:
+            return
+
+        if self.memory is None:
+            logger.warning("train_step called but replay buffer not initialized")
             return
 
         # Store experience
@@ -524,14 +679,31 @@ class AgenticDefender:
 
     def get_statistics(self) -> dict:
         """Get agent statistics."""
-        return {
+        stats = {
             "steps_done": self.steps_done,
             "episodes_done": self.episodes_done,
             "epsilon": self.epsilon,
-            "memory_size": len(self.memory) if TORCH_AVAILABLE else 0,
             "model_loaded": self.model_loaded,
-            "device": str(self.device)
+            "device": str(self.device),
+            "inference_only": self.inference_only,
+            "mode": "INFERENCE" if self.inference_only else "TRAINING"
         }
+
+        # Memory size only in training mode
+        if TORCH_AVAILABLE and self.memory is not None:
+            stats["memory_size"] = len(self.memory)
+        else:
+            stats["memory_size"] = 0
+
+        # Event publisher stats
+        if self.event_publisher:
+            stats["event_publishing_enabled"] = True
+            if hasattr(self.event_publisher, 'publish_count'):
+                stats["events_published"] = self.event_publisher.publish_count
+        else:
+            stats["event_publishing_enabled"] = False
+
+        return stats
 
     def set_gateway(self, gateway):
         """Set gateway instance for real traffic control."""
@@ -711,6 +883,30 @@ class AgenticDefender:
                         "gateway_mode": result["gateway_mode"]
                     },
                     success=result["success"]
+                )
+
+            # =================================================================
+            # PUBLISH EVENT FOR OFFLINE RL TRAINING
+            # =================================================================
+            # Map action result to outcome
+            outcome_map = {
+                "MONITOR": "monitored",
+                "DEPLOY_HONEYPOT": "redirected" if result.get("honeypot_id") else "monitored",
+                "ISOLATE_DEVICE": "blocked" if result["real_action_taken"] else "monitored",
+                "ENGAGE_ATTACKER": "engaged" if result.get("honeypot_deployed") else "redirected",
+                "ALERT_USER": "alerted"
+            }
+            outcome = outcome_map.get(action, "monitored")
+
+            # Publish event with decision context
+            if hasattr(self, '_last_state') and hasattr(self, '_last_decision'):
+                self._publish_decision_event(
+                    threat_info=threat_info,
+                    state=self._last_state,
+                    decision=self._last_decision,
+                    outcome=outcome,
+                    outcome_success=result["success"],
+                    gateway_mode=has_gateway
                 )
 
         except Exception as e:
