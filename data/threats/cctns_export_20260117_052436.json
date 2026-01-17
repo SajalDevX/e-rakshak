@@ -1,0 +1,30 @@
+{
+  "report_type": "CYBER_INCIDENT",
+  "report_date": "2026-01-17T05:24:36.726431",
+  "reporting_agency": "RAKSHAK IoT Security System",
+  "incidents": [
+    {
+      "incident_id": "THR-20260117052316-000001",
+      "incident_date": "2026-01-17T05:23:16.463707",
+      "incident_type": "DENIAL_OF_SERVICE",
+      "severity": "HIGH",
+      "source_details": {
+        "ip_address": "10.172.250.138",
+        "port": 10009
+      },
+      "target_details": {
+        "ip_address": "192.168.1.1",
+        "port": 5540,
+        "device_name": "Router"
+      },
+      "attack_details": {
+        "protocol": "udp",
+        "packet_count": 146,
+        "duration_seconds": 26.239661581865317,
+        "payload_sample": ""
+      },
+      "detection_method": "simulation",
+      "status": "DETECTED_AND_MITIGATED"
+    }
+  ]
+}

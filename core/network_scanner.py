@@ -175,6 +175,13 @@ class NetworkScanner:
 
     def _detect_network_interface(self) -> str:
         """Auto-detect the best network interface."""
+        # If gateway is available, use its LAN interface
+        if self.gateway and hasattr(self.gateway, 'lan_interface'):
+            lan_if = self.gateway.lan_interface
+            if lan_if:
+                logger.info(f"Using gateway LAN interface: {lan_if}")
+                return lan_if
+
         if not NETIFACES_AVAILABLE:
             logger.warning("netifaces not available, using default eth0")
             return self.network_config.get("interface", "eth0")
@@ -182,11 +189,17 @@ class NetworkScanner:
         try:
             interfaces = netifaces.interfaces()
 
-            # Priority order for interface names
-            priority_prefixes = ['eth', 'enp', 'ens', 'wlan', 'wlp', 'eno', 'em']
+            # Exclude virtual/docker interfaces
+            excluded_prefixes = ['br-', 'docker', 'veth', 'virbr', 'lo']
+
+            # Priority order for interface names (USB ethernet first for our setup)
+            priority_prefixes = ['enx', 'eth', 'enp', 'ens', 'eno', 'em', 'wlan', 'wlp', 'wlo']
 
             for prefix in priority_prefixes:
                 for iface in interfaces:
+                    # Skip excluded interfaces
+                    if any(iface.startswith(excl) for excl in excluded_prefixes):
+                        continue
                     if iface.startswith(prefix):
                         # Check if interface has IPv4 address
                         addrs = netifaces.ifaddresses(iface)
@@ -196,13 +209,15 @@ class NetworkScanner:
                                 logger.info(f"Auto-detected network interface: {iface}")
                                 return iface
 
-            # Fallback: find any interface with IPv4 (except loopback)
+            # Fallback: find any interface with IPv4 (except loopback and virtual)
             for iface in interfaces:
-                if iface != 'lo':
-                    addrs = netifaces.ifaddresses(iface)
-                    if netifaces.AF_INET in addrs:
-                        logger.info(f"Using fallback interface: {iface}")
-                        return iface
+                # Skip excluded interfaces
+                if any(iface.startswith(excl) for excl in excluded_prefixes):
+                    continue
+                addrs = netifaces.ifaddresses(iface)
+                if netifaces.AF_INET in addrs:
+                    logger.info(f"Using fallback interface: {iface}")
+                    return iface
 
         except Exception as e:
             logger.error(f"Failed to auto-detect interface: {e}")
@@ -443,39 +458,52 @@ class NetworkScanner:
         devices = []
         leases = self.gateway.refresh_dhcp_leases()
 
-        for mac, lease in leases.items():
-            # Check if device already exists
-            if lease.ip_address in self.devices:
-                device = self.devices[lease.ip_address]
-                device.last_seen = datetime.now().isoformat()
-                device.hostname = lease.hostname if lease.hostname != "unknown" else device.hostname
-            else:
-                # Create new device from lease
-                device = Device(
-                    id=self._generate_device_id(),
-                    ip=lease.ip_address,
-                    mac=lease.mac_address,
-                    hostname=lease.hostname,
-                    device_type=self._guess_device_type(lease.mac_address, lease.hostname),
-                    first_seen=lease.lease_start.isoformat() if hasattr(lease.lease_start, 'isoformat') else str(lease.lease_start),
-                    last_seen=datetime.now().isoformat(),
-                    status="active" if lease.is_active else "inactive"
-                )
+        # Get current lease IPs to track disconnected devices
+        current_lease_ips = {lease.ip_address for lease in leases.values()}
 
-                # Try to identify device from MAC
-                self._identify_device(device)
+        with self._devices_lock:
+            # Mark devices not in current leases as inactive
+            for ip in list(self.devices.keys()):
+                if ip not in current_lease_ips:
+                    if self.devices[ip].status == "active":
+                        self.devices[ip].status = "inactive"
+                        logger.info(f"Device {ip} marked as inactive (disconnected)")
 
-                # Calculate risk score
-                device.risk_score = self._calculate_risk_score(device)
+            for mac, lease in leases.items():
+                # Check if device already exists
+                if lease.ip_address in self.devices:
+                    device = self.devices[lease.ip_address]
+                    device.last_seen = datetime.now().isoformat()
+                    device.hostname = lease.hostname if lease.hostname != "unknown" else device.hostname
+                    if device.status == "inactive" and lease.is_active:
+                        device.status = "active"
+                else:
+                    # Create new device from lease
+                    device = Device(
+                        id=self._generate_device_id(),
+                        ip=lease.ip_address,
+                        mac=lease.mac_address,
+                        hostname=lease.hostname,
+                        device_type=self._guess_device_type(lease.mac_address, lease.hostname),
+                        first_seen=lease.lease_start.isoformat() if hasattr(lease.lease_start, 'isoformat') else str(lease.lease_start),
+                        last_seen=datetime.now().isoformat(),
+                        status="active" if lease.is_active else "inactive"
+                    )
 
-            # Check if device is isolated
-            if lease.ip_address in self.gateway.isolated_devices:
-                device.status = "isolated"
+                    # Try to identify device from MAC
+                    self._identify_device(device)
 
-            devices.append(device)
+                    # Calculate risk score
+                    device.risk_score = self._calculate_risk_score(device)
 
-            # Update internal tracking
-            self.devices[device.ip] = device
+                # Check if device is isolated
+                if lease.ip_address in self.gateway.isolated_devices:
+                    device.status = "isolated"
+
+                devices.append(device)
+
+                # Update internal tracking
+                self.devices[device.ip] = device
 
         logger.debug(f"Discovered {len(devices)} devices from DHCP leases")
         return devices
@@ -724,16 +752,17 @@ class NetworkScanner:
         Returns device characteristics that can be used to create
         a convincing honeypot clone.
         """
-        if device_type:
-            for device in self.devices.values():
-                if device.device_type == device_type:
-                    return self._create_morph_profile(device)
+        with self._devices_lock:
+            if device_type:
+                for device in list(self.devices.values()):
+                    if device.device_type == device_type:
+                        return self._create_morph_profile(device)
 
-        # Return random high-risk device
-        high_risk = [d for d in self.devices.values() if d.risk_score > 50]
-        if high_risk:
-            device = high_risk[0]
-            return self._create_morph_profile(device)
+            # Return random high-risk device
+            high_risk = [d for d in list(self.devices.values()) if d.risk_score > 50]
+            if high_risk:
+                device = high_risk[0]
+                return self._create_morph_profile(device)
 
         return None
 
@@ -771,11 +800,13 @@ class NetworkScanner:
 
     def get_high_risk_devices(self, threshold: int = 60) -> List[Device]:
         """Get devices with risk score above threshold."""
-        return [d for d in self.devices.values() if d.risk_score >= threshold]
+        with self._devices_lock:
+            return [d for d in list(self.devices.values()) if d.risk_score >= threshold]
 
     def get_statistics(self) -> Dict:
         """Get network statistics."""
-        devices = list(self.devices.values())
+        with self._devices_lock:
+            devices = list(self.devices.values())
         return {
             "total_devices": len(devices),
             "active_devices": len([d for d in devices if d.status == "active"]),

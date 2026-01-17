@@ -1,0 +1,92 @@
+{
+  "export_date": "2026-01-17T05:24:41.525816",
+  "statistics": {
+    "total_threats": 1,
+    "total_actions": 4,
+    "threats_by_type": {
+      "dos_attack": 1
+    },
+    "threats_by_severity": {
+      "high": 1
+    },
+    "actions_by_type": {
+      "deploy_honeypot": 2,
+      "honeypot_redirect": 1,
+      "DEPLOY_HONEYPOT": 1
+    }
+  },
+  "threats": [
+    {
+      "id": "THR-20260117052316-000001",
+      "timestamp": "2026-01-17T05:23:16.463707",
+      "type": "dos_attack",
+      "severity": "high",
+      "source_ip": "10.172.250.138",
+      "source_port": 10009,
+      "target_ip": "192.168.1.1",
+      "target_port": 5540,
+      "target_device": "Router",
+      "protocol": "udp",
+      "payload": "",
+      "packets_count": 146,
+      "duration_seconds": 26.239661581865317,
+      "detected_by": "simulation",
+      "raw_data": {}
+    }
+  ],
+  "actions": [
+    {
+      "id": "ACT-20260117052316-000002",
+      "timestamp": "2026-01-17T05:23:16.780594",
+      "threat_id": "THR-20260117052316-000001",
+      "action": "deploy_honeypot",
+      "target": "telnet:2323",
+      "status": "success",
+      "details": {
+        "honeypot_id": "HP-0001",
+        "persona": "tp_link"
+      }
+    },
+    {
+      "id": "ACT-20260117052316-000003",
+      "timestamp": "2026-01-17T05:23:16.818121",
+      "threat_id": "THR-20260117052316-000001",
+      "action": "honeypot_redirect",
+      "target": "10.172.250.138:5540\u2192:2323",
+      "status": "success",
+      "details": {
+        "honeypot_id": "HP-0001",
+        "source_ip": "10.172.250.138",
+        "original_port": 5540,
+        "honeypot_port": 2323,
+        "protocol": "telnet",
+        "real_redirection": true
+      }
+    },
+    {
+      "id": "ACT-20260117052316-000004",
+      "timestamp": "2026-01-17T05:23:16.823914",
+      "threat_id": "THR-20260117052316-000001",
+      "action": "DEPLOY_HONEYPOT",
+      "target": "10.172.250.138",
+      "status": "decided",
+      "details": {
+        "confidence": 0.8,
+        "q_value": 0.0,
+        "threat_severity": "high"
+      }
+    },
+    {
+      "id": "ACT-20260117052323-000005",
+      "timestamp": "2026-01-17T05:23:23.523495",
+      "threat_id": "manual",
+      "action": "deploy_honeypot",
+      "target": "telnet:2324",
+      "status": "success",
+      "details": {
+        "honeypot_id": "HP-0002",
+        "persona": "tp_link"
+      }
+    }
+  ]
+}

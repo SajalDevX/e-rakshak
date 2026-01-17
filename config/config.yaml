@@ -85,7 +85,7 @@ network:
 # Agentic Defender (KAAL) Settings
 # -----------------------------------------------------------------------------
 agent:
-  model_path: "models/dqn_model.pth"
+  model_path: "models/kaal_policy.pth"
   state_size: 10
   action_size: 5
   actions:
@@ -116,6 +116,38 @@ agent:
     medium: 60
     high: 80
     critical: 95
+
+# -----------------------------------------------------------------------------
+# KAAL Offline RL Configuration
+# -----------------------------------------------------------------------------
+# KAAL (Knowledge-Augmented Autonomous Learner) runs in two modes:
+# - Inference-Only (default): For Jetson deployment - no training, deterministic
+# - Training: For offline learning from events (separate training machine)
+# -----------------------------------------------------------------------------
+kaal:
+  # Inference mode (recommended for Jetson deployment)
+  inference_only: true              # No inline training, pure greedy decisions
+  model_path: "models/kaal_policy.pth"  # Pre-trained policy checkpoint
+
+  # Event publishing for offline RL
+  event_publishing:
+    enabled: true                   # Publish events for offline training
+    publisher_type: "local"         # "local" (Redis/Memory) or "kafka"
+    async_publish: true             # Non-blocking event publishing
+    queue_size: 1000                # Max pending events in async queue
+
+    # Kafka settings (if publisher_type: "kafka")
+    kafka_bootstrap_servers: "localhost:9092"
+    kafka_topic: "rakshak-attack-events"
+
+  # Event store configuration
+  event_store:
+    backend: "memory"               # "redis" or "memory"
+    redis_url: "redis://localhost:6379"
+    redis_key: "rakshak:attack_events"
+    memory_max_size: 10000          # Max events in memory store
+    auto_export_interval: 3600      # Export to JSON every N seconds (0 to disable)
+    export_path: "data/events/"     # Path for JSON exports
 
 # -----------------------------------------------------------------------------
 # LLM Honeypot (PRAHARI) Settings
@@ -275,15 +307,15 @@ gateway:
   # ---------------------------------------------------------------------------
   # Network Interface Configuration
   # ---------------------------------------------------------------------------
-  # WAN Interface: Connected to modem/ISP (gets public IP via DHCP)
-  wan_interface: "eth0"             # Built-in ethernet on Jetson
+  # WAN Interface: Connected to internet via WiFi
+  wan_interface: "wlo1"             # WiFi interface (internet)
 
   # LAN Interface: Connected to router in AP mode (static IP)
-  lan_interface: "eth1"             # USB-to-Ethernet adapter
+  lan_interface: "enx207bd51a6a7d"  # USB Ethernet to router in AP mode
                                     # Can also be "auto" for auto-detection
 
   # Auto-detection settings
-  auto_detect_interfaces: true      # Automatically find USB ethernet
+  auto_detect_interfaces: false     # Manual configuration for laptop setup
   usb_ethernet_patterns:            # Patterns to match USB ethernet
     - "eth1"
     - "enx*"                        # Standard USB ethernet naming
@@ -292,17 +324,17 @@ gateway:
   # ---------------------------------------------------------------------------
   # LAN Network Configuration
   # ---------------------------------------------------------------------------
-  lan_ip: "192.168.100.1"           # Gateway IP address
+  lan_ip: "10.42.0.1"               # Gateway IP address (NetworkManager shared)
   lan_netmask: "255.255.255.0"      # Subnet mask
-  lan_network: "192.168.100.0/24"   # Network CIDR
+  lan_network: "10.42.0.0/24"       # Network CIDR
 
   # ---------------------------------------------------------------------------
   # DHCP Server Configuration (dnsmasq)
   # ---------------------------------------------------------------------------
   dhcp:
-    enabled: true
-    range_start: "192.168.100.10"   # First IP to assign
-    range_end: "192.168.100.250"    # Last IP to assign
+    enabled: false                  # NetworkManager handles DHCP
+    range_start: "10.42.0.10"       # First IP to assign
+    range_end: "10.42.0.254"        # Last IP to assign
     lease_time: "24h"               # Lease duration
 
     # Static IP assignments for known devices (optional)
@@ -314,9 +346,9 @@ gateway:
     #     hostname: "smart-tv"
 
   # Backward compatibility aliases
-  dhcp_enabled: true
-  dhcp_range_start: "192.168.100.10"
-  dhcp_range_end: "192.168.100.250"
+  dhcp_enabled: false
+  dhcp_range_start: "10.42.0.10"
+  dhcp_range_end: "10.42.0.254"
   dhcp_lease_time: "24h"
 
   # ---------------------------------------------------------------------------
@@ -413,8 +445,8 @@ gateway:
   # Jetson Xavier NX Specific Settings
   # ---------------------------------------------------------------------------
   jetson:
-    is_jetson_platform: true        # Running on Jetson
-    optimize_for_jetson: true       # Enable Jetson optimizations
+    is_jetson_platform: false       # Running on Ubuntu laptop
+    optimize_for_jetson: false      # Disable Jetson optimizations
     use_gpu_for_ml: false           # Use GPU for ML inference (if available)
     power_mode: "MAXN"              # Jetson power mode
 

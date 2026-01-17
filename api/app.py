@@ -178,7 +178,7 @@ def register_routes(app: Flask):
         success = scanner.isolate_device(device_ip)
 
         if success:
-            # Emit WebSocket event
+            # Emit WebSocket event (broadcast=True to send to all clients)
             socketio.emit("device_isolated", {
                 "ip": device_ip,
                 "timestamp": datetime.now().isoformat()
@@ -329,7 +329,7 @@ def register_routes(app: Flask):
         )
 
         if honeypot:
-            # Emit WebSocket event
+            # Emit WebSocket event (broadcast=True to send to all clients)
             socketio.emit("honeypot_deployed", {
                 "id": honeypot.id,
                 "port": honeypot.port,
@@ -460,8 +460,18 @@ def register_routes(app: Flask):
 
         from core.threat_logger import SimulatedThreatGenerator
 
-        generator = SimulatedThreatGenerator(app.config_data)
-        threat = generator.generate_threat()
+        # Get real devices from network scanner
+        real_devices = []
+        if hasattr(app.orchestrator, 'scanner') and app.orchestrator.scanner:
+            devices = app.orchestrator.scanner.get_all_devices()
+            real_devices = [{"ip": d.ip, "hostname": d.hostname or d.device_type, "name": d.hostname or d.device_type} for d in devices]
+
+        # Get optional attack type from request
+        data = request.get_json() or {}
+        attack_type = data.get("attack_type")  # e.g., "brute_force", "dos_attack", etc.
+
+        generator = SimulatedThreatGenerator(app.config_data, real_devices=real_devices)
+        threat = generator.generate_threat(attack_type=attack_type)
 
         # Log the threat
         logger = app.orchestrator.threat_logger
@@ -479,7 +489,7 @@ def register_routes(app: Flask):
             detected_by="simulation"
         )
 
-        # Emit WebSocket event
+        # Emit WebSocket event (broadcast=True to send to all clients)
         socketio.emit("threat_detected", {
             "threat": event.to_dict(),
             "timestamp": datetime.now().isoformat()
