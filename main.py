@@ -76,6 +76,14 @@ except ImportError as e:
     GATEWAY_AVAILABLE = False
     logger.warning(f"Gateway modules not available: {e}")
 
+# ARP Interceptor for LAN-to-LAN protection (KAVACH)
+try:
+    from core.arp_interceptor import ARPInterceptor, create_interceptor_from_config
+    ARP_INTERCEPTOR_AVAILABLE = True
+except ImportError as e:
+    ARP_INTERCEPTOR_AVAILABLE = False
+    logger.warning(f"ARP interceptor not available: {e}")
+
 # Rich console for pretty output
 console = Console()
 
@@ -266,6 +274,7 @@ class RakshakOrchestrator:
         # Initialize gateway FIRST if in gateway mode
         self.gateway = None
         self.packet_filter = None
+        self.arp_interceptor = None  # KAVACH for LAN-to-LAN protection
 
         if gateway_mode:
             if not GATEWAY_AVAILABLE:
@@ -278,6 +287,23 @@ class RakshakOrchestrator:
         self.threat_logger = ThreatLogger(config)
         self.llm_honeypot = LLMHoneypot(config)
 
+        # Initialize Trust Manager for Zero Trust enrollment
+        self.trust_manager = None
+        if gateway_mode and self.gateway:
+            try:
+                from core.trust_manager import TrustManager
+                db_path = config.get("database", {}).get("path", "data/rakshak.db")
+
+                self.trust_manager = TrustManager(
+                    config=config,
+                    db_path=db_path,
+                    gateway=self.gateway
+                )
+                logger.info("Trust Manager initialized for Zero Trust enrollment")
+            except Exception as e:
+                logger.warning(f"Failed to initialize Trust Manager: {e}")
+                self.trust_manager = None
+
         # Initialize IDS classifier
         self.ids_classifier = IDSClassifier(model_dir="models/ids")
         if self.ids_classifier.is_loaded:
@@ -286,7 +312,12 @@ class RakshakOrchestrator:
             logger.warning("IDS classifier not loaded - using rule-based detection only")
 
         # Pass gateway reference to components that need it
-        self.network_scanner = NetworkScanner(config, self.threat_logger, gateway=self.gateway)
+        self.network_scanner = NetworkScanner(
+            config,
+            self.threat_logger,
+            gateway=self.gateway,
+            trust_manager=self.trust_manager
+        )
         self.deception_engine = DeceptionEngine(
             config,
             self.llm_honeypot,
@@ -360,6 +391,8 @@ class RakshakOrchestrator:
             console.print("[bold cyan]" + "=" * 60 + "[/bold cyan]\n")
             console.print(f"  WAN Interface: {self.gateway.config.wan_interface}")
             console.print(f"  LAN Interface: {self.gateway.config.lan_interface}")
+            if self.gateway.config.bridge_mode:
+                console.print(f"  Bridge Mode:   ENABLED ({self.gateway.config.bridge_name})")
             console.print(f"  Gateway IP:    {self.gateway.config.lan_ip}")
             console.print(f"  Jetson:        {self.gateway.is_jetson}")
             console.print("")
@@ -373,6 +406,15 @@ class RakshakOrchestrator:
             # Deploy startup trap honeypots for proactive defense
             if self.deception_engine.enabled:
                 self._deploy_startup_honeypots()
+
+            # Start KAVACH (ARP Interceptor) for LAN-to-LAN protection
+            if ARP_INTERCEPTOR_AVAILABLE:
+                self._start_arp_interceptor()
+
+            # Start passive discovery for static IP devices (cameras, NVRs)
+            if self.network_scanner.passive_discovery:
+                self.network_scanner.start_passive_discovery()
+                console.print("[bold cyan]MAYA: Passive discovery active (SSDP, ONVIF, ARP)[/bold cyan]")
 
         console.print(f"[bold green]RAKSHAK Started in {mode} mode[/bold green]")
         console.print(f"[dim]Dashboard: http://localhost:{self.config['api']['port']}[/dim]\n")
@@ -409,6 +451,16 @@ class RakshakOrchestrator:
         logger.info("Stopping RAKSHAK...")
         self.running = False
         self.deception_engine.stop_all_honeypots()
+
+        # Stop passive discovery if active
+        if self.network_scanner.passive_discovery:
+            logger.info("Stopping MAYA passive discovery...")
+            self.network_scanner.stop_passive_discovery()
+
+        # Stop ARP interceptor if active (restores ARP tables)
+        if self.arp_interceptor:
+            logger.info("Stopping KAVACH ARP interceptor...")
+            self.arp_interceptor.stop()
 
         # Stop gateway if active
         if self.gateway_mode and self.gateway:
@@ -451,6 +503,15 @@ class RakshakOrchestrator:
                 if self.packet_filter and devices:
                     known_ips = [d.ip for d in devices if d.status == "active"]
                     self.packet_filter.set_known_devices(known_ips)
+
+                # Update KAVACH ARP interceptor with discovered devices
+                if self.arp_interceptor and devices:
+                    for device in devices:
+                        if device.status == "active" and device.mac:
+                            self.arp_interceptor.add_device(device.ip, device.mac)
+
+                # Cleanup stale inactive devices (removes after 5 minutes of inactivity)
+                self.network_scanner.cleanup_stale_devices(inactive_threshold_seconds=300)
 
             except Exception as e:
                 logger.error(f"Scanner error: {e}")
@@ -725,6 +786,79 @@ class RakshakOrchestrator:
             console.print(f"[bold cyan]CHAKRAVYUH: {deployed_count} trap honeypots deployed[/bold cyan]")
         else:
             logger.warning("No trap honeypots could be deployed (ports in use?)")
+
+    def _start_arp_interceptor(self):
+        """Start KAVACH (ARP Interceptor) for LAN-to-LAN protection."""
+        lan_interception_config = self.config.get("gateway", {}).get("lan_interception", {})
+
+        if not lan_interception_config.get("enabled", False):
+            logger.info("KAVACH: LAN interception disabled in config")
+            return
+
+        try:
+            self.arp_interceptor = create_interceptor_from_config(self.config)
+
+            if self.arp_interceptor:
+                # Set callback for internal traffic detection
+                self.arp_interceptor.on_internal_traffic = self._on_internal_traffic
+
+                # Start the interceptor
+                if self.arp_interceptor.start():
+                    console.print("[bold cyan]KAVACH: LAN-to-LAN interception active[/bold cyan]")
+                    console.print("[dim]All internal traffic now flows through RAKSHAK[/dim]")
+                else:
+                    logger.error("KAVACH: Failed to start ARP interceptor")
+            else:
+                logger.warning("KAVACH: Could not create ARP interceptor")
+
+        except Exception as e:
+            logger.error(f"KAVACH: Error starting ARP interceptor: {e}")
+
+    def _on_internal_traffic(self, traffic_info: dict):
+        """Callback when internal device-to-device traffic is detected."""
+        source_ip = traffic_info.get("source_ip", "unknown")
+        dest_ip = traffic_info.get("dest_ip", "unknown")
+        dest_port = traffic_info.get("dest_port", 0)
+        protocol = traffic_info.get("protocol", "tcp")
+
+        logger.warning(f"KAVACH: Internal traffic {source_ip} -> {dest_ip}:{dest_port}")
+
+        # Create threat for KAAL to evaluate
+        threat_info = {
+            'type': 'lateral_movement',
+            'severity': 'medium',
+            'source_ip': source_ip,
+            'target_ip': dest_ip,
+            'target_port': dest_port,
+            'target_device': self.network_scanner.get_device_name(dest_ip) if hasattr(self.network_scanner, 'get_device_name') else 'Unknown Device',
+            'protocol': protocol,
+            'packets_count': 1,
+            'duration_seconds': 0,
+            'description': f"Internal traffic from {source_ip} to {dest_ip}:{dest_port}",
+            'detected_by': 'kavach'
+        }
+
+        # Log the threat for KAAL processing
+        self.threat_logger.log_threat(
+            threat_type=threat_info['type'],
+            severity=threat_info['severity'],
+            source_ip=threat_info['source_ip'],
+            target_ip=threat_info['target_ip'],
+            target_device=threat_info['target_device'],
+            target_port=threat_info['target_port'],
+            protocol=threat_info['protocol'],
+            packets_count=threat_info['packets_count'],
+            duration_seconds=threat_info['duration_seconds'],
+            detected_by=threat_info['detected_by']
+        )
+
+        # Emit alert to dashboard
+        self._emit_event('alert', {
+            'message': f"Internal traffic detected: {source_ip} → {dest_ip}:{dest_port}",
+            'severity': 'warning',
+            'source_ip': source_ip,
+            'target_ip': dest_ip
+        })
 
     def _run_flask_app(self):
         """Run the Flask dashboard application."""

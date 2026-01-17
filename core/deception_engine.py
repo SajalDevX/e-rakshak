@@ -120,6 +120,9 @@ class DeceptionEngine:
         # Honeypot ID counter
         self._honeypot_counter = 0
 
+        # Attacker to honeypot mapping (for reuse)
+        self.attacker_honeypots: Dict[str, str] = {}  # {source_ip: honeypot_id}
+
         # Server threads
         self._server_threads: List[threading.Thread] = []
         self._running = False
@@ -150,6 +153,15 @@ class DeceptionEngine:
         if not self.enabled:
             logger.warning("Deception engine disabled")
             return None
+
+        # Check if attacker already has an active honeypot (reuse instead of creating new)
+        source_ip = threat_info.get("source_ip") if threat_info else None
+        if source_ip and source_ip in self.attacker_honeypots:
+            existing_id = self.attacker_honeypots[source_ip]
+            existing_hp = self.honeypots.get(existing_id)
+            if existing_hp and existing_hp.status == "active":
+                logger.info(f"CHAKRAVYUH: Reusing honeypot {existing_id} for attacker {source_ip}")
+                return existing_hp
 
         if len(self.honeypots) >= self.max_honeypots:
             logger.warning(f"Maximum honeypots ({self.max_honeypots}) reached")
@@ -205,6 +217,10 @@ class DeceptionEngine:
         with self._honeypots_lock:
             self.honeypots[honeypot.id] = honeypot
 
+        # Track attacker→honeypot mapping for reuse
+        if source_ip:
+            self.attacker_honeypots[source_ip] = honeypot.id
+
         logger.info(f"Deployed honeypot {honeypot.id} ({protocol}:{port})")
 
         # Log the deployment
@@ -247,7 +263,7 @@ class DeceptionEngine:
         Returns:
             Honeypot instance if successful, None otherwise
         """
-        # Deploy honeypot first
+        # Deploy honeypot first (may reuse existing one for same attacker)
         honeypot = self.deploy_honeypot(
             threat_info=threat_info,
             protocol=protocol,
@@ -257,6 +273,11 @@ class DeceptionEngine:
         if not honeypot:
             logger.error("Failed to deploy honeypot for redirection")
             return None
+
+        # Skip redirection if honeypot already has active redirection (reused)
+        if getattr(honeypot, 'has_redirection', False):
+            logger.debug(f"Honeypot {honeypot.id} already has active redirection, skipping NAT setup")
+            return honeypot
 
         # Setup traffic redirection if gateway is available and in gateway mode
         if self.gateway and hasattr(self.gateway, 'is_gateway_mode') and self.gateway.is_gateway_mode:
@@ -694,6 +715,21 @@ class DeceptionEngine:
         try:
             # Receive request
             request = client_socket.recv(4096).decode("utf-8", errors="ignore")
+
+            # Filter out known false positives (system connectivity checks)
+            is_connectivity_check = any(pattern in request.lower() for pattern in [
+                "connectivity-check",
+                "connectivitycheck",
+                "captive.apple.com",
+                "msftconnecttest",
+                "gstatic.com/generate_204"
+            ])
+            if is_connectivity_check:
+                logger.debug(f"Ignoring connectivity check from {source_ip}")
+                # Still send response but don't log as threat
+                response = "HTTP/1.1 204 No Content\r\nConnection: close\r\n\r\n"
+                client_socket.send(response.encode())
+                return
 
             # Log the request
             if self.threat_logger:

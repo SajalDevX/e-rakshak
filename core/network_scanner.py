@@ -69,6 +69,8 @@ class Device:
     last_seen: str = ""
     status: str = "active"  # active, isolated, honeypot
     is_honeypot: bool = False
+    zone: str = "unknown"  # Zero Trust zone (guest, iot, main, mgmt, quarantine)
+    enrollment_status: str = "unknown"  # unknown, pending, enrolled
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -112,7 +114,7 @@ class NetworkScanner:
         "AC:CC:8E": ("Roku", "streaming"),
     }
 
-    def __init__(self, config: dict, threat_logger=None, gateway=None):
+    def __init__(self, config: dict, threat_logger=None, gateway=None, trust_manager=None):
         """
         Initialize the network scanner.
 
@@ -120,16 +122,23 @@ class NetworkScanner:
             config: Configuration dictionary
             threat_logger: ThreatLogger instance
             gateway: RakshakGateway instance (for DHCP-based discovery in gateway mode)
+            trust_manager: TrustManager instance (for Zero Trust zone assignment)
         """
         self.config = config
         self.threat_logger = threat_logger
         self.gateway = gateway  # Gateway reference for DHCP-based discovery
+        self.trust_manager = trust_manager  # Trust Manager for zone assignment
         self.network_config = config.get("network", {})
         self.simulation_config = config.get("simulation", {})
 
         # Device storage
         self.devices: Dict[str, Device] = {}
         self._devices_lock = threading.Lock()
+        self._mac_to_ip: Dict[str, str] = {}  # MAC→IP index for detecting IP changes
+
+        # Startup grace period for preventing false inactive status
+        self._startup_time = datetime.now()
+        self._startup_grace_period = 120  # 2 minutes grace period
 
         # Simulation mode
         self.simulation_mode = self.simulation_config.get("enabled", True)
@@ -162,11 +171,18 @@ class NetworkScanner:
         # Device ID counter
         self._device_counter = 0
 
+        # Passive discovery for static IP devices (cameras, NVRs)
+        self.passive_discovery = None
+        self._init_passive_discovery()
+
         # Load simulated devices if in simulation mode
         if self.simulation_mode:
             self._load_simulated_devices()
+        else:
+            # In gateway mode, load devices from database
+            self._load_devices_from_db()
 
-        logger.info(f"NetworkScanner initialized (simulation={self.simulation_mode})")
+        logger.info(f"NetworkScanner initialized (simulation={self.simulation_mode}, interface={self.interface})")
 
     def _generate_device_id(self) -> str:
         """Generate unique device ID."""
@@ -175,11 +191,18 @@ class NetworkScanner:
 
     def _detect_network_interface(self) -> str:
         """Auto-detect the best network interface."""
-        # If gateway is available, use its LAN interface
-        if self.gateway and hasattr(self.gateway, 'lan_interface'):
-            lan_if = self.gateway.lan_interface
-            if lan_if:
-                logger.info(f"Using gateway LAN interface: {lan_if}")
+        # If gateway is available and bridge mode is enabled, use bridge interface
+        if self.gateway:
+            # Check for bridge mode - use bridge name if enabled
+            if hasattr(self.gateway, 'config') and self.gateway.config.bridge_mode:
+                bridge_name = self.gateway.config.bridge_name
+                logger.info(f"MAYA: Using bridge interface: {bridge_name} (bridge mode enabled)")
+                return bridge_name
+
+            # Fall back to gateway LAN interface (which may already be the bridge)
+            if hasattr(self.gateway, 'config') and self.gateway.config.lan_interface:
+                lan_if = self.gateway.config.lan_interface
+                logger.info(f"MAYA: Using gateway LAN interface: {lan_if}")
                 return lan_if
 
         if not NETIFACES_AVAILABLE:
@@ -250,6 +273,194 @@ class NetworkScanner:
 
         return "192.168.1.0/24"
 
+    def _init_passive_discovery(self):
+        """Initialize passive discovery for static IP devices."""
+        # Skip in simulation mode
+        if self.simulation_mode:
+            return
+
+        # Check if passive discovery is enabled in config
+        passive_config = self.network_config.get("passive_discovery", {})
+        if not passive_config.get("enabled", True):
+            logger.info("MAYA: Passive discovery disabled in config")
+            return
+
+        # Only enable in gateway/bridge mode for full visibility
+        if not self.gateway:
+            logger.info("MAYA: Passive discovery requires gateway mode")
+            return
+
+        try:
+            from core.passive_discovery import PassiveDiscovery
+
+            self.passive_discovery = PassiveDiscovery(
+                interface=self.interface,
+                ssdp_enabled=passive_config.get("ssdp_enabled", True),
+                onvif_enabled=passive_config.get("onvif_enabled", True),
+                rtsp_probe_enabled=passive_config.get("rtsp_probe_enabled", True),
+                arp_listener_enabled=passive_config.get("arp_listener_enabled", True),
+                on_device_discovered=self._on_passive_device_found
+            )
+            logger.info(f"MAYA: Passive discovery initialized on {self.interface}")
+
+        except ImportError:
+            logger.warning("MAYA: Passive discovery module not available")
+        except Exception as e:
+            logger.error(f"MAYA: Failed to initialize passive discovery: {e}")
+
+    def start_passive_discovery(self):
+        """Start passive discovery listeners."""
+        if self.passive_discovery:
+            self.passive_discovery.start()
+            logger.info("MAYA: Passive discovery started")
+
+    def stop_passive_discovery(self):
+        """Stop passive discovery listeners."""
+        if self.passive_discovery:
+            self.passive_discovery.stop()
+            logger.info("MAYA: Passive discovery stopped")
+
+    def _on_passive_device_found(self, device_info: dict):
+        """
+        Callback when passive discovery finds a device.
+
+        Merges passively discovered devices (static IPs) with DHCP-tracked devices.
+        """
+        ip = device_info.get("ip")
+        if not ip:
+            return
+
+        # Skip if already known from DHCP
+        with self._devices_lock:
+            if ip in self.devices:
+                # Update existing device with additional info from passive discovery
+                device = self.devices[ip]
+
+                # ACTIVE STATUS FIX: Passive discovery confirms device is active
+                if device.status == "inactive":
+                    device.status = "active"
+                    logger.info(f"MAYA: Device {ip} is now active (detected via {device_info.get('method', 'passive')})")
+
+                if device_info.get("mac") and device.mac == "unknown":
+                    device.mac = device_info["mac"]
+                if device_info.get("device_type") and device.device_type == "unknown":
+                    device.device_type = device_info["device_type"]
+                if device_info.get("manufacturer") and device.manufacturer == "unknown":
+                    device.manufacturer = device_info["manufacturer"]
+                # Add discovered services
+                for svc in device_info.get("services", []):
+                    if svc not in device.services:
+                        device.services.append(svc)
+                for port in device_info.get("open_ports", []):
+                    if port not in device.open_ports:
+                        device.open_ports.append(port)
+                device.last_seen = datetime.now().isoformat()
+                logger.debug(f"MAYA: Updated device {ip} with passive discovery info")
+
+                # Update device in database
+                self._save_device_to_db(device)
+                return
+
+            # New device - create entry for static IP device
+            device = Device(
+                id=self._generate_device_id(),
+                ip=ip,
+                mac=device_info.get("mac", "unknown"),
+                hostname=device_info.get("hostname", ""),
+                device_type=device_info.get("device_type", "unknown"),
+                manufacturer=device_info.get("manufacturer", "unknown"),
+                services=device_info.get("services", []),
+                open_ports=device_info.get("open_ports", []),
+                first_seen=datetime.now().isoformat(),
+                last_seen=datetime.now().isoformat(),
+                status="active"
+            )
+
+            # Calculate risk score
+            device.risk_score = self._calculate_risk_score(device)
+
+            self.devices[ip] = device
+            if device.mac and device.mac != "unknown":
+                self._mac_to_ip[device.mac] = ip
+
+            logger.info(f"MAYA: Discovered static IP device: {ip} ({device.device_type}, {device.manufacturer})")
+
+            # Save new device to database with zone assignment
+            self._save_device_to_db(device)
+
+    def _save_device_to_db(self, device: Device):
+        """
+        Save or update device in database with Zero Trust zone assignment.
+
+        Args:
+            device: Device object to save
+        """
+        if not self.threat_logger:
+            return
+
+        # First, check if device already exists in database with enrolled status
+        existing_zone = None
+        existing_status = None
+
+        try:
+            import sqlite3
+            conn = sqlite3.connect(self.threat_logger.db_path)
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT zone, enrollment_status FROM devices WHERE ip = ? OR mac = ?",
+                (device.ip, device.mac)
+            )
+            result = cursor.fetchone()
+            conn.close()
+
+            if result:
+                existing_zone, existing_status = result
+        except Exception as e:
+            logger.debug(f"Could not check existing device status: {e}")
+
+        # Determine zone assignment
+        zone = "guest"  # Default zone for unknown devices
+        enrollment_status = "unknown"
+
+        # CRITICAL FIX: Preserve manually enrolled devices
+        if existing_status == "enrolled" and existing_zone:
+            # Device was manually enrolled - DO NOT override!
+            zone = existing_zone
+            enrollment_status = existing_status
+            logger.debug(f"Preserving enrolled device {device.ip} in {zone} zone")
+        else:
+            # New device or not yet enrolled - calculate zone from IP
+            if self.trust_manager:
+                # Use TrustManager to determine zone from IP
+                determined_zone = self.trust_manager.get_zone_for_ip(device.ip)
+                if determined_zone:
+                    zone = determined_zone
+                    enrollment_status = "pending" if zone == "guest" else "enrolled"
+
+        # Update Device object with zone info
+        device.zone = zone
+        device.enrollment_status = enrollment_status
+
+        # Save to database using ThreatLogger
+        self.threat_logger.log_device(
+            ip=device.ip,
+            mac=device.mac,
+            hostname=device.hostname or "unknown",
+            device_type=device.device_type or "unknown",
+            os=device.os or "unknown",
+            zone=zone,
+            enrollment_status=enrollment_status,
+            risk_score=device.risk_score
+        )
+
+        logger.debug(f"Saved device {device.ip} to database (zone={zone}, status={enrollment_status})")
+
+    def get_passive_discovery_devices(self) -> Dict[str, dict]:
+        """Get devices discovered via passive methods."""
+        if self.passive_discovery:
+            return self.passive_discovery.get_discovered_devices()
+        return {}
+
     def _load_simulated_devices(self):
         """Load simulated devices from config."""
         fake_devices = self.simulation_config.get("fake_devices", [])
@@ -274,6 +485,62 @@ class NetworkScanner:
             logger.debug(f"Loaded simulated device: {device.hostname} ({device.ip})")
 
         logger.info(f"Loaded {len(self.devices)} simulated devices")
+
+    def _load_devices_from_db(self):
+        """Load devices from database to populate in-memory cache."""
+        if not self.threat_logger:
+            return
+
+        try:
+            import sqlite3
+            db_path = self.threat_logger.db_path
+            conn = sqlite3.connect(db_path)
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+
+            cursor.execute("""
+                SELECT ip, mac, hostname, device_type, os,
+                       zone, enrollment_status, risk_score,
+                       first_seen, last_seen, status
+                FROM devices
+                WHERE status != 'inactive'
+                ORDER BY last_seen DESC
+            """)
+
+            rows = cursor.fetchall()
+            loaded_count = 0
+
+            for row in rows:
+                device = Device(
+                    id=self._generate_device_id(),
+                    ip=row['ip'],
+                    mac=row['mac'] or "unknown",
+                    hostname=row['hostname'] or "",
+                    device_type=row['device_type'] or "unknown",
+                    os=row['os'] or "unknown",
+                    risk_score=row['risk_score'] or 0,
+                    first_seen=row['first_seen'] or datetime.now().isoformat(),
+                    last_seen=row['last_seen'] or datetime.now().isoformat(),
+                    status=row['status'] or "active",
+                    zone=row['zone'] or "unknown",
+                    enrollment_status=row['enrollment_status'] or "unknown"
+                )
+
+                self.devices[device.ip] = device
+                if device.mac and device.mac != "unknown":
+                    self._mac_to_ip[device.mac] = device.ip
+
+                loaded_count += 1
+
+            conn.close()
+
+            if loaded_count > 0:
+                logger.info(f"Loaded {loaded_count} devices from database")
+            else:
+                logger.debug("No devices found in database")
+
+        except Exception as e:
+            logger.warning(f"Failed to load devices from database: {e}")
 
     def _enrich_simulated_device(self, device: Device):
         """Add realistic details to simulated device."""
@@ -461,16 +728,36 @@ class NetworkScanner:
         # Get current lease IPs to track disconnected devices
         current_lease_ips = {lease.ip_address for lease in leases.values()}
 
+        # Calculate if we're still in startup grace period
+        startup_grace_active = (datetime.now() - self._startup_time).total_seconds() < self._startup_grace_period
+
         with self._devices_lock:
             # Mark devices not in current leases as inactive
             for ip in list(self.devices.keys()):
                 if ip not in current_lease_ips:
-                    if self.devices[ip].status == "active":
+                    # GRACE PERIOD FIX: Don't mark inactive during startup
+                    if not startup_grace_active and self.devices[ip].status == "active":
                         self.devices[ip].status = "inactive"
                         logger.info(f"Device {ip} marked as inactive (disconnected)")
 
             for mac, lease in leases.items():
-                # Check if device already exists
+                # Check if this MAC already has a device with different IP (IP changed)
+                if mac in self._mac_to_ip:
+                    old_ip = self._mac_to_ip[mac]
+                    if old_ip != lease.ip_address and old_ip in self.devices:
+                        # Device changed IP - update existing device instead of creating new
+                        device = self.devices.pop(old_ip)  # Remove old IP entry
+                        logger.info(f"MAYA: Device {mac} changed IP: {old_ip} → {lease.ip_address}")
+                        device.ip = lease.ip_address
+                        device.last_seen = datetime.now().isoformat()
+                        device.hostname = lease.hostname if lease.hostname != "unknown" else device.hostname
+                        device.status = "active" if lease.is_active else "inactive"
+                        self.devices[lease.ip_address] = device
+                        self._mac_to_ip[mac] = lease.ip_address
+                        devices.append(device)
+                        continue
+
+                # Check if device already exists at this IP
                 if lease.ip_address in self.devices:
                     device = self.devices[lease.ip_address]
                     device.last_seen = datetime.now().isoformat()
@@ -510,9 +797,52 @@ class NetworkScanner:
 
                 # Update internal tracking
                 self.devices[device.ip] = device
+                # Track MAC→IP mapping
+                if mac:
+                    self._mac_to_ip[mac] = lease.ip_address
 
         logger.debug(f"Discovered {len(devices)} devices from DHCP leases")
         return devices
+
+    def cleanup_stale_devices(self, inactive_threshold_seconds: int = 300) -> int:
+        """
+        Remove devices that have been inactive for longer than threshold.
+
+        This prevents stale entries from accumulating when devices leave
+        the network or change IP addresses.
+
+        Args:
+            inactive_threshold_seconds: Remove devices inactive for longer than this (default: 5 min)
+
+        Returns:
+            Number of devices removed
+        """
+        with self._devices_lock:
+            now = datetime.now()
+            to_remove = []
+
+            for ip, device in self.devices.items():
+                if device.status == "inactive":
+                    try:
+                        last_seen = datetime.fromisoformat(device.last_seen)
+                        inactive_duration = (now - last_seen).total_seconds()
+                        if inactive_duration > inactive_threshold_seconds:
+                            to_remove.append(ip)
+                    except (ValueError, TypeError):
+                        # Invalid timestamp, mark for removal
+                        to_remove.append(ip)
+
+            for ip in to_remove:
+                device = self.devices.pop(ip)
+                # Also remove from MAC→IP index
+                if device.mac and device.mac in self._mac_to_ip:
+                    del self._mac_to_ip[device.mac]
+                logger.info(f"MAYA: Removed stale device {ip} ({device.hostname or 'unknown'})")
+
+            if to_remove:
+                logger.info(f"MAYA: Cleaned up {len(to_remove)} stale device(s)")
+
+            return len(to_remove)
 
     def _guess_device_type(self, mac: str, hostname: str) -> str:
         """Guess device type from MAC address and hostname."""
@@ -661,6 +991,9 @@ class NetworkScanner:
         with self._devices_lock:
             device.last_seen = datetime.now().isoformat()
             self.devices[device.ip] = device
+
+            # Save to database with zone assignment
+            self._save_device_to_db(device)
 
     def isolate_device(self, device_ip: str) -> bool:
         """

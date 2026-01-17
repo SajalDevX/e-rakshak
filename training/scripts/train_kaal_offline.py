@@ -360,7 +360,7 @@ def train_offline(
     # Load checkpoint if resuming
     if resume_path and os.path.exists(resume_path):
         print(f"Loading checkpoint from {resume_path}")
-        checkpoint = torch.load(resume_path, map_location=device)
+        checkpoint = torch.load(resume_path, map_location=device, weights_only=False)
         policy_net.load_state_dict(checkpoint["policy_state_dict"])
         target_net.load_state_dict(checkpoint.get("target_state_dict", checkpoint["policy_state_dict"]))
         start_epoch = checkpoint.get("epoch", 0)
