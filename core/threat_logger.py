@@ -198,7 +198,103 @@ class ThreatLogger:
                 risk_score INTEGER,
                 first_seen TEXT,
                 last_seen TEXT,
-                status TEXT
+                status TEXT,
+                enrollment_status TEXT DEFAULT 'unknown',
+                zone TEXT DEFAULT 'guest',
+                enrollment_date TEXT,
+                enrolled_by TEXT,
+                firewall_rules_applied TEXT,
+                isolation_level TEXT,
+                isolation_reason TEXT,
+                isolated_at TEXT
+            )
+        """)
+
+        # Zero Trust: Zone change history
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS zone_history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                device_mac TEXT NOT NULL,
+                old_zone TEXT,
+                new_zone TEXT NOT NULL,
+                changed_at TEXT NOT NULL,
+                changed_by TEXT,
+                reason TEXT,
+                FOREIGN KEY (device_mac) REFERENCES devices(mac)
+            )
+        """)
+
+        # Zero Trust: Enrollment audit log
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS enrollment_log (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                device_mac TEXT NOT NULL,
+                action TEXT NOT NULL,
+                old_status TEXT,
+                new_status TEXT,
+                zone_assigned TEXT,
+                performed_by TEXT,
+                performed_at TEXT NOT NULL,
+                FOREIGN KEY (device_mac) REFERENCES devices(mac)
+            )
+        """)
+
+        # Zero Trust: Persistent isolation state
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS persistent_isolations (
+                ip_address TEXT PRIMARY KEY,
+                mac_address TEXT,
+                isolation_level TEXT NOT NULL,
+                reason TEXT,
+                isolated_at TEXT NOT NULL,
+                expires_at TEXT,
+                is_active INTEGER DEFAULT 1
+            )
+        """)
+
+        # Zero Trust: Device behavior baselines
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS device_baselines (
+                device_ip TEXT PRIMARY KEY,
+                device_mac TEXT,
+                baseline_start TEXT NOT NULL,
+                total_flows INTEGER DEFAULT 0,
+                status TEXT DEFAULT 'learning',
+                protocols_used TEXT,
+                common_dst_ports TEXT,
+                internal_peers TEXT,
+                avg_bytes_per_flow REAL,
+                active_hours TEXT,
+                last_updated TEXT
+            )
+        """)
+
+        # Zero Trust: Device anomalies
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS device_anomalies (
+                id TEXT PRIMARY KEY,
+                timestamp TEXT NOT NULL,
+                device_ip TEXT NOT NULL,
+                anomaly_type TEXT NOT NULL,
+                severity TEXT NOT NULL,
+                description TEXT,
+                deviation_score REAL,
+                FOREIGN KEY (device_ip) REFERENCES device_baselines(device_ip)
+            )
+        """)
+
+        # Zero Trust: Attack chains
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS attack_chains (
+                chain_id TEXT PRIMARY KEY,
+                root_device_ip TEXT NOT NULL,
+                compromised_devices TEXT,
+                attack_sequence TEXT,
+                first_seen TEXT NOT NULL,
+                last_activity TEXT NOT NULL,
+                chain_length INTEGER,
+                severity TEXT,
+                is_active INTEGER DEFAULT 1
             )
         """)
 
@@ -516,6 +612,78 @@ class ThreatLogger:
 
         logger.info(f"JSON export saved to {filepath}")
         return filepath
+
+    def log_device(
+        self,
+        ip: str,
+        mac: str,
+        hostname: str = "unknown",
+        device_type: str = "unknown",
+        os: str = "unknown",
+        zone: str = "guest",
+        enrollment_status: str = "unknown",
+        risk_score: int = 0
+    ):
+        """
+        Log or update a discovered device in the database with zone assignment.
+
+        Args:
+            ip: Device IP address
+            mac: Device MAC address
+            hostname: Device hostname
+            device_type: Type of device
+            os: Operating system
+            zone: Security zone (guest, iot, main, mgmt, quarantine)
+            enrollment_status: Enrollment status (unknown, pending, enrolled)
+            risk_score: Risk score 0-100
+        """
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+
+        device_id = f"DEV-{mac.replace(':', '').upper()}"
+        timestamp = datetime.now().isoformat()
+
+        try:
+            # Check if device exists
+            cursor.execute("SELECT id FROM devices WHERE ip = ? OR mac = ?", (ip, mac))
+            existing = cursor.fetchone()
+
+            if existing:
+                # Update existing device
+                cursor.execute("""
+                    UPDATE devices
+                    SET hostname = ?,
+                        device_type = ?,
+                        os = ?,
+                        zone = ?,
+                        enrollment_status = ?,
+                        risk_score = ?,
+                        last_seen = ?,
+                        status = 'active'
+                    WHERE ip = ? OR mac = ?
+                """, (hostname, device_type, os, zone, enrollment_status,
+                      risk_score, timestamp, ip, mac))
+                logger.debug(f"Updated device {ip} in database (zone={zone})")
+            else:
+                # Insert new device
+                cursor.execute("""
+                    INSERT INTO devices (
+                        id, ip, mac, hostname, device_type, os,
+                        risk_score, first_seen, last_seen, status,
+                        enrollment_status, zone
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (device_id, ip, mac, hostname, device_type, os,
+                      risk_score, timestamp, timestamp, 'active',
+                      enrollment_status, zone))
+                logger.info(f"Added device {ip} to database (zone={zone}, status={enrollment_status})")
+
+            conn.commit()
+
+        except Exception as e:
+            logger.error(f"Failed to log device {ip}: {e}")
+            conn.rollback()
+        finally:
+            conn.close()
 
 
 # Simulated threat generator for testing

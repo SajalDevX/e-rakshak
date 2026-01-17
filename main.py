@@ -287,6 +287,23 @@ class RakshakOrchestrator:
         self.threat_logger = ThreatLogger(config)
         self.llm_honeypot = LLMHoneypot(config)
 
+        # Initialize Trust Manager for Zero Trust enrollment
+        self.trust_manager = None
+        if gateway_mode and self.gateway:
+            try:
+                from core.trust_manager import TrustManager
+                db_path = config.get("database", {}).get("path", "data/rakshak.db")
+
+                self.trust_manager = TrustManager(
+                    config=config,
+                    db_path=db_path,
+                    gateway=self.gateway
+                )
+                logger.info("Trust Manager initialized for Zero Trust enrollment")
+            except Exception as e:
+                logger.warning(f"Failed to initialize Trust Manager: {e}")
+                self.trust_manager = None
+
         # Initialize IDS classifier
         self.ids_classifier = IDSClassifier(model_dir="models/ids")
         if self.ids_classifier.is_loaded:
@@ -295,7 +312,12 @@ class RakshakOrchestrator:
             logger.warning("IDS classifier not loaded - using rule-based detection only")
 
         # Pass gateway reference to components that need it
-        self.network_scanner = NetworkScanner(config, self.threat_logger, gateway=self.gateway)
+        self.network_scanner = NetworkScanner(
+            config,
+            self.threat_logger,
+            gateway=self.gateway,
+            trust_manager=self.trust_manager
+        )
         self.deception_engine = DeceptionEngine(
             config,
             self.llm_honeypot,

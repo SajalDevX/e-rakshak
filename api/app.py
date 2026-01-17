@@ -209,6 +209,114 @@ def register_routes(app: Flask):
         })
 
     # =========================================================================
+    # API Routes - Zero Trust Enrollment
+    # =========================================================================
+
+    @app.route("/api/auth/login", methods=["POST"])
+    def login():
+        """Authenticate user and return JWT token."""
+        from core.api_auth import authenticate_user, generate_token
+
+        data = request.json
+        username = data.get("username")
+        password = data.get("password")
+
+        auth_result = authenticate_user(username, password)
+        if not auth_result:
+            return jsonify({"success": False, "error": "Invalid credentials"}), 401
+
+        username, role = auth_result
+        token = generate_token(username, role)
+
+        return jsonify({
+            "success": True,
+            "token": token,
+            "username": username,
+            "role": role
+        })
+
+    @app.route("/api/devices/<device_ip>/enroll", methods=["POST"])
+    def initiate_enrollment(device_ip: str):
+        """Mark device as pending enrollment."""
+        if not app.orchestrator or not hasattr(app.orchestrator, 'trust_manager'):
+            return jsonify({"success": False, "error": "Trust manager not available"}), 503
+
+        if not app.orchestrator.trust_manager:
+            return jsonify({"success": False, "error": "Trust manager not initialized"}), 503
+
+        trust_manager = app.orchestrator.trust_manager
+        success = trust_manager.initiate_enrollment(device_ip)
+
+        if success:
+            socketio.emit("device_enrollment_started", {
+                "ip": device_ip,
+                "timestamp": datetime.now().isoformat()
+            })
+
+            return jsonify({
+                "success": True,
+                "message": f"Enrollment initiated for {device_ip}"
+            })
+
+        return jsonify({"success": False, "error": "Failed to initiate enrollment"}), 500
+
+    @app.route("/api/devices/<device_ip>/approve", methods=["POST"])
+    def approve_enrollment(device_ip: str):
+        """Approve device enrollment and assign to zone."""
+        if not app.orchestrator or not hasattr(app.orchestrator, 'trust_manager'):
+            return jsonify({"success": False, "error": "Trust manager not available"}), 503
+
+        if not app.orchestrator.trust_manager:
+            return jsonify({"success": False, "error": "Trust manager not initialized"}), 503
+
+        data = request.json
+        zone = data.get("zone", "main")
+        approved_by = data.get("approved_by", "admin")  # TODO: Get from JWT token
+
+        trust_manager = app.orchestrator.trust_manager
+        success = trust_manager.approve_enrollment(device_ip, zone, approved_by)
+
+        if success:
+            # Update in-memory device cache with new zone
+            scanner = app.orchestrator.network_scanner
+            device = scanner.get_device(device_ip)
+            if device:
+                device.zone = zone
+                device.enrollment_status = "enrolled"
+                scanner.update_device(device)
+                logger.info(f"Updated in-memory cache: {device_ip} zone={zone}")
+
+            socketio.emit("device_enrolled", {
+                "ip": device_ip,
+                "zone": zone,
+                "timestamp": datetime.now().isoformat()
+            })
+
+            return jsonify({
+                "success": True,
+                "message": f"Device {device_ip} enrolled to {zone} zone"
+            })
+
+        return jsonify({"success": False, "error": "Failed to approve enrollment"}), 500
+
+    @app.route("/api/zones/statistics")
+    def get_zone_statistics():
+        """Get device count per zone."""
+        if not app.orchestrator or not hasattr(app.orchestrator, 'trust_manager'):
+            return jsonify({"success": False, "error": "Trust manager not available"}), 503
+
+        if not app.orchestrator.trust_manager:
+            return jsonify({"success": False, "error": "Trust manager not initialized"}), 503
+
+        trust_manager = app.orchestrator.trust_manager
+        stats = trust_manager.get_zone_statistics()
+
+        return jsonify({
+            "success": True,
+            "data": stats
+        })
+
+    # =========================================================================
     # API Routes - Threats
     # =========================================================================
 

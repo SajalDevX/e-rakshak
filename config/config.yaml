@@ -549,3 +549,52 @@ alerts:
     device_isolated: "सुरक्षा के लिए {device} को अलग कर दिया गया है।"
     honeypot_deployed: "{ip} से हमलावर को फंसाने के लिए हनीपॉट तैनात किया गया।"
     attack_blocked: "{ip} से हमला सफलतापूर्वक रोक दिया गया।"
+
+# -----------------------------------------------------------------------------
+# Zero Trust Zone Management
+# -----------------------------------------------------------------------------
+zero_trust:
+  enabled: true
+
+  zones:
+    mgmt:
+      ip_range: "10.42.0.1-10.42.0.9"
+      trust_level: "admin"
+      dhcp_enabled: false  # Static IPs only
+
+    main:
+      ip_range: "10.42.0.10-10.42.0.99"
+      trust_level: "trusted"
+      dhcp_pool_start: "10.42.0.10"
+      dhcp_pool_end: "10.42.0.99"
+
+    iot:
+      ip_range: "10.42.0.100-10.42.0.199"
+      trust_level: "limited"
+      dhcp_pool_start: "10.42.0.100"
+      dhcp_pool_end: "10.42.0.199"
+
+    guest:
+      ip_range: "10.42.0.200-10.42.0.249"
+      trust_level: "untrusted"
+      dhcp_pool_start: "10.42.0.200"
+      dhcp_pool_end: "10.42.0.249"
+
+    quarantine:
+      ip_range: "10.42.0.250-10.42.0.254"
+      trust_level: "hostile"
+      dhcp_enabled: false
+
+  # Default zone for unknown devices
+  default_zone: "guest"
+
+  # Zone communication matrix
+  allowed_communication:
+    mgmt_to_all: true
+    main_to_iot_ports: [80, 443, 554, 1883, 5353, 1900]
+    main_to_internet: true
+    iot_to_internet_ports: [443, 53, 123]  # HTTPS, DNS, NTP only
+    iot_to_iot: false  # CRITICAL: Prevent lateral movement
+    guest_to_internet: true
+    guest_to_rfc1918: false  # Block all internal networks
+    quarantine_to_all: false

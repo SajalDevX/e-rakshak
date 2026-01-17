@@ -236,35 +236,102 @@ function renderDevices(devices) {
     const tbody = document.getElementById('devices-table-body');
 
     if (!devices || devices.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="loading">${t('loading')}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="loading">${t('loading')}</td></tr>`;
         return;
     }
 
-    tbody.innerHTML = devices.map(device => `
-        <tr>
-            <td>
-                <div style="font-weight: 500;">${device.hostname || 'Unknown'}</div>
-                <div class="text-muted" style="font-size: 0.75rem;">${device.device_type}</div>
-            </td>
-            <td><code>${device.ip}</code></td>
-            <td>
-                <span class="risk-badge risk-${getRiskLevel(device.risk_score)}">
-                    ${device.risk_score}%
-                </span>
-            </td>
-            <td>
-                <span class="status-badge status-${device.status}">
-                    ${device.status}
-                </span>
-            </td>
-            <td>
+    tbody.innerHTML = devices.map(device => {
+        // Get zone badge
+        const zoneBadge = getZoneBadge(device.zone || 'unknown');
+
+        // Get enrollment status
+        const enrollmentStatus = device.enrollment_status || 'unknown';
+
+        // Determine action buttons based on enrollment status
+        let actionButtons = '';
+
+        if (enrollmentStatus === 'unknown') {
+            // Unknown device - show "Enroll" button
+            actionButtons = `
+                <button class="btn btn-sm btn-primary" onclick="initiateEnrollment('${device.ip}')">
+                    Enroll
+                </button>
+            `;
+        } else if (enrollmentStatus === 'pending') {
+            // Pending - show zone dropdown and "Approve" button
+            actionButtons = `
+                <select id="zone-${device.ip}" class="zone-select">
+                    <option value="main">MAIN (Trusted)</option>
+                    <option value="iot" selected>IOT (Limited)</option>
+                    <option value="guest">GUEST (Untrusted)</option>
+                </select>
+                <button class="btn btn-sm btn-success" onclick="approveEnrollment('${device.ip}')">
+                    Approve
+                </button>
+            `;
+        } else if (enrollmentStatus === 'enrolled') {
+            // Enrolled - show zone change and isolate
+            actionButtons = `
+                <select id="zone-${device.ip}" class="zone-select" onchange="changeZone('${device.ip}')">
+                    <option value="main" ${device.zone === 'main' ? 'selected' : ''}>MAIN</option>
+                    <option value="iot" ${device.zone === 'iot' ? 'selected' : ''}>IOT</option>
+                    <option value="guest" ${device.zone === 'guest' ? 'selected' : ''}>GUEST</option>
+                </select>
+                <button class="btn btn-sm btn-danger" onclick="isolateDevice('${device.ip}')"
+                        ${device.status === 'isolated' ? 'disabled' : ''}>
+                    Isolate
+                </button>
+            `;
+        } else {
+            // Fallback - just isolate button
+            actionButtons = `
                 <button class="btn btn-sm btn-danger" onclick="isolateDevice('${device.ip}')"
                         ${device.status === 'isolated' ? 'disabled' : ''}>
                     ${t('isolate')}
                 </button>
-            </td>
-        </tr>
-    `).join('');
+            `;
+        }
+
+        return `
+            <tr>
+                <td>
+                    <div style="font-weight: 500;">${device.hostname || 'Unknown'}</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">${device.device_type || 'Unknown'}</div>
+                </td>
+                <td><code>${device.ip}</code></td>
+                <td>${zoneBadge}</td>
+                <td>
+                    <span class="risk-badge risk-${getRiskLevel(device.risk_score || 0)}">
+                        ${device.risk_score || 0}%
+                    </span>
+                </td>
+                <td>
+                    <span class="status-badge status-${device.status || 'active'}">
+                        ${device.status || 'active'}
+                    </span>
+                </td>
+                <td class="action-cell">
+                    ${actionButtons}
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function getZoneBadge(zone) {
+    const zoneColors = {
+        'mgmt': 'primary',
+        'main': 'success',
+        'iot': 'warning',
+        'guest': 'secondary',
+        'quarantine': 'danger',
+        'unknown': 'dark'
+    };
+
+    const color = zoneColors[zone] || 'dark';
+    const displayName = zone.toUpperCase();
+
+    return `<span class="badge badge-${color}">${displayName}</span>`;
 }
 
 function getRiskLevel(score) {
@@ -450,6 +517,96 @@ async function isolateDevice(ip) {
         }
     } catch (error) {
         console.error('Failed to isolate device:', error);
+    }
+}
+
+async function initiateEnrollment(ip) {
+    const token = localStorage.getItem('auth_token');
+
+    try {
+        const response = await fetch(`${API_BASE}/api/devices/${ip}/enroll`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await response.json();
+        if (data.success) {
+            addEvent('info', `Enrollment initiated for ${ip}`);
+            showAlert(`Device ${ip} marked for enrollment`, 'success');
+            loadDevices();
+        } else {
+            showAlert(data.error || 'Failed to initiate enrollment', 'danger');
+        }
+    } catch (error) {
+        console.error('Failed to initiate enrollment:', error);
+        showAlert('Error initiating enrollment', 'danger');
+    }
+}
+
+async function approveEnrollment(ip) {
+    const token = localStorage.getItem('auth_token');
+    const zoneSelect = document.getElementById(`zone-${ip}`);
+    const zone = zoneSelect ? zoneSelect.value : 'iot';
+
+    try {
+        const response = await fetch(`${API_BASE}/api/devices/${ip}/approve`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ zone: zone })
+        });
+        const data = await response.json();
+        if (data.success) {
+            addEvent('action', `Device ${ip} enrolled to ${zone.toUpperCase()} zone`);
+            showAlert(`Device enrolled to ${zone.toUpperCase()} zone`, 'success');
+            loadDevices();
+        } else {
+            showAlert(data.error || 'Failed to approve enrollment', 'danger');
+        }
+    } catch (error) {
+        console.error('Failed to approve enrollment:', error);
+        showAlert('Error approving enrollment', 'danger');
+    }
+}
+
+async function changeZone(ip) {
+    const token = localStorage.getItem('auth_token');
+    const zoneSelect = document.getElementById(`zone-${ip}`);
+    const newZone = zoneSelect.value;
+
+    // Confirm zone change
+    if (!confirm(`Change device ${ip} to ${newZone.toUpperCase()} zone?`)) {
+        // Revert selection
+        loadDevices();
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE}/api/devices/${ip}/approve`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ zone: newZone })
+        });
+        const data = await response.json();
+        if (data.success) {
+            addEvent('action', `Device ${ip} moved to ${newZone.toUpperCase()} zone`);
+            showAlert(`Zone changed to ${newZone.toUpperCase()}`, 'success');
+            loadDevices();
+        } else {
+            showAlert(data.error || 'Failed to change zone', 'danger');
+            loadDevices(); // Revert UI
+        }
+    } catch (error) {
+        console.error('Failed to change zone:', error);
+        showAlert('Error changing zone', 'danger');
+        loadDevices(); // Revert UI
     }
 }
 

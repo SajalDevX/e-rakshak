@@ -601,6 +601,89 @@ body {
 }
 
 /* -----------------------------------------------------------------------------
+   Zero Trust Zone Badges
+   ----------------------------------------------------------------------------- */
+.badge {
+    display: inline-block;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badge-primary {
+    background: rgba(59, 130, 246, 0.2);
+    color: var(--accent-blue);
+}
+
+.badge-success {
+    background: rgba(16, 185, 129, 0.2);
+    color: var(--accent-green);
+}
+
+.badge-warning {
+    background: rgba(245, 158, 11, 0.2);
+    color: var(--accent-orange);
+}
+
+.badge-secondary {
+    background: rgba(148, 163, 184, 0.2);
+    color: var(--text-secondary);
+}
+
+.badge-danger {
+    background: rgba(239, 68, 68, 0.2);
+    color: var(--accent-red);
+}
+
+.badge-dark {
+    background: rgba(71, 85, 105, 0.2);
+    color: var(--text-secondary);
+}
+
+/* -----------------------------------------------------------------------------
+   Zone Select & Action Cell
+   ----------------------------------------------------------------------------- */
+.zone-select {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    cursor: pointer;
+    margin-right: var(--spacing-xs);
+    transition: border-color 0.2s;
+}
+
+.zone-select:hover {
+    border-color: var(--accent-cyan);
+}
+
+.zone-select:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+}
+
+.action-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    flex-wrap: wrap;
+}
+
+.action-cell .btn {
+    white-space: nowrap;
+}
+
+.action-cell .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(50%);
+}
+
+/* -----------------------------------------------------------------------------
    Responsive
    ----------------------------------------------------------------------------- */
 @media (max-width: 1200px) {

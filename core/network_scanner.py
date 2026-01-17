@@ -69,6 +69,8 @@ class Device:
     last_seen: str = ""
     status: str = "active"  # active, isolated, honeypot
     is_honeypot: bool = False
+    zone: str = "unknown"  # Zero Trust zone (guest, iot, main, mgmt, quarantine)
+    enrollment_status: str = "unknown"  # unknown, pending, enrolled
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -112,7 +114,7 @@ class NetworkScanner:
         "AC:CC:8E": ("Roku", "streaming"),
     }
 
-    def __init__(self, config: dict, threat_logger=None, gateway=None):
+    def __init__(self, config: dict, threat_logger=None, gateway=None, trust_manager=None):
         """
         Initialize the network scanner.
 
@@ -120,10 +122,12 @@ class NetworkScanner:
             config: Configuration dictionary
             threat_logger: ThreatLogger instance
             gateway: RakshakGateway instance (for DHCP-based discovery in gateway mode)
+            trust_manager: TrustManager instance (for Zero Trust zone assignment)
         """
         self.config = config
         self.threat_logger = threat_logger
         self.gateway = gateway  # Gateway reference for DHCP-based discovery
+        self.trust_manager = trust_manager  # Trust Manager for zone assignment
         self.network_config = config.get("network", {})
         self.simulation_config = config.get("simulation", {})
 
@@ -131,6 +135,10 @@ class NetworkScanner:
         self.devices: Dict[str, Device] = {}
         self._devices_lock = threading.Lock()
         self._mac_to_ip: Dict[str, str] = {}  # MAC→IP index for detecting IP changes
+
+        # Startup grace period for preventing false inactive status
+        self._startup_time = datetime.now()
+        self._startup_grace_period = 120  # 2 minutes grace period
 
         # Simulation mode
         self.simulation_mode = self.simulation_config.get("enabled", True)
@@ -170,6 +178,9 @@ class NetworkScanner:
         # Load simulated devices if in simulation mode
         if self.simulation_mode:
             self._load_simulated_devices()
+        else:
+            # In gateway mode, load devices from database
+            self._load_devices_from_db()
 
         logger.info(f"NetworkScanner initialized (simulation={self.simulation_mode}, interface={self.interface})")
 
@@ -324,6 +335,12 @@ class NetworkScanner:
             if ip in self.devices:
                 # Update existing device with additional info from passive discovery
                 device = self.devices[ip]
+
+                # ACTIVE STATUS FIX: Passive discovery confirms device is active
+                if device.status == "inactive":
+                    device.status = "active"
+                    logger.info(f"MAYA: Device {ip} is now active (detected via {device_info.get('method', 'passive')})")
+
                 if device_info.get("mac") and device.mac == "unknown":
                     device.mac = device_info["mac"]
                 if device_info.get("device_type") and device.device_type == "unknown":
@@ -339,6 +356,9 @@ class NetworkScanner:
                         device.open_ports.append(port)
                 device.last_seen = datetime.now().isoformat()
                 logger.debug(f"MAYA: Updated device {ip} with passive discovery info")
+
+                # Update device in database
+                self._save_device_to_db(device)
                 return
 
             # New device - create entry for static IP device
@@ -364,6 +384,76 @@ class NetworkScanner:
                 self._mac_to_ip[device.mac] = ip
 
             logger.info(f"MAYA: Discovered static IP device: {ip} ({device.device_type}, {device.manufacturer})")
+
+            # Save new device to database with zone assignment
+            self._save_device_to_db(device)
+
+    def _save_device_to_db(self, device: Device):
+        """
+        Save or update device in database with Zero Trust zone assignment.
+
+        Args:
+            device: Device object to save
+        """
+        if not self.threat_logger:
+            return
+
+        # First, check if device already exists in database with enrolled status
+        existing_zone = None
+        existing_status = None
+
+        try:
+            import sqlite3
+            conn = sqlite3.connect(self.threat_logger.db_path)
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT zone, enrollment_status FROM devices WHERE ip = ? OR mac = ?",
+                (device.ip, device.mac)
+            )
+            result = cursor.fetchone()
+            conn.close()
+
+            if result:
+                existing_zone, existing_status = result
+        except Exception as e:
+            logger.debug(f"Could not check existing device status: {e}")
+
+        # Determine zone assignment
+        zone = "guest"  # Default zone for unknown devices
+        enrollment_status = "unknown"
+
+        # CRITICAL FIX: Preserve manually enrolled devices
+        if existing_status == "enrolled" and existing_zone:
+            # Device was manually enrolled - DO NOT override!
+            zone = existing_zone
+            enrollment_status = existing_status
+            logger.debug(f"Preserving enrolled device {device.ip} in {zone} zone")
+        else:
+            # New device or not yet enrolled - calculate zone from IP
+            if self.trust_manager:
+                # Use TrustManager to determine zone from IP
+                determined_zone = self.trust_manager.get_zone_for_ip(device.ip)
+                if determined_zone:
+                    zone = determined_zone
+                    enrollment_status = "pending" if zone == "guest" else "enrolled"
+
+        # Update Device object with zone info
+        device.zone = zone
+        device.enrollment_status = enrollment_status
+
+        # Save to database using ThreatLogger
+        self.threat_logger.log_device(
+            ip=device.ip,
+            mac=device.mac,
+            hostname=device.hostname or "unknown",
+            device_type=device.device_type or "unknown",
+            os=device.os or "unknown",
+            zone=zone,
+            enrollment_status=enrollment_status,
+            risk_score=device.risk_score
+        )
+
+        logger.debug(f"Saved device {device.ip} to database (zone={zone}, status={enrollment_status})")
 
     def get_passive_discovery_devices(self) -> Dict[str, dict]:
         """Get devices discovered via passive methods."""
@@ -395,6 +485,62 @@ class NetworkScanner:
             logger.debug(f"Loaded simulated device: {device.hostname} ({device.ip})")
 
         logger.info(f"Loaded {len(self.devices)} simulated devices")
+
+    def _load_devices_from_db(self):
+        """Load devices from database to populate in-memory cache."""
+        if not self.threat_logger:
+            return
+
+        try:
+            import sqlite3
+            db_path = self.threat_logger.db_path
+            conn = sqlite3.connect(db_path)
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+
+            cursor.execute("""
+                SELECT ip, mac, hostname, device_type, os,
+                       zone, enrollment_status, risk_score,
+                       first_seen, last_seen, status
+                FROM devices
+                WHERE status != 'inactive'
+                ORDER BY last_seen DESC
+            """)
+
+            rows = cursor.fetchall()
+            loaded_count = 0
+
+            for row in rows:
+                device = Device(
+                    id=self._generate_device_id(),
+                    ip=row['ip'],
+                    mac=row['mac'] or "unknown",
+                    hostname=row['hostname'] or "",
+                    device_type=row['device_type'] or "unknown",
+                    os=row['os'] or "unknown",
+                    risk_score=row['risk_score'] or 0,
+                    first_seen=row['first_seen'] or datetime.now().isoformat(),
+                    last_seen=row['last_seen'] or datetime.now().isoformat(),
+                    status=row['status'] or "active",
+                    zone=row['zone'] or "unknown",
+                    enrollment_status=row['enrollment_status'] or "unknown"
+                )
+
+                self.devices[device.ip] = device
+                if device.mac and device.mac != "unknown":
+                    self._mac_to_ip[device.mac] = device.ip
+
+                loaded_count += 1
+
+            conn.close()
+
+            if loaded_count > 0:
+                logger.info(f"Loaded {loaded_count} devices from database")
+            else:
+                logger.debug("No devices found in database")
+
+        except Exception as e:
+            logger.warning(f"Failed to load devices from database: {e}")
 
     def _enrich_simulated_device(self, device: Device):
         """Add realistic details to simulated device."""
@@ -582,11 +728,15 @@ class NetworkScanner:
         # Get current lease IPs to track disconnected devices
         current_lease_ips = {lease.ip_address for lease in leases.values()}
 
+        # Calculate if we're still in startup grace period
+        startup_grace_active = (datetime.now() - self._startup_time).total_seconds() < self._startup_grace_period
+
         with self._devices_lock:
             # Mark devices not in current leases as inactive
             for ip in list(self.devices.keys()):
                 if ip not in current_lease_ips:
-                    if self.devices[ip].status == "active":
+                    # GRACE PERIOD FIX: Don't mark inactive during startup
+                    if not startup_grace_active and self.devices[ip].status == "active":
                         self.devices[ip].status = "inactive"
                         logger.info(f"Device {ip} marked as inactive (disconnected)")
 
@@ -841,6 +991,9 @@ class NetworkScanner:
         with self._devices_lock:
             device.last_seen = datetime.now().isoformat()
             self.devices[device.ip] = device
+
+            # Save to database with zone assignment
+            self._save_device_to_db(device)
 
     def isolate_device(self, device_ip: str) -> bool:
         """

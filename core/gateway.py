@@ -121,8 +121,9 @@ class RakshakGateway:
     Provides real device isolation and honeypot redirection via iptables.
     """
 
-    def __init__(self, config: Optional[GatewayConfig] = None):
+    def __init__(self, config: Optional[GatewayConfig] = None, full_config: Optional[dict] = None):
         self.config = config or GatewayConfig()
+        self.full_config = full_config or {}
         self.interfaces: Dict[str, NetworkInterface] = {}
         self.dhcp_leases: Dict[str, DHCPLease] = {}
         self.isolated_devices: Dict[str, IsolatedDevice] = {}
@@ -131,6 +132,7 @@ class RakshakGateway:
         self.is_gateway_mode = False
         self.is_jetson = False
         self._original_lan_interface = None  # For bridge mode rollback
+        self.firewall_persistence = None  # Will be set after database initialization
 
         # Paths
         self.dnsmasq_config_path = Path("/etc/dnsmasq.d/rakshak.conf")
@@ -548,6 +550,7 @@ class RakshakGateway:
         - RAKSHAK_ISOLATED: Isolated device rules
         - RAKSHAK_HONEYPOT: Honeypot redirection rules
         - RAKSHAK_RATELIMIT: Rate limiting rules
+        - RAKSHAK_ZONE_*: Zero Trust zone enforcement chains
         """
         try:
             chains = [
@@ -555,6 +558,14 @@ class RakshakGateway:
                 ("filter", "RAKSHAK_ISOLATED"),
                 ("filter", "RAKSHAK_RATELIMIT"),
                 ("nat", "RAKSHAK_HONEYPOT"),
+                # Zero Trust zone chains
+                ("filter", "RAKSHAK_ZONE_ENFORCE"),
+                ("filter", "RAKSHAK_ZONE_MGMT"),
+                ("filter", "RAKSHAK_ZONE_MAIN"),
+                ("filter", "RAKSHAK_ZONE_IOT"),
+                ("filter", "RAKSHAK_ZONE_GUEST"),
+                ("filter", "RAKSHAK_ZONE_QUARANTINE"),
+                ("filter", "RAKSHAK_BLOCK_RFC1918"),
             ]
 
             for table, chain in chains:
@@ -571,20 +582,25 @@ class RakshakGateway:
                 )
 
             # Insert jumps to our chains at the beginning of built-in chains
-            # Order: ISOLATED -> RATELIMIT -> FORWARD
+            # Order: ZONE_ENFORCE -> ISOLATED -> RATELIMIT -> FORWARD
 
             subprocess.run([
                 "iptables", "-I", "FORWARD", "1",
-                "-j", "RAKSHAK_ISOLATED"
+                "-j", "RAKSHAK_ZONE_ENFORCE"
             ], capture_output=True)
 
             subprocess.run([
                 "iptables", "-I", "FORWARD", "2",
-                "-j", "RAKSHAK_RATELIMIT"
+                "-j", "RAKSHAK_ISOLATED"
             ], capture_output=True)
 
             subprocess.run([
                 "iptables", "-I", "FORWARD", "3",
+                "-j", "RAKSHAK_RATELIMIT"
+            ], capture_output=True)
+
+            subprocess.run([
+                "iptables", "-I", "FORWARD", "4",
                 "-j", "RAKSHAK_FORWARD"
             ], capture_output=True)
 
@@ -593,6 +609,10 @@ class RakshakGateway:
                 "iptables", "-t", "nat", "-I", "PREROUTING", "1",
                 "-j", "RAKSHAK_HONEYPOT"
             ], capture_output=True)
+
+            # Apply Zero Trust zone rules if enabled
+            if self.full_config.get("zero_trust", {}).get("enabled", False):
+                self._apply_zone_rules()
 
             logger.info("RAKSHAK firewall chains configured")
             return True
@@ -647,6 +667,96 @@ class RakshakGateway:
         except Exception as e:
             logger.error(f"Failed to cleanup firewall chains: {e}")
             return False
+
+    def _add_rule(self, chain: str, rule_spec: str, comment: str):
+        """Helper to add iptables rule with comment"""
+        try:
+            subprocess.run(
+                f"iptables -A {chain} {rule_spec} -m comment --comment 'rakshak-zt-{comment}'",
+                shell=True, check=True, capture_output=True
+            )
+        except Exception as e:
+            logger.warning(f"Failed to add rule to {chain}: {e}")
+
+    def _apply_zone_rules(self):
+        """Apply firewall rules for each Zero Trust zone"""
+        logger.info("Applying Zero Trust zone firewall rules")
+
+        wan = self.config.wan_interface
+
+        # MGMT Zone: Full access
+        self._add_rule("RAKSHAK_ZONE_MGMT",
+                       "-s 10.42.0.1/29 -j ACCEPT",
+                       "mgmt-full-access")
+
+        # MAIN Zone: Internet + controlled IoT access
+        self._add_rule("RAKSHAK_ZONE_MAIN",
+                       f"-s 10.42.0.10/25 -o {wan} -j ACCEPT",
+                       "main-to-internet")
+
+        self._add_rule("RAKSHAK_ZONE_MAIN",
+                       "-s 10.42.0.10/25 -d 10.42.0.100/25 "
+                       "-p tcp -m multiport --dports 80,443,554,1883 -j ACCEPT",
+                       "main-to-iot-allowed-ports")
+
+        self._add_rule("RAKSHAK_ZONE_MAIN",
+                       "-s 10.42.0.10/25 -d 10.42.0.200/28 -j DROP",
+                       "main-block-guest")
+
+        # IOT Zone: CRITICAL - Prevent lateral movement
+        self._add_rule("RAKSHAK_ZONE_IOT",
+                       "-s 10.42.0.100/25 -d 10.42.0.100/25 -j DROP",
+                       "iot-block-iot-lateral-movement")
+
+        self._add_rule("RAKSHAK_ZONE_IOT",
+                       f"-s 10.42.0.100/25 -o {wan} "
+                       "-p tcp --dport 443 -j ACCEPT",
+                       "iot-https-only")
+
+        self._add_rule("RAKSHAK_ZONE_IOT",
+                       f"-s 10.42.0.100/25 -o {wan} "
+                       "-p udp -m multiport --dports 53,123 -j ACCEPT",
+                       "iot-dns-ntp-only")
+
+        # GUEST Zone: Internet only, block RFC1918
+        self._add_rule("RAKSHAK_ZONE_GUEST",
+                       f"-s 10.42.0.200/28 -o {wan} "
+                       "-j RAKSHAK_BLOCK_RFC1918",
+                       "guest-to-internet-filtered")
+
+        self._add_rule("RAKSHAK_ZONE_GUEST",
+                       "-s 10.42.0.200/28 -d 10.42.0.0/24 -j DROP",
+                       "guest-block-lan")
+
+        # RFC1918 blocking chain
+        for subnet in ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"]:
+            self._add_rule("RAKSHAK_BLOCK_RFC1918",
+                           f"-d {subnet} -j REJECT --reject-with icmp-net-unreachable",
+                           f"block-{subnet.replace('/', '-').replace('.', '-')}")
+
+        self._add_rule("RAKSHAK_BLOCK_RFC1918", "-j ACCEPT", "allow-public")
+
+        # QUARANTINE Zone: Full isolation
+        self._add_rule("RAKSHAK_ZONE_QUARANTINE",
+                       "-s 10.42.0.250/29 -j DROP",
+                       "quarantine-drop-all")
+
+        # Zone dispatcher (called from RAKSHAK_ZONE_ENFORCE)
+        zone_configs = [
+            ("mgmt", "10.42.0.1", "10.42.0.9", "RAKSHAK_ZONE_MGMT"),
+            ("main", "10.42.0.10", "10.42.0.99", "RAKSHAK_ZONE_MAIN"),
+            ("iot", "10.42.0.100", "10.42.0.199", "RAKSHAK_ZONE_IOT"),
+            ("guest", "10.42.0.200", "10.42.0.249", "RAKSHAK_ZONE_GUEST"),
+            ("quarantine", "10.42.0.250", "10.42.0.254", "RAKSHAK_ZONE_QUARANTINE")
+        ]
+
+        for zone_name, start_ip, end_ip, chain in zone_configs:
+            self._add_rule("RAKSHAK_ZONE_ENFORCE",
+                           f"-m iprange --src-range {start_ip}-{end_ip} "
+                           f"-j {chain}",
+                           f"dispatch-{zone_name}")
+
+        logger.info("Zero Trust zone firewall rules applied")
 
     def setup_nat(self) -> bool:
         """Setup NAT (Network Address Translation) rules"""
@@ -918,7 +1028,21 @@ expand-hosts
         self.is_running = True
         self.is_gateway_mode = True
 
-        # Step 8: Start DHCP lease monitor
+        # Step 8: Initialize firewall persistence and restore isolations
+        if self.full_config.get("zero_trust", {}).get("enabled", False):
+            try:
+                from core.firewall_persistence import FirewallPersistence
+                db_path = self.full_config.get("database", {}).get("path", "data/rakshak.db")
+                self.firewall_persistence = FirewallPersistence(db_path)
+
+                # Restore persistent isolations from database
+                restored_count = self.firewall_persistence.restore_isolations_on_startup(self)
+                if restored_count > 0:
+                    logger.info(f"Restored {restored_count} persistent isolations")
+            except Exception as e:
+                logger.warning(f"Failed to initialize firewall persistence: {e}")
+
+        # Step 9: Start DHCP lease monitor
         self._start_lease_monitor()
 
         logger.info("=" * 60)
@@ -932,6 +1056,17 @@ expand-hosts
         logger.info(f"  Gateway IP: {self.config.lan_ip}")
         logger.info(f"  DHCP Range: {self.config.dhcp_range_start} - {self.config.dhcp_range_end}")
         logger.info(f"  Jetson Platform: {self.is_jetson}")
+
+        # Zero Trust status
+        if self.full_config.get("zero_trust", {}).get("enabled", False):
+            logger.info("  Zero Trust: ENABLED")
+            logger.info(f"    - 5 security zones configured")
+            logger.info(f"    - IoT lateral movement blocked")
+            logger.info(f"    - Guest RFC1918 access blocked")
+            logger.info(f"    - Persistent isolation enabled")
+        else:
+            logger.info("  Zero Trust: DISABLED")
+
         logger.info("=" * 60)
 
         return True
@@ -1243,6 +1378,124 @@ expand-hosts
             logger.error(f"Failed to unisolate device {ip_address}: {e}")
             return False
 
+    def isolate_device_enhanced(self, ip_address: str,
+                                level: IsolationLevel = IsolationLevel.FULL,
+                                reason: str = "Threat detected",
+                                duration_minutes: Optional[int] = None,
+                                kill_existing_connections: bool = True,
+                                revoke_dhcp: bool = False,
+                                persist_across_reboot: bool = True,
+                                mac_address: Optional[str] = None) -> bool:
+        """
+        Enhanced multi-layer device isolation.
+
+        Applies multiple isolation layers for comprehensive device blocking:
+        1. iptables DROP rules
+        2. TCP RST for existing connections
+        3. DNS blackhole
+        4. DHCP lease revocation (optional)
+        5. ARP interceptor blocking (optional)
+        6. Database persistence
+
+        Args:
+            ip_address: IP address to isolate
+            level: Isolation level
+            reason: Reason for isolation
+            duration_minutes: Auto-expire duration
+            kill_existing_connections: Send TCP RST to kill existing connections
+            revoke_dhcp: Revoke DHCP lease
+            persist_across_reboot: Save to database for reboot survival
+            mac_address: MAC address (optional, for DHCP revocation)
+
+        Returns:
+            True if successful, False otherwise
+        """
+        logger.warning(f"ENHANCED ISOLATION: {ip_address} | Level: {level.value} | Reason: {reason}")
+
+        # Layer 1: Existing iptables DROP rules
+        success = self.isolate_device(ip_address, level, reason, duration_minutes)
+        if not success:
+            return False
+
+        # Layer 2: TCP RST for existing connections
+        if kill_existing_connections and level == IsolationLevel.FULL:
+            try:
+                subprocess.run([
+                    "iptables", "-I", "RAKSHAK_ISOLATED", "1",
+                    "-s", ip_address, "-p", "tcp",
+                    "-j", "REJECT", "--reject-with", "tcp-reset",
+                    "-m", "comment", "--comment", f"rakshak-rst-{ip_address}"
+                ], check=True, capture_output=True)
+                logger.info(f"TCP RST layer applied for {ip_address}")
+            except Exception as e:
+                logger.warning(f"Failed to add TCP RST layer: {e}")
+
+        # Layer 3: DNS blackhole
+        if level == IsolationLevel.FULL:
+            self._add_dns_blackhole(ip_address)
+
+        # Layer 4: DHCP revocation (optional)
+        if revoke_dhcp and mac_address:
+            self._revoke_dhcp_lease(ip_address, mac_address)
+
+        # Layer 5: ARP interceptor blocking
+        # This will be handled by arp_interceptor.block_device() if available
+        # Not implemented here to avoid circular dependency
+
+        # Layer 6: Persistence
+        if persist_across_reboot and self.firewall_persistence:
+            expires_at = None
+            if duration_minutes:
+                expires_at = datetime.now() + timedelta(minutes=duration_minutes)
+
+            self.firewall_persistence.save_isolation_state(
+                ip=ip_address,
+                mac_address=mac_address or self._get_mac_for_ip(ip_address),
+                level=level.value,
+                reason=reason,
+                expires_at=expires_at
+            )
+
+        logger.critical(f"Enhanced isolation complete for {ip_address}")
+        return True
+
+    def _add_dns_blackhole(self, ip_address: str):
+        """Block all DNS queries from isolated device"""
+        try:
+            blackhole_file = Path("/etc/dnsmasq.d/rakshak-blackhole.conf")
+            blackhole_file.parent.mkdir(parents=True, exist_ok=True)
+
+            with open(blackhole_file, "a") as f:
+                f.write(f"# Blackhole DNS for {ip_address}\n")
+                f.write(f"address=/#/{ip_address}/\n")
+
+            # Reload dnsmasq (ignore errors if not running)
+            subprocess.run(["systemctl", "reload", "dnsmasq"], check=False, capture_output=True)
+
+            logger.info(f"DNS blackhole applied for {ip_address}")
+        except Exception as e:
+            logger.warning(f"Failed to apply DNS blackhole: {e}")
+
+    def _revoke_dhcp_lease(self, ip_address: str, mac_address: str):
+        """Revoke DHCP lease for a device"""
+        try:
+            lease_file = Path("/var/lib/misc/dnsmasq.leases")
+            if not lease_file.exists():
+                logger.debug("DHCP lease file not found")
+                return
+
+            lines = lease_file.read_text().splitlines()
+            filtered = [l for l in lines if ip_address not in l and mac_address not in l]
+
+            lease_file.write_text('\n'.join(filtered) + '\n')
+
+            # Reload dnsmasq
+            subprocess.run(["systemctl", "reload", "dnsmasq"], check=False, capture_output=True)
+
+            logger.info(f"DHCP lease revoked for {ip_address} ({mac_address})")
+        except Exception as e:
+            logger.warning(f"Failed to revoke DHCP lease: {e}")
+
     def redirect_to_honeypot(self, source_ip: str,
                              original_port: int,
                              honeypot_port: int,
@@ -1515,7 +1768,7 @@ def create_gateway_from_config(config_dict: Dict) -> RakshakGateway:
         proxy_arp_enabled=bridge_config.get("proxy_arp", True)
     )
 
-    return RakshakGateway(config)
+    return RakshakGateway(config, full_config=config_dict)
 
 
 if __name__ == "__main__":
