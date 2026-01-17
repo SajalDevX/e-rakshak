@@ -475,8 +475,14 @@ class NetworkScanner:
                     device = self.devices[lease.ip_address]
                     device.last_seen = datetime.now().isoformat()
                     device.hostname = lease.hostname if lease.hostname != "unknown" else device.hostname
-                    if device.status == "inactive" and lease.is_active:
-                        device.status = "active"
+                    # Update status based on actual reachability (unless isolated)
+                    if device.status != "isolated":
+                        if lease.is_active and device.status == "inactive":
+                            device.status = "active"
+                            logger.info(f"Device {device.hostname} ({device.ip}) is now active")
+                        elif not lease.is_active and device.status == "active":
+                            device.status = "inactive"
+                            logger.info(f"Device {device.hostname} ({device.ip}) is now inactive (disconnected)")
                 else:
                     # Create new device from lease
                     device = Device(

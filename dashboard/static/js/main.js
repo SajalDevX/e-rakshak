@@ -147,6 +147,11 @@ function initializeSocket() {
     socket.on('status_update', (data) => {
         updateStats(data);
     });
+
+    socket.on('devices_update', (data) => {
+        renderDevices(data.devices);
+        document.getElementById('devices-count').textContent = data.count;
+    });
 }
 
 function updateConnectionStatus(connected) {
@@ -615,6 +620,7 @@ function setupEventListeners() {
 function startAutoRefresh() {
     setInterval(() => {
         loadStatus();
+        loadDevices();
         loadHoneypots();
     }, REFRESH_INTERVAL);
 }

@@ -531,6 +531,13 @@ class RakshakGateway:
                 "-j", "ACCEPT"
             ], capture_output=True)
 
+            # Log dashboard access attempts for threat monitoring
+            subprocess.run([
+                "iptables", "-A", "INPUT",
+                "-p", "tcp", "--dport", "5000", "--syn",
+                "-j", "LOG", "--log-prefix", "[RAKSHAK-DASHBOARD] ", "--log-level", "4"
+            ], capture_output=True)
+
             # Allow RAKSHAK dashboard
             subprocess.run([
                 "iptables", "-A", "INPUT",
@@ -787,8 +794,42 @@ expand-hosts
             logger.info(f"Auto-expiring isolation for {ip}")
             self.unisolate_device(ip)
 
+    def _check_device_reachable(self, ip_address: str) -> bool:
+        """
+        Check if a device is reachable by examining the ARP cache.
+
+        A device is considered reachable if its ARP entry is REACHABLE, STALE, or DELAY.
+        If the entry is INCOMPLETE or FAILED, the device is not on the network.
+        """
+        try:
+            result = subprocess.run(
+                ["ip", "neigh", "show", ip_address],
+                capture_output=True, text=True, timeout=2
+            )
+            output = result.stdout.strip()
+
+            if not output:
+                return False
+
+            # Check ARP state - REACHABLE, STALE, DELAY are OK; INCOMPLETE, FAILED are not
+            if "REACHABLE" in output or "STALE" in output or "DELAY" in output or "PERMANENT" in output:
+                return True
+            elif "INCOMPLETE" in output or "FAILED" in output:
+                return False
+
+            # If we have a MAC address in the output, device was recently seen
+            # Format: "10.42.0.72 dev enx... lladdr aa:bb:cc:dd:ee:ff REACHABLE"
+            if "lladdr" in output:
+                return True
+
+            return False
+
+        except Exception as e:
+            logger.debug(f"ARP check failed for {ip_address}: {e}")
+            return True  # Assume active on error to avoid false negatives
+
     def refresh_dhcp_leases(self) -> Dict[str, DHCPLease]:
-        """Refresh DHCP leases from dnsmasq"""
+        """Refresh DHCP leases from dnsmasq and verify device connectivity"""
         try:
             if not self.dhcp_leases_path.exists():
                 return self.dhcp_leases
@@ -799,15 +840,21 @@ expand-hosts
                     if len(parts) >= 4:
                         timestamp, mac, ip, hostname = parts[0], parts[1], parts[2], parts[3]
 
+                        # Verify device is actually reachable via ARP
+                        is_reachable = self._check_device_reachable(ip)
+
                         lease = DHCPLease(
                             mac_address=mac,
                             ip_address=ip,
                             hostname=hostname if hostname != "*" else "unknown",
                             lease_start=datetime.fromtimestamp(int(timestamp) - 86400),
                             lease_end=datetime.fromtimestamp(int(timestamp)),
-                            is_active=True
+                            is_active=is_reachable
                         )
                         self.dhcp_leases[mac] = lease
+
+                        if not is_reachable:
+                            logger.debug(f"Device {hostname} ({ip}) has DHCP lease but is not reachable")
 
             logger.debug(f"Refreshed {len(self.dhcp_leases)} DHCP leases")
 

@@ -201,6 +201,30 @@ llm:
 deception:
   enabled: true
   max_honeypots: 10
+
+  # Auto-deploy honeypots on startup for proactive defense
+  auto_deploy_on_startup: true
+
+  # Trap ports - these look enticing to attackers
+  # Any connection to these ports = suspicious activity -> honeypot engagement
+  trap_ports:
+    - port: 21
+      protocol: telnet
+      persona: tp_link
+    - port: 23
+      protocol: telnet
+      persona: wyze_cam
+    - port: 80
+      protocol: http
+      persona: samsung_tv
+    - port: 8080
+      protocol: http
+      persona: tp_link
+    - port: 22
+      protocol: telnet    # Fake SSH via telnet handler
+      persona: nest
+
+  # Default honeypot ports (for dynamic deployment)
   honeypot_ports:
     telnet: 2323
     ssh: 2222

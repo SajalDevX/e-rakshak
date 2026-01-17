@@ -133,7 +133,8 @@ class DeceptionEngine:
 
     def deploy_honeypot(self, threat_info: dict = None,
                        protocol: str = "telnet",
-                       persona: str = "tp_link") -> Optional[Honeypot]:
+                       persona: str = "tp_link",
+                       fixed_port: int = None) -> Optional[Honeypot]:
         """
         Deploy a new honeypot in response to a threat.
 
@@ -141,6 +142,7 @@ class DeceptionEngine:
             threat_info: Information about the detected threat
             protocol: Protocol to emulate (telnet, ssh, http)
             persona: Device persona to use
+            fixed_port: If specified, use this exact port instead of finding one
 
         Returns:
             Honeypot object or None if deployment failed
@@ -154,10 +156,12 @@ class DeceptionEngine:
             return None
 
         # Determine port
-        port = self.default_ports.get(protocol, 2323)
-
-        # Find available port
-        port = self._find_available_port(port)
+        if fixed_port:
+            port = fixed_port
+        else:
+            port = self.default_ports.get(protocol, 2323)
+            # Find available port
+            port = self._find_available_port(port)
         if port is None:
             logger.error("No available ports for honeypot")
             return None

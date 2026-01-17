@@ -20,7 +20,7 @@ import queue
 import time
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Callable, Set
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum
 
 from loguru import logger
@@ -105,6 +105,13 @@ class PacketFilter:
         # Callbacks for packet events
         self.on_threat_detected: Optional[Callable] = None
         self.on_packet_blocked: Optional[Callable] = None
+        self.on_dashboard_access: Optional[Callable] = None  # Callback for dashboard access
+
+        # Dashboard access tracking
+        self.dashboard_connections: Dict[str, List[datetime]] = {}  # {ip: [timestamps]}
+        self.dashboard_monitor_thread: Optional[threading.Thread] = None
+        self.known_devices: Set[str] = set()  # IPs of known/authorized devices
+        self.gateway_ip: str = "10.42.0.1"
 
         # Suspicious patterns to detect
         self.suspicious_ports = {
@@ -554,6 +561,149 @@ class PacketFilter:
         """Stop packet filter"""
         self.is_running = False
         logger.info("PacketFilter stopped")
+
+    # =========================================================================
+    # Dashboard Access Monitoring
+    # =========================================================================
+
+    def set_known_devices(self, device_ips: List[str]):
+        """Set list of known device IPs (authorized to access dashboard)"""
+        self.known_devices = set(device_ips)
+        logger.debug(f"Known devices updated: {len(self.known_devices)} devices")
+
+    def start_dashboard_monitor(self):
+        """Start monitoring dashboard access from kernel logs"""
+        if self.dashboard_monitor_thread and self.dashboard_monitor_thread.is_alive():
+            logger.warning("Dashboard monitor already running")
+            return
+
+        self.dashboard_monitor_thread = threading.Thread(
+            target=self._monitor_dashboard_access,
+            daemon=True,
+            name="DashboardMonitor"
+        )
+        self.dashboard_monitor_thread.start()
+        logger.info("Dashboard access monitor started")
+
+    def _monitor_dashboard_access(self):
+        """Monitor /var/log/kern.log or dmesg for dashboard access attempts"""
+        import re
+
+        # Pattern to match: [RAKSHAK-DASHBOARD] ... SRC=10.42.0.66 ...
+        log_pattern = re.compile(
+            r'\[RAKSHAK-DASHBOARD\].*SRC=(\d+\.\d+\.\d+\.\d+).*DPT=5000'
+        )
+
+        try:
+            # Try to tail kern.log or use dmesg
+            log_file = "/var/log/kern.log"
+            if not os.path.exists(log_file):
+                log_file = "/var/log/syslog"
+
+            if os.path.exists(log_file):
+                # Use tail -F to follow the log file
+                process = subprocess.Popen(
+                    ["tail", "-F", "-n", "0", log_file],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.DEVNULL,
+                    text=True
+                )
+
+                logger.info(f"Monitoring {log_file} for dashboard access")
+
+                while self.is_running:
+                    line = process.stdout.readline()
+                    if line:
+                        match = log_pattern.search(line)
+                        if match:
+                            src_ip = match.group(1)
+                            self._handle_dashboard_access(src_ip)
+
+                process.terminate()
+            else:
+                logger.warning("No kernel log file found for dashboard monitoring")
+
+        except Exception as e:
+            logger.error(f"Dashboard monitor error: {e}")
+
+    def _handle_dashboard_access(self, src_ip: str):
+        """Handle a dashboard access attempt"""
+        now = datetime.now()
+
+        # Track connection
+        if src_ip not in self.dashboard_connections:
+            self.dashboard_connections[src_ip] = []
+
+        self.dashboard_connections[src_ip].append(now)
+
+        # Keep only last 60 seconds of connections
+        cutoff = now - timedelta(seconds=60)
+        self.dashboard_connections[src_ip] = [
+            t for t in self.dashboard_connections[src_ip] if t > cutoff
+        ]
+
+        # Check for suspicious patterns
+        connection_count = len(self.dashboard_connections[src_ip])
+        is_known_device = src_ip in self.known_devices
+
+        suspicious = False
+        reason = ""
+
+        # Rapid connections (more than 5 in 10 seconds)
+        recent_cutoff = now - timedelta(seconds=10)
+        recent_connections = sum(
+            1 for t in self.dashboard_connections[src_ip] if t > recent_cutoff
+        )
+
+        if recent_connections > 5:
+            suspicious = True
+            reason = f"Rapid dashboard access: {recent_connections} connections in 10 seconds"
+
+        # Unknown device accessing dashboard
+        if not is_known_device:
+            suspicious = True
+            reason = f"Unknown device accessing dashboard"
+
+        # Log and notify
+        if suspicious:
+            logger.warning(f"Suspicious dashboard access from {src_ip}: {reason}")
+
+            if self.on_dashboard_access:
+                self.on_dashboard_access({
+                    "source_ip": src_ip,
+                    "target_ip": self.gateway_ip,
+                    "target_port": 5000,
+                    "connection_count": connection_count,
+                    "is_known_device": is_known_device,
+                    "suspicious": True,
+                    "reason": reason,
+                    "timestamp": now.isoformat()
+                })
+        else:
+            logger.debug(f"Dashboard access from {src_ip} (known: {is_known_device})")
+
+    def get_dashboard_access_stats(self) -> Dict:
+        """Get dashboard access statistics"""
+        now = datetime.now()
+        cutoff = now - timedelta(minutes=5)
+
+        stats = {
+            "total_unique_ips": len(self.dashboard_connections),
+            "recent_accesses": {},
+            "suspicious_ips": []
+        }
+
+        for ip, timestamps in self.dashboard_connections.items():
+            recent = [t for t in timestamps if t > cutoff]
+            if recent:
+                stats["recent_accesses"][ip] = {
+                    "count": len(recent),
+                    "is_known": ip in self.known_devices
+                }
+                if len(recent) > 10:  # More than 10 accesses in 5 minutes
+                    stats["suspicious_ips"].append(ip)
+
+        return stats
 
 
 # Predefined security rules

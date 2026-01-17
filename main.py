@@ -302,6 +302,11 @@ class RakshakOrchestrator:
             self.agentic_defender.set_packet_filter(self.packet_filter)
             # Connect IDS classifier callback to packet filter
             self.packet_filter.on_threat_detected = self._on_packet_inspected
+            # Connect dashboard access callback
+            self.packet_filter.on_dashboard_access = self._on_dashboard_access
+            # Set gateway IP for dashboard monitoring
+            lan_ip = self.config.get("gateway", {}).get("lan_ip", "10.42.0.1")
+            self.packet_filter.gateway_ip = lan_ip
 
         # Flask app for dashboard
         self.app = create_app(config, self)
@@ -358,6 +363,16 @@ class RakshakOrchestrator:
             console.print(f"  Gateway IP:    {self.gateway.config.lan_ip}")
             console.print(f"  Jetson:        {self.gateway.is_jetson}")
             console.print("")
+
+            # Start dashboard access monitor
+            if self.packet_filter:
+                self.packet_filter.is_running = True
+                self.packet_filter.start_dashboard_monitor()
+                console.print("[dim]Dashboard access monitoring enabled[/dim]")
+
+            # Deploy startup trap honeypots for proactive defense
+            if self.deception_engine.enabled:
+                self._deploy_startup_honeypots()
 
         console.print(f"[bold green]RAKSHAK Started in {mode} mode[/bold green]")
         console.print(f"[dim]Dashboard: http://localhost:{self.config['api']['port']}[/dim]\n")
@@ -425,6 +440,17 @@ class RakshakOrchestrator:
                 # Check for new devices or changes
                 for device in devices:
                     self.network_scanner.update_device(device)
+
+                # Emit devices_update event to dashboard
+                self._emit_event('devices_update', {
+                    'devices': [d.to_dict() for d in devices],
+                    'count': len(devices)
+                })
+
+                # Update known devices list for dashboard access monitoring
+                if self.packet_filter and devices:
+                    known_ips = [d.ip for d in devices if d.status == "active"]
+                    self.packet_filter.set_known_devices(known_ips)
 
             except Exception as e:
                 logger.error(f"Scanner error: {e}")
@@ -599,6 +625,106 @@ class RakshakOrchestrator:
 
             # Queue threat for processing by KAAL
             self.threat_logger.log_threat(threat_info)
+
+    def _on_dashboard_access(self, access_info: dict):
+        """Callback when suspicious dashboard access is detected."""
+        if not access_info.get('suspicious'):
+            return
+
+        source_ip = access_info.get('source_ip', 'unknown')
+        reason = access_info.get('reason', 'Suspicious access pattern')
+
+        logger.warning(f"Suspicious dashboard access from {source_ip}: {reason}")
+
+        # Create threat for KAAL to process
+        threat_info = {
+            'type': 'unauthorized_access',
+            'severity': 'medium',
+            'source_ip': source_ip,
+            'target_ip': access_info.get('target_ip', '10.42.0.1'),
+            'target_port': 5000,
+            'target_device': 'RAKSHAK Gateway',
+            'protocol': 'tcp',
+            'packets_count': access_info.get('connection_count', 1),
+            'duration_seconds': 10,
+            'description': reason,
+            'detected_by': 'dashboard_monitor'
+        }
+
+        # Log the threat (this will queue it for KAAL processing)
+        self.threat_logger.log_threat(
+            threat_type=threat_info['type'],
+            severity=threat_info['severity'],
+            source_ip=threat_info['source_ip'],
+            target_ip=threat_info['target_ip'],
+            target_device=threat_info['target_device'],
+            target_port=threat_info['target_port'],
+            protocol=threat_info['protocol'],
+            packets_count=threat_info['packets_count'],
+            duration_seconds=threat_info['duration_seconds'],
+            detected_by=threat_info['detected_by']
+        )
+
+        # Emit alert to dashboard
+        self._emit_event('alert', {
+            'message': f"Suspicious access to dashboard from {source_ip}",
+            'severity': 'warning',
+            'source_ip': source_ip,
+            'reason': reason
+        })
+
+    def _deploy_startup_honeypots(self):
+        """Deploy honeypots on trap ports at startup for proactive defense."""
+        deception_config = self.config.get("deception", {})
+
+        if not deception_config.get("auto_deploy_on_startup", False):
+            logger.info("Auto-deploy honeypots disabled in config")
+            return
+
+        trap_ports = deception_config.get("trap_ports", [])
+        if not trap_ports:
+            # Default trap ports if not configured
+            trap_ports = [
+                {"port": 21, "protocol": "telnet", "persona": "tp_link"},
+                {"port": 23, "protocol": "telnet", "persona": "wyze_cam"},
+                {"port": 80, "protocol": "http", "persona": "samsung_tv"},
+                {"port": 8080, "protocol": "http", "persona": "tp_link"},
+                {"port": 22, "protocol": "telnet", "persona": "nest"},
+            ]
+
+        deployed_count = 0
+        for trap in trap_ports:
+            port = trap.get("port")
+            protocol = trap.get("protocol", "telnet")
+            persona = trap.get("persona", "tp_link")
+
+            # Check if port is available
+            try:
+                import socket
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                sock.bind(("0.0.0.0", port))
+                sock.close()
+            except OSError:
+                logger.warning(f"Trap port {port} already in use, skipping")
+                continue
+
+            # Deploy honeypot on this fixed port
+            honeypot = self.deception_engine.deploy_honeypot(
+                threat_info={"target_device": persona, "startup_trap": True},
+                protocol=protocol,
+                persona=persona,
+                fixed_port=port
+            )
+
+            if honeypot:
+                deployed_count += 1
+                logger.info(f"TRAP: Deployed {protocol} honeypot on port {port} ({persona})")
+
+        if deployed_count > 0:
+            console.print(f"[bold cyan]CHAKRAVYUH: {deployed_count} trap honeypots deployed[/bold cyan]")
+        else:
+            logger.warning("No trap honeypots could be deployed (ports in use?)")
 
     def _run_flask_app(self):
         """Run the Flask dashboard application."""
