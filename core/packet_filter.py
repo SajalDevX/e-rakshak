@@ -107,6 +107,10 @@ class PacketFilter:
         self.on_packet_blocked: Optional[Callable] = None
         self.on_dashboard_access: Optional[Callable] = None  # Callback for dashboard access
 
+        # Phase 3: Enhanced detection callbacks
+        self.port_scan_detector: Optional[Callable] = None  # PortScanDetector instance
+        self.arp_spoofing_detector: Optional[Callable] = None  # ARPSpoofingDetector instance
+
         # Dashboard access tracking
         self.dashboard_connections: Dict[str, List[datetime]] = {}  # {ip: [timestamps]}
         self.dashboard_monitor_thread: Optional[threading.Thread] = None
@@ -180,10 +184,39 @@ class PacketFilter:
                         protocol = "tcp"
                         src_port = pkt[TCP].sport
                         dst_port = pkt[TCP].dport
+
+                        # Phase 3: Port scan detection
+                        if self.port_scan_detector:
+                            tcp_flags = pkt[TCP].flags
+                            tcp_flags_str = str(tcp_flags)
+                            scan_result = self.port_scan_detector.detect_scan(
+                                src_ip=src_ip,
+                                dst_ip=dst_ip,
+                                dst_port=dst_port,
+                                tcp_flags=tcp_flags_str,
+                                protocol="tcp"
+                            )
+                            if scan_result and self.on_threat_detected:
+                                # Port scan detected - notify threat processor
+                                self.on_threat_detected(scan_result)
+
                     elif UDP in pkt:
                         protocol = "udp"
                         src_port = pkt[UDP].sport
                         dst_port = pkt[UDP].dport
+
+                        # Phase 3: UDP port scan detection
+                        if self.port_scan_detector:
+                            scan_result = self.port_scan_detector.detect_scan(
+                                src_ip=src_ip,
+                                dst_ip=dst_ip,
+                                dst_port=dst_port,
+                                tcp_flags="",
+                                protocol="udp"
+                            )
+                            if scan_result and self.on_threat_detected:
+                                self.on_threat_detected(scan_result)
+
                     elif ICMP in pkt:
                         protocol = "icmp"
 

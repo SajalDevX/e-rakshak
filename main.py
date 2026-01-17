@@ -67,6 +67,11 @@ from core.threat_logger import ThreatLogger
 from core.ids_classifier import IDSClassifier
 from api.app import create_app
 
+# Phase 3: Enhanced Detection & Response Systems
+from core.response_decision_engine import ResponseDecisionEngine, ThreatContext
+from core.arp_spoofing_detector import ARPSpoofingDetector
+from core.port_scan_detector import PortScanDetector
+
 # Gateway modules (for inline security gateway mode)
 try:
     from core.gateway import RakshakGateway, GatewayConfig, create_gateway_from_config, IsolationLevel
@@ -311,6 +316,12 @@ class RakshakOrchestrator:
         else:
             logger.warning("IDS classifier not loaded - using rule-based detection only")
 
+        # Initialize Phase 3: Enhanced Detection & Response Systems
+        self.response_engine = ResponseDecisionEngine(config)
+        self.arp_spoofing_detector = ARPSpoofingDetector(config, self.threat_logger)
+        self.port_scan_detector = PortScanDetector(config, self.threat_logger)
+        logger.info("Phase 3 detection systems initialized (Response Engine, ARP Spoofing, Port Scan)")
+
         # Pass gateway reference to components that need it
         self.network_scanner = NetworkScanner(
             config,
@@ -339,6 +350,11 @@ class RakshakOrchestrator:
             # Set gateway IP for dashboard monitoring
             lan_ip = self.config.get("gateway", {}).get("lan_ip", "10.42.0.1")
             self.packet_filter.gateway_ip = lan_ip
+
+            # Phase 3: Connect enhanced detectors to packet filter
+            self.packet_filter.port_scan_detector = self.port_scan_detector
+            self.packet_filter.arp_spoofing_detector = self.arp_spoofing_detector
+            logger.info("Phase 3 detectors connected to packet filter")
 
         # Flask app for dashboard
         self.app = create_app(config, self)
@@ -541,7 +557,7 @@ class RakshakOrchestrator:
                 logger.error(f"Threat processor error: {e}")
 
     def _process_threat(self, threat: dict):
-        """Process a detected threat using the agentic defender."""
+        """Process a detected threat using the agentic defender and response engine."""
         logger.info(f"Processing threat: {threat.get('type')} from {threat.get('source_ip')}")
 
         # Emit threat_detected event to dashboard
@@ -550,9 +566,45 @@ class RakshakOrchestrator:
             'message': f"Threat detected: {threat.get('type')} from {threat.get('source_ip')}"
         })
 
-        # Get AI decision
+        # Phase 3: Use Response Decision Engine for graduated response
+        response_decision = None
+        if self.response_engine:
+            # Build threat context for response engine
+            from core.response_decision_engine import ThreatContext
+
+            # Get device info
+            source_device = self.network_scanner.get_device(threat.get('source_ip'))
+            device_zone = source_device.zone if source_device else "guest"
+            device_type = source_device.device_type if source_device else "unknown"
+            device_criticality = self._get_device_criticality(device_type)
+
+            # Check if repeat offender
+            is_repeat = self.response_engine.check_repeat_offender(threat.get('source_ip'))
+
+            context = ThreatContext(
+                threat_type=threat.get('type', 'unknown'),
+                severity=threat.get('severity', 'medium'),
+                confidence=threat.get('confidence', 0.7),
+                source_ip=threat.get('source_ip'),
+                device_type=device_type,
+                device_zone=device_zone,
+                device_criticality=device_criticality,
+                anomaly_count=threat.get('anomaly_count', 0),
+                is_repeat_offender=is_repeat
+            )
+
+            response_decision = self.response_engine.decide_response(context)
+            logger.info(f"Response Engine: {response_decision.level.name} - {response_decision.action}")
+
+        # Get AI decision from KAAL
         action = self.agentic_defender.decide(threat)
         logger.info(f"KAAL decided: {action['action']}")
+
+        # If response engine provided higher escalation, use it
+        if response_decision and response_decision.auto_execute:
+            logger.warning(f"Response Engine escalating to: {response_decision.level.name}")
+            # Map response level to action
+            action = self._map_response_to_action(response_decision, threat)
 
         # Execute action
         self._execute_action(action, threat)
@@ -566,7 +618,8 @@ class RakshakOrchestrator:
             'threat_type': threat.get('type'),
             'target': threat.get('target_device'),
             'message': f"KAAL action: {action['action']}",
-            'gateway_mode': self.gateway_mode
+            'gateway_mode': self.gateway_mode,
+            'response_level': response_decision.level.name if response_decision else None
         })
 
         # Emit status update
@@ -625,6 +678,61 @@ class RakshakOrchestrator:
             self._send_alert(threat)
 
         return result
+
+    def _get_device_criticality(self, device_type: str) -> str:
+        """
+        Determine device criticality level.
+
+        Returns: "low", "medium", "high", or "critical"
+        """
+        critical_devices = ["server", "nas", "gateway", "router"]
+        high_devices = ["desktop", "laptop", "workstation"]
+        medium_devices = ["mobile", "tablet", "smart_tv"]
+        # low: IoT devices, cameras, smart plugs, etc.
+
+        if device_type in critical_devices:
+            return "critical"
+        elif device_type in high_devices:
+            return "high"
+        elif device_type in medium_devices:
+            return "medium"
+        else:
+            return "low"  # Default for IoT devices
+
+    def _map_response_to_action(self, response_decision, threat: dict) -> dict:
+        """
+        Map Response Decision Engine output to KAAL action format.
+
+        Args:
+            response_decision: ResponseDecision from response engine
+            threat: Threat dictionary
+
+        Returns:
+            Action dictionary compatible with KAAL
+        """
+        from core.response_decision_engine import ResponseLevel
+
+        # Map response levels to KAAL actions
+        level_to_action = {
+            ResponseLevel.MONITOR: "MONITOR",
+            ResponseLevel.ALERT: "ALERT_USER",
+            ResponseLevel.RATE_LIMIT: "MONITOR",  # Mapped to MONITOR (gateway handles rate limiting)
+            ResponseLevel.DEPLOY_HONEYPOT: "DEPLOY_HONEYPOT",
+            ResponseLevel.QUARANTINE: "ISOLATE_DEVICE",
+            ResponseLevel.ISOLATE: "ISOLATE_DEVICE",
+            ResponseLevel.FULL_BLOCK: "ISOLATE_DEVICE"
+        }
+
+        kaal_action = level_to_action.get(response_decision.level, "MONITOR")
+
+        return {
+            "action": kaal_action,
+            "confidence": response_decision.confidence,
+            "reason": response_decision.reason,
+            "response_level": response_decision.level.name,
+            "auto_execute": response_decision.auto_execute,
+            "requires_approval": response_decision.requires_approval
+        }
 
     def _emit_event(self, event_name: str, data: dict):
         """Emit a WebSocket event to the dashboard."""
