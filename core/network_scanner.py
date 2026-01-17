@@ -114,7 +114,7 @@ class NetworkScanner:
         "AC:CC:8E": ("Roku", "streaming"),
     }
 
-    def __init__(self, config: dict, threat_logger=None, gateway=None, trust_manager=None):
+    def __init__(self, config: dict, threat_logger=None, gateway=None, trust_manager=None, orchestrator=None):
         """
         Initialize the network scanner.
 
@@ -123,11 +123,13 @@ class NetworkScanner:
             threat_logger: ThreatLogger instance
             gateway: RakshakGateway instance (for DHCP-based discovery in gateway mode)
             trust_manager: TrustManager instance (for Zero Trust zone assignment)
+            orchestrator: RAKSHAKOrchestrator instance (for emitting real-time events)
         """
         self.config = config
         self.threat_logger = threat_logger
         self.gateway = gateway  # Gateway reference for DHCP-based discovery
         self.trust_manager = trust_manager  # Trust Manager for zone assignment
+        self.orchestrator = orchestrator  # Orchestrator for real-time event emission
         self.network_config = config.get("network", {})
         self.simulation_config = config.get("simulation", {})
 
@@ -340,6 +342,14 @@ class NetworkScanner:
                 if device.status == "inactive":
                     device.status = "active"
                     logger.info(f"MAYA: Device {ip} is now active (detected via {device_info.get('method', 'passive')})")
+
+                    # REAL-TIME FIX: Emit status change event
+                    if self.orchestrator:
+                        self.orchestrator._emit_event('device_status_changed', {
+                            'ip': ip,
+                            'status': 'active',
+                            'timestamp': datetime.now().isoformat()
+                        })
 
                 if device_info.get("mac") and device.mac == "unknown":
                     device.mac = device_info["mac"]
@@ -755,6 +765,14 @@ class NetworkScanner:
                         device.status = "inactive"
                         logger.info(f"Device {ip} marked as inactive (disconnected)")
 
+                        # REAL-TIME FIX: Emit status change event
+                        if self.orchestrator:
+                            self.orchestrator._emit_event('device_status_changed', {
+                                'ip': ip,
+                                'status': 'inactive',
+                                'timestamp': datetime.now().isoformat()
+                            })
+
             for mac, lease in leases.items():
                 # Check if this MAC already has a device with different IP (IP changed)
                 if mac in self._mac_to_ip:
@@ -782,9 +800,25 @@ class NetworkScanner:
                         if lease.is_active and device.status == "inactive":
                             device.status = "active"
                             logger.info(f"Device {device.hostname} ({device.ip}) is now active")
+
+                            # REAL-TIME FIX: Emit status change event
+                            if self.orchestrator:
+                                self.orchestrator._emit_event('device_status_changed', {
+                                    'ip': device.ip,
+                                    'status': 'active',
+                                    'timestamp': datetime.now().isoformat()
+                                })
                         elif not lease.is_active and device.status == "active":
                             device.status = "inactive"
                             logger.info(f"Device {device.hostname} ({device.ip}) is now inactive (disconnected)")
+
+                            # REAL-TIME FIX: Emit status change event
+                            if self.orchestrator:
+                                self.orchestrator._emit_event('device_status_changed', {
+                                    'ip': device.ip,
+                                    'status': 'inactive',
+                                    'timestamp': datetime.now().isoformat()
+                                })
                 else:
                     # Create new device from lease
                     device = Device(
@@ -1040,6 +1074,14 @@ class NetworkScanner:
                     self.devices[device_ip].status = "isolated"
                     logger.warning(f"Device {device_ip} ISOLATED via gateway (REAL)")
 
+                    # REAL-TIME FIX: Emit status change event
+                    if self.orchestrator:
+                        self.orchestrator._emit_event('device_status_changed', {
+                            'ip': device_ip,
+                            'status': 'isolated',
+                            'timestamp': datetime.now().isoformat()
+                        })
+
                     if self.threat_logger:
                         self.threat_logger.log_action(
                             threat_id="manual",
@@ -1060,6 +1102,14 @@ class NetworkScanner:
         else:
             self.devices[device_ip].status = "isolated"
             logger.warning(f"Device {device_ip} marked as isolated (SIMULATED - no real traffic control)")
+
+            # REAL-TIME FIX: Emit status change event
+            if self.orchestrator:
+                self.orchestrator._emit_event('device_status_changed', {
+                    'ip': device_ip,
+                    'status': 'isolated',
+                    'timestamp': datetime.now().isoformat()
+                })
 
             if self.threat_logger:
                 self.threat_logger.log_action(
@@ -1091,12 +1141,30 @@ class NetworkScanner:
             if success:
                 self.devices[device_ip].status = "active"
                 logger.info(f"Device {device_ip} unisolated via gateway")
+
+                # REAL-TIME FIX: Emit status change event
+                if self.orchestrator:
+                    self.orchestrator._emit_event('device_status_changed', {
+                        'ip': device_ip,
+                        'status': 'active',
+                        'timestamp': datetime.now().isoformat()
+                    })
+
                 return True
             return False
 
         # Standalone mode
         self.devices[device_ip].status = "active"
         logger.info(f"Device {device_ip} marked as active (SIMULATED)")
+
+        # REAL-TIME FIX: Emit status change event
+        if self.orchestrator:
+            self.orchestrator._emit_event('device_status_changed', {
+                'ip': device_ip,
+                'status': 'active',
+                'timestamp': datetime.now().isoformat()
+            })
+
         return True
 
     def get_device_for_morphing(self, device_type: str = None) -> Optional[Dict]:

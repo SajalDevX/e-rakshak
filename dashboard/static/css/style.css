@@ -379,6 +379,7 @@ body {
 }
 
 .status-active { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); }
+.status-inactive { background: rgba(156, 163, 175, 0.2); color: #6b7280; }
 .status-isolated { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
 
 /* -----------------------------------------------------------------------------

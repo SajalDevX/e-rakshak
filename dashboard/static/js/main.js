@@ -152,6 +152,11 @@ function initializeSocket() {
         renderDevices(data.devices);
         document.getElementById('devices-count').textContent = data.count;
     });
+
+    socket.on('device_status_changed', (data) => {
+        console.log(`Device ${data.ip} status changed to ${data.status}`);
+        updateDeviceStatus(data.ip, data.status);
+    });
 }
 
 function updateConnectionStatus(connected) {
@@ -316,6 +321,23 @@ function renderDevices(devices) {
             </tr>
         `;
     }).join('');
+}
+
+function updateDeviceStatus(ip, newStatus) {
+    const rows = document.querySelectorAll('#devices-table-body tr');
+    rows.forEach(row => {
+        const ipCell = row.querySelector('code');
+        if (ipCell && ipCell.textContent === ip) {
+            const statusBadge = row.querySelector('.status-badge');
+            if (statusBadge) {
+                // Remove old status class
+                statusBadge.className = 'status-badge';
+                // Add new status class
+                statusBadge.classList.add(`status-${newStatus}`);
+                statusBadge.textContent = newStatus;
+            }
+        }
+    });
 }
 
 function getZoneBadge(zone) {

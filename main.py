@@ -316,7 +316,8 @@ class RakshakOrchestrator:
             config,
             self.threat_logger,
             gateway=self.gateway,
-            trust_manager=self.trust_manager
+            trust_manager=self.trust_manager,
+            orchestrator=self
         )
         self.deception_engine = DeceptionEngine(
             config,
