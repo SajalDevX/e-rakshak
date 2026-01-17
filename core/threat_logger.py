@@ -269,6 +269,83 @@ class ThreatLogger:
             )
         """)
 
+        # Device Fingerprinting: Multi-signal fingerprints
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS device_fingerprints (
+                device_mac TEXT PRIMARY KEY,
+                device_ip TEXT NOT NULL,
+                ja3_hash TEXT,
+                ja3_confidence REAL,
+                ja3_vendor TEXT,
+                ja3_device_type TEXT,
+                dhcp_option55 TEXT,
+                dhcp_confidence REAL,
+                dhcp_os TEXT,
+                tcp_signature TEXT,
+                tcp_confidence REAL,
+                tcp_os TEXT,
+                dns_domains TEXT,
+                dns_confidence REAL,
+                dns_vendor TEXT,
+                fused_vendor TEXT,
+                fused_device_type TEXT,
+                fused_os TEXT,
+                overall_confidence REAL,
+                identity_status TEXT DEFAULT 'UNKNOWN',
+                first_seen TEXT NOT NULL,
+                last_updated TEXT NOT NULL,
+                fingerprint_complete INTEGER DEFAULT 0,
+                FOREIGN KEY (device_mac) REFERENCES devices(mac)
+            )
+        """)
+
+        # Device Fingerprinting: Confidence tracking
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS device_confidence (
+                device_ip TEXT PRIMARY KEY,
+                device_mac TEXT,
+                confidence_score REAL DEFAULT 0.0,
+                state TEXT DEFAULT 'DISCOVERED',
+                signals_collected INTEGER DEFAULT 0,
+                anomaly_count INTEGER DEFAULT 0,
+                drift_score REAL DEFAULT 0.0,
+                last_confidence_update TEXT,
+                confidence_decay_rate REAL DEFAULT 0.01,
+                re_evaluation_needed INTEGER DEFAULT 0,
+                FOREIGN KEY (device_ip) REFERENCES devices(ip),
+                FOREIGN KEY (device_mac) REFERENCES devices(mac)
+            )
+        """)
+
+        # Device Fingerprinting: Signal history
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS fingerprint_signal_history (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                device_mac TEXT NOT NULL,
+                signal_type TEXT NOT NULL,
+                signal_value TEXT,
+                confidence REAL,
+                captured_at TEXT NOT NULL,
+                FOREIGN KEY (device_mac) REFERENCES devices(mac)
+            )
+        """)
+
+        # Device Fingerprinting: Cloud endpoint mappings
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS device_cloud_endpoints (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                device_ip TEXT NOT NULL,
+                device_mac TEXT NOT NULL,
+                domain TEXT NOT NULL,
+                resolved_ip TEXT,
+                vendor TEXT,
+                first_seen TEXT NOT NULL,
+                last_seen TEXT NOT NULL,
+                query_count INTEGER DEFAULT 1,
+                FOREIGN KEY (device_ip) REFERENCES devices(ip)
+            )
+        """)
+
         # Zero Trust: Device anomalies
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS device_anomalies (
@@ -295,6 +372,53 @@ class ThreatLogger:
                 chain_length INTEGER,
                 severity TEXT,
                 is_active INTEGER DEFAULT 1
+            )
+        """)
+
+        # Enhanced Detection: ARP spoofing events
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS arp_spoofing_events (
+                id TEXT PRIMARY KEY,
+                timestamp TEXT NOT NULL,
+                victim_ip TEXT NOT NULL,
+                real_mac TEXT,
+                fake_mac TEXT NOT NULL,
+                attack_type TEXT,
+                severity TEXT NOT NULL,
+                confidence REAL,
+                action_taken TEXT
+            )
+        """)
+
+        # Enhanced Detection: Port scan events
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS port_scan_events (
+                id TEXT PRIMARY KEY,
+                timestamp TEXT NOT NULL,
+                scanner_ip TEXT NOT NULL,
+                ports_scanned TEXT,
+                scan_type TEXT NOT NULL,
+                severity TEXT,
+                confidence REAL,
+                action_taken TEXT
+            )
+        """)
+
+        # Enhanced Detection: Identity drift events
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS identity_drift_events (
+                id TEXT PRIMARY KEY,
+                timestamp TEXT NOT NULL,
+                device_ip TEXT NOT NULL,
+                device_mac TEXT,
+                drift_score REAL NOT NULL,
+                drift_type TEXT,
+                severity TEXT NOT NULL,
+                baseline_protocols TEXT,
+                current_protocols TEXT,
+                baseline_ports TEXT,
+                current_ports TEXT,
+                action_taken TEXT
             )
         """)
 
@@ -681,6 +805,289 @@ class ThreatLogger:
 
         except Exception as e:
             logger.error(f"Failed to log device {ip}: {e}")
+            conn.rollback()
+        finally:
+            conn.close()
+
+    def log_fingerprint(
+        self,
+        device_mac: str,
+        device_ip: str,
+        ja3_hash: str = None,
+        ja3_confidence: float = 0.0,
+        ja3_vendor: str = None,
+        ja3_device_type: str = None,
+        dhcp_option55: str = None,
+        dhcp_confidence: float = 0.0,
+        dhcp_os: str = None,
+        tcp_signature: str = None,
+        tcp_confidence: float = 0.0,
+        tcp_os: str = None,
+        dns_domains: str = None,
+        dns_confidence: float = 0.0,
+        dns_vendor: str = None,
+        fused_vendor: str = None,
+        fused_device_type: str = None,
+        fused_os: str = None,
+        overall_confidence: float = 0.0,
+        identity_status: str = "UNKNOWN",
+        fingerprint_complete: bool = False
+    ):
+        """
+        Log or update device fingerprint data.
+
+        Args:
+            device_mac: Device MAC address
+            device_ip: Device IP address
+            ja3_hash: JA3 TLS fingerprint hash
+            ja3_confidence: JA3 signal confidence
+            ja3_vendor: Vendor identified by JA3
+            ja3_device_type: Device type from JA3
+            dhcp_option55: DHCP Option 55 signature
+            dhcp_confidence: DHCP signal confidence
+            dhcp_os: OS identified by DHCP
+            tcp_signature: TCP/IP stack signature
+            tcp_confidence: TCP/IP signal confidence
+            tcp_os: OS identified by TCP/IP
+            dns_domains: DNS domains queried (comma-separated)
+            dns_confidence: DNS correlation confidence
+            dns_vendor: Vendor identified by DNS
+            fused_vendor: Final fused vendor identification
+            fused_device_type: Final fused device type
+            fused_os: Final fused OS
+            overall_confidence: Overall identity confidence (0.0-1.0)
+            identity_status: Identity status (UNKNOWN, CONFIRMED, SUSPICIOUS)
+            fingerprint_complete: Whether fingerprinting is complete
+        """
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        timestamp = datetime.now().isoformat()
+
+        try:
+            # Check if fingerprint exists
+            cursor.execute("SELECT device_mac FROM device_fingerprints WHERE device_mac = ?", (device_mac,))
+            existing = cursor.fetchone()
+
+            if existing:
+                # Update existing fingerprint
+                cursor.execute("""
+                    UPDATE device_fingerprints
+                    SET device_ip = ?,
+                        ja3_hash = COALESCE(?, ja3_hash),
+                        ja3_confidence = COALESCE(?, ja3_confidence),
+                        ja3_vendor = COALESCE(?, ja3_vendor),
+                        ja3_device_type = COALESCE(?, ja3_device_type),
+                        dhcp_option55 = COALESCE(?, dhcp_option55),
+                        dhcp_confidence = COALESCE(?, dhcp_confidence),
+                        dhcp_os = COALESCE(?, dhcp_os),
+                        tcp_signature = COALESCE(?, tcp_signature),
+                        tcp_confidence = COALESCE(?, tcp_confidence),
+                        tcp_os = COALESCE(?, tcp_os),
+                        dns_domains = COALESCE(?, dns_domains),
+                        dns_confidence = COALESCE(?, dns_confidence),
+                        dns_vendor = COALESCE(?, dns_vendor),
+                        fused_vendor = COALESCE(?, fused_vendor),
+                        fused_device_type = COALESCE(?, fused_device_type),
+                        fused_os = COALESCE(?, fused_os),
+                        overall_confidence = ?,
+                        identity_status = ?,
+                        last_updated = ?,
+                        fingerprint_complete = ?
+                    WHERE device_mac = ?
+                """, (device_ip, ja3_hash, ja3_confidence, ja3_vendor, ja3_device_type,
+                      dhcp_option55, dhcp_confidence, dhcp_os,
+                      tcp_signature, tcp_confidence, tcp_os,
+                      dns_domains, dns_confidence, dns_vendor,
+                      fused_vendor, fused_device_type, fused_os,
+                      overall_confidence, identity_status, timestamp,
+                      1 if fingerprint_complete else 0, device_mac))
+                logger.debug(f"Updated fingerprint for {device_mac} (confidence={overall_confidence:.2f})")
+            else:
+                # Insert new fingerprint
+                cursor.execute("""
+                    INSERT INTO device_fingerprints (
+                        device_mac, device_ip, ja3_hash, ja3_confidence, ja3_vendor, ja3_device_type,
+                        dhcp_option55, dhcp_confidence, dhcp_os,
+                        tcp_signature, tcp_confidence, tcp_os,
+                        dns_domains, dns_confidence, dns_vendor,
+                        fused_vendor, fused_device_type, fused_os,
+                        overall_confidence, identity_status,
+                        first_seen, last_updated, fingerprint_complete
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (device_mac, device_ip, ja3_hash, ja3_confidence, ja3_vendor, ja3_device_type,
+                      dhcp_option55, dhcp_confidence, dhcp_os,
+                      tcp_signature, tcp_confidence, tcp_os,
+                      dns_domains, dns_confidence, dns_vendor,
+                      fused_vendor, fused_device_type, fused_os,
+                      overall_confidence, identity_status,
+                      timestamp, timestamp, 1 if fingerprint_complete else 0))
+                logger.info(f"Created fingerprint for {device_mac} (confidence={overall_confidence:.2f})")
+
+            conn.commit()
+
+        except Exception as e:
+            logger.error(f"Failed to log fingerprint for {device_mac}: {e}")
+            conn.rollback()
+        finally:
+            conn.close()
+
+    def update_device_confidence(
+        self,
+        device_ip: str,
+        device_mac: str,
+        confidence_score: float,
+        state: str = "FINGERPRINTING",
+        signals_collected: int = 0,
+        drift_score: float = 0.0,
+        anomaly_count: int = 0,
+        re_evaluation_needed: bool = False
+    ):
+        """
+        Update device confidence tracking.
+
+        Args:
+            device_ip: Device IP address
+            device_mac: Device MAC address
+            confidence_score: Overall confidence score (0.0-1.0)
+            state: Device state (DISCOVERED, FINGERPRINTING, IDENTIFIED, TRUSTED, SUSPICIOUS)
+            signals_collected: Number of fingerprint signals collected
+            drift_score: Identity drift score
+            anomaly_count: Number of anomalies detected
+            re_evaluation_needed: Whether re-evaluation is needed
+        """
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        timestamp = datetime.now().isoformat()
+
+        try:
+            cursor.execute("SELECT device_ip FROM device_confidence WHERE device_ip = ?", (device_ip,))
+            existing = cursor.fetchone()
+
+            if existing:
+                cursor.execute("""
+                    UPDATE device_confidence
+                    SET device_mac = ?,
+                        confidence_score = ?,
+                        state = ?,
+                        signals_collected = ?,
+                        drift_score = ?,
+                        anomaly_count = ?,
+                        last_confidence_update = ?,
+                        re_evaluation_needed = ?
+                    WHERE device_ip = ?
+                """, (device_mac, confidence_score, state, signals_collected,
+                      drift_score, anomaly_count, timestamp,
+                      1 if re_evaluation_needed else 0, device_ip))
+            else:
+                cursor.execute("""
+                    INSERT INTO device_confidence (
+                        device_ip, device_mac, confidence_score, state,
+                        signals_collected, drift_score, anomaly_count,
+                        last_confidence_update, re_evaluation_needed
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (device_ip, device_mac, confidence_score, state,
+                      signals_collected, drift_score, anomaly_count,
+                      timestamp, 1 if re_evaluation_needed else 0))
+
+            conn.commit()
+            logger.debug(f"Updated confidence for {device_ip}: {confidence_score:.2f} ({state})")
+
+        except Exception as e:
+            logger.error(f"Failed to update confidence for {device_ip}: {e}")
+            conn.rollback()
+        finally:
+            conn.close()
+
+    def log_cloud_endpoint(
+        self,
+        device_ip: str,
+        device_mac: str,
+        domain: str,
+        resolved_ip: str = None,
+        vendor: str = None
+    ):
+        """
+        Log a cloud endpoint (DNS query) from a device.
+
+        Args:
+            device_ip: Device IP address
+            device_mac: Device MAC address
+            domain: DNS domain queried
+            resolved_ip: Resolved IP address
+            vendor: Identified vendor from domain
+        """
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        timestamp = datetime.now().isoformat()
+
+        try:
+            # Check if endpoint already logged for this device
+            cursor.execute("""
+                SELECT id, query_count FROM device_cloud_endpoints
+                WHERE device_mac = ? AND domain = ?
+            """, (device_mac, domain))
+            existing = cursor.fetchone()
+
+            if existing:
+                # Update query count and last seen
+                cursor.execute("""
+                    UPDATE device_cloud_endpoints
+                    SET last_seen = ?,
+                        query_count = ?,
+                        resolved_ip = COALESCE(?, resolved_ip),
+                        vendor = COALESCE(?, vendor)
+                    WHERE id = ?
+                """, (timestamp, existing[1] + 1, resolved_ip, vendor, existing[0]))
+            else:
+                # Insert new endpoint
+                cursor.execute("""
+                    INSERT INTO device_cloud_endpoints (
+                        device_ip, device_mac, domain, resolved_ip, vendor,
+                        first_seen, last_seen, query_count
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """, (device_ip, device_mac, domain, resolved_ip, vendor,
+                      timestamp, timestamp, 1))
+
+            conn.commit()
+
+        except Exception as e:
+            logger.error(f"Failed to log cloud endpoint for {device_ip}: {e}")
+            conn.rollback()
+        finally:
+            conn.close()
+
+    def log_fingerprint_signal(
+        self,
+        device_mac: str,
+        signal_type: str,
+        signal_value: str,
+        confidence: float
+    ):
+        """
+        Log an individual fingerprint signal to history.
+
+        Args:
+            device_mac: Device MAC address
+            signal_type: Signal type (tls_ja3, dhcp_option55, tcp_stack, dns_query)
+            signal_value: Signal value
+            confidence: Signal confidence
+        """
+        conn = sqlite3.connect(self.db_path)
+        cursor = conn.cursor()
+        timestamp = datetime.now().isoformat()
+
+        try:
+            cursor.execute("""
+                INSERT INTO fingerprint_signal_history (
+                    device_mac, signal_type, signal_value, confidence, captured_at
+                ) VALUES (?, ?, ?, ?, ?)
+            """, (device_mac, signal_type, signal_value, confidence, timestamp))
+
+            conn.commit()
+            logger.debug(f"Logged {signal_type} signal for {device_mac}")
+
+        except Exception as e:
+            logger.error(f"Failed to log signal for {device_mac}: {e}")
             conn.rollback()
         finally:
             conn.close()

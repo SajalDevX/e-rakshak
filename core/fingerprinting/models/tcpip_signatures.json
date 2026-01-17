@@ -1,0 +1,66 @@
+{
+  "ttl=64:mss=1460:wsize=29200:wscale=7:opts=MSS,SACK,TS,NOP,WS": {
+    "os": "Linux 4.x",
+    "vendor": "Generic",
+    "device_type": "camera",
+    "confidence": 0.75,
+    "common_devices": ["Raspberry Pi", "IoT Cameras", "NVRs"],
+    "last_updated": "2026-01-18"
+  },
+  "ttl=128:mss=1460:wsize=65535:wscale=8:opts=MSS,NOP,WS,NOP,NOP,SACK": {
+    "os": "Windows 10",
+    "vendor": "Microsoft",
+    "device_type": "desktop",
+    "confidence": 0.85,
+    "common_versions": ["Windows 10", "Windows 11"],
+    "last_updated": "2026-01-18"
+  },
+  "ttl=255:mss=1460:wsize=5840:wscale=0:opts=MSS": {
+    "os": "Embedded (Custom Stack)",
+    "vendor": "IoT Device",
+    "device_type": "camera",
+    "confidence": 0.65,
+    "common_devices": ["Hikvision", "Dahua Cameras"],
+    "last_updated": "2026-01-18"
+  },
+  "ttl=64:mss=1460:wsize=65535:wscale=7:opts=MSS,SACK,TS,NOP,WS": {
+    "os": "macOS",
+    "vendor": "Apple",
+    "device_type": "laptop",
+    "confidence": 0.82,
+    "common_versions": ["macOS 11+"],
+    "last_updated": "2026-01-18"
+  },
+  "ttl=64:mss=1380:wsize=14600:wscale=4:opts=MSS,SACK,TS,NOP,WS": {
+    "os": "Android",
+    "vendor": "Google",
+    "device_type": "mobile",
+    "confidence": 0.78,
+    "common_versions": ["Android 9+"],
+    "last_updated": "2026-01-18"
+  },
+  "ttl=64:mss=1440:wsize=65535:wscale=3:opts=MSS,NOP,WS,SACK,TS,NOP,NOP": {
+    "os": "iOS",
+    "vendor": "Apple",
+    "device_type": "mobile",
+    "confidence": 0.80,
+    "common_versions": ["iOS 13+"],
+    "last_updated": "2026-01-18"
+  },
+  "ttl=255:mss=536:wsize=8192:wscale=0:opts=MSS": {
+    "os": "Embedded (Very Simple)",
+    "vendor": "Generic IoT",
+    "device_type": "smart_plug",
+    "confidence": 0.60,
+    "common_devices": ["Smart Plugs", "Smart Switches"],
+    "last_updated": "2026-01-18"
+  },
+  "ttl=64:mss=1460:wsize=32768:wscale=7:opts=MSS,NOP,NOP,SACK,NOP,WS": {
+    "os": "Linux (Router)",
+    "vendor": "Generic",
+    "device_type": "router",
+    "confidence": 0.70,
+    "common_devices": ["OpenWrt", "DD-WRT Routers"],
+    "last_updated": "2026-01-18"
+  }
+}

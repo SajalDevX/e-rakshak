@@ -207,7 +207,7 @@ class AgenticDefender:
         self.inference_only = self.kaal_config.get("inference_only", True)
 
         # Network parameters
-        self.state_size = self.agent_config.get("state_size", 10)
+        self.state_size = self.agent_config.get("state_size", 15)  # Extended from 10 to 15
         self.action_size = self.agent_config.get("action_size", 5)
         hidden_layers = self.agent_config.get("hidden_layers", [128, 128])
         self.hidden_size = hidden_layers[0] if hidden_layers else 128
@@ -369,7 +369,7 @@ class AgenticDefender:
         """
         Encode threat information into state vector.
 
-        State features (10-dimensional):
+        State features (15-dimensional - EXTENDED):
             [0] attack_type (normalized 0-1)
             [1] severity (normalized 0-1)
             [2] source_port / 65535
@@ -380,6 +380,11 @@ class AgenticDefender:
             [7] device_risk_score / 100
             [8] time_of_day (normalized 0-1)
             [9] protocol_risk (normalized 0-1)
+            [10] drift_score (identity drift 0-1) - NEW
+            [11] arp_spoof_confidence (0-1) - NEW
+            [12] scan_rate (port scan rate 0-1) - NEW
+            [13] chain_length (attack chain length / 10) - NEW
+            [14] iot_violation_flag (IoT lateral movement 0/1) - NEW
         """
         state = np.zeros(self.state_size, dtype=np.float32)
 
@@ -419,6 +424,28 @@ class AgenticDefender:
         protocol = threat_info.get("protocol", "tcp").lower()
         protocol_risks = {"tcp": 0.3, "udp": 0.4, "icmp": 0.2}
         state[9] = protocol_risks.get(protocol, 0.5)
+
+        # ===== NEW DIMENSIONS (10-14) =====
+
+        # [10] Identity drift score (from device_behavior.py)
+        state[10] = min(threat_info.get("drift_score", 0.0), 1.0)
+
+        # [11] ARP spoofing confidence (from arp_spoofing_detector.py)
+        state[11] = min(threat_info.get("arp_spoof_confidence", 0.0), 1.0)
+
+        # [12] Port scan rate (from port_scan_detector.py)
+        # Normalize: 0 scans/min = 0.0, 100+ scans/min = 1.0
+        scan_rate = threat_info.get("scan_rate", 0.0)
+        state[12] = min(scan_rate / 100.0, 1.0)
+
+        # [13] Attack chain length (from attack_chain_tracker.py)
+        # Normalize: 0 hops = 0.0, 10+ hops = 1.0
+        chain_length = threat_info.get("chain_length", 0)
+        state[13] = min(chain_length / 10.0, 1.0)
+
+        # [14] IoT lateral movement violation flag
+        iot_violation = threat_info.get("iot_lateral_movement", False)
+        state[14] = 1.0 if iot_violation else 0.0
 
         return state
 

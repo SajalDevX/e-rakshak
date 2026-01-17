@@ -383,3 +383,318 @@ class AttackChainTracker:
             chain_data for chain_data in self.chains.values()
             if chain_data.get('is_active', False)
         ]
+
+    def detect_iot_lateral_movement(
+        self,
+        source_ip: str,
+        dest_ip: str,
+        source_zone: str,
+        dest_zone: str,
+        source_device_type: str = "unknown",
+        dest_device_type: str = "unknown"
+    ) -> Optional[dict]:
+        """
+        Detect IoT-to-IoT lateral movement (CRITICAL security event).
+
+        IoT devices should NEVER communicate directly with each other.
+        Any IoT-to-IoT traffic indicates compromise.
+
+        Args:
+            source_ip: Source IP address
+            dest_ip: Destination IP address
+            source_zone: Source device zone
+            dest_zone: Destination device zone
+            source_device_type: Source device type
+            dest_device_type: Destination device type
+
+        Returns:
+            Detection result dict if lateral movement detected
+        """
+        # CRITICAL: Detect IoT-to-IoT communication
+        is_iot_lateral = (
+            source_zone == "iot" and dest_zone == "iot" and
+            source_ip != dest_ip  # Not same device
+        )
+
+        if is_iot_lateral:
+            logger.critical(
+                f"IoT LATERAL MOVEMENT DETECTED: {source_ip} ({source_device_type}) "
+                f"→ {dest_ip} ({dest_device_type})"
+            )
+
+            # Record as compromise with maximum severity
+            chain_info = self.record_compromise(
+                source_ip=source_ip,
+                target_ip=dest_ip,
+                attack_type="IOT_LATERAL_MOVEMENT",
+                severity="critical",
+                confidence=0.95  # Very high confidence - this should never happen
+            )
+
+            result = {
+                'alert_type': 'IOT_LATERAL_MOVEMENT',
+                'severity': 'critical',
+                'confidence': 0.95,
+                'source_ip': source_ip,
+                'dest_ip': dest_ip,
+                'source_device_type': source_device_type,
+                'dest_device_type': dest_device_type,
+                'recommended_action': 'IMMEDIATE_ISOLATION_BOTH_DEVICES',
+                'chain_info': chain_info,
+                'threat_level': 'IMMINENT_BREACH'
+            }
+
+            # Log to database
+            self._log_iot_lateral_event(result)
+
+            return result
+
+        # Check for other suspicious cross-zone patterns
+        suspicious_patterns = self._check_suspicious_zone_patterns(
+            source_ip, dest_ip, source_zone, dest_zone,
+            source_device_type, dest_device_type
+        )
+
+        if suspicious_patterns:
+            return suspicious_patterns
+
+        return None
+
+    def _check_suspicious_zone_patterns(
+        self,
+        source_ip: str,
+        dest_ip: str,
+        source_zone: str,
+        dest_zone: str,
+        source_device_type: str,
+        dest_device_type: str
+    ) -> Optional[dict]:
+        """Check for other suspicious cross-zone communication patterns."""
+
+        # Pattern 1: Guest device attacking IoT
+        if source_zone == "guest" and dest_zone == "iot":
+            logger.warning(f"Guest device {source_ip} accessing IoT device {dest_ip}")
+            return {
+                'alert_type': 'GUEST_TO_IOT_ACCESS',
+                'severity': 'high',
+                'confidence': 0.85,
+                'source_ip': source_ip,
+                'dest_ip': dest_ip,
+                'recommended_action': 'MONITOR_AND_RATE_LIMIT'
+            }
+
+        # Pattern 2: Quarantine breach attempt
+        if source_zone == "quarantine":
+            logger.critical(f"Quarantined device {source_ip} attempting to communicate with {dest_ip}")
+            return {
+                'alert_type': 'QUARANTINE_BREACH_ATTEMPT',
+                'severity': 'critical',
+                'confidence': 0.99,
+                'source_ip': source_ip,
+                'dest_ip': dest_ip,
+                'recommended_action': 'REINFORCE_ISOLATION'
+            }
+
+        # Pattern 3: IoT device accessing Main network (unusual)
+        if source_zone == "iot" and dest_zone == "main":
+            logger.warning(f"IoT device {source_ip} accessing Main network device {dest_ip}")
+            return {
+                'alert_type': 'IOT_TO_MAIN_ACCESS',
+                'severity': 'medium',
+                'confidence': 0.70,
+                'source_ip': source_ip,
+                'dest_ip': dest_ip,
+                'recommended_action': 'VERIFY_LEGITIMATE_TRAFFIC'
+            }
+
+        return None
+
+    def detect_cascade_compromise(
+        self,
+        chain_id: str,
+        time_window_minutes: int = 30
+    ) -> Optional[dict]:
+        """
+        Detect rapid cascade compromise (multiple devices compromised quickly).
+
+        Indicates automated worm/botnet propagation.
+
+        Args:
+            chain_id: Chain ID to analyze
+            time_window_minutes: Time window for cascade detection
+
+        Returns:
+            Cascade detection result if detected
+        """
+        if chain_id not in self.chains:
+            return None
+
+        chain_data = self.chains[chain_id]
+        attack_sequence = chain_data.get('attack_sequence', [])
+
+        if len(attack_sequence) < 3:
+            return None  # Need at least 3 compromises for cascade
+
+        # Check if multiple compromises happened within time window
+        current_time = datetime.now()
+        time_window = timedelta(minutes=time_window_minutes)
+
+        recent_compromises = [
+            edge for edge in attack_sequence
+            if current_time - datetime.fromisoformat(edge['timestamp']) < time_window
+        ]
+
+        if len(recent_compromises) >= 3:
+            logger.critical(
+                f"CASCADE COMPROMISE DETECTED: {len(recent_compromises)} devices "
+                f"compromised in {time_window_minutes} minutes (Chain: {chain_id})"
+            )
+
+            return {
+                'alert_type': 'CASCADE_COMPROMISE',
+                'severity': 'critical',
+                'chain_id': chain_id,
+                'devices_compromised': len(recent_compromises),
+                'time_window_minutes': time_window_minutes,
+                'compromised_ips': [edge['target'] for edge in recent_compromises],
+                'recommended_action': 'NETWORK_WIDE_LOCKDOWN'
+            }
+
+        return None
+
+    def analyze_attack_vector(self, chain_id: str) -> dict:
+        """
+        Analyze attack vector and propagation method.
+
+        Identifies:
+        - Initial entry point
+        - Propagation method (SSH, SMB, exploits)
+        - Target selection pattern
+        - Attack timeline
+
+        Args:
+            chain_id: Chain ID to analyze
+
+        Returns:
+            Attack vector analysis
+        """
+        if chain_id not in self.chains:
+            return {}
+
+        chain_data = self.chains[chain_id]
+        attack_sequence = chain_data.get('attack_sequence', [])
+
+        if not attack_sequence:
+            return {}
+
+        # Analyze attack types
+        attack_types = [edge['attack_type'] for edge in attack_sequence]
+        attack_type_counts = {}
+        for attack_type in attack_types:
+            attack_type_counts[attack_type] = attack_type_counts.get(attack_type, 0) + 1
+
+        # Determine primary vector
+        primary_vector = max(attack_type_counts, key=attack_type_counts.get) if attack_type_counts else "unknown"
+
+        # Analyze timeline
+        timestamps = [datetime.fromisoformat(edge['timestamp']) for edge in attack_sequence]
+        if len(timestamps) >= 2:
+            total_duration = (timestamps[-1] - timestamps[0]).total_seconds()
+            avg_time_between_hops = total_duration / (len(timestamps) - 1)
+        else:
+            total_duration = 0
+            avg_time_between_hops = 0
+
+        # Determine propagation speed
+        if avg_time_between_hops < 60:
+            propagation_speed = "RAPID_AUTOMATED"  # < 1 minute = likely worm
+        elif avg_time_between_hops < 300:
+            propagation_speed = "MODERATE_AUTOMATED"  # < 5 minutes
+        else:
+            propagation_speed = "MANUAL_OR_SLOW"
+
+        return {
+            'chain_id': chain_id,
+            'root_device': chain_data['root_device_ip'],
+            'total_compromises': len(attack_sequence),
+            'primary_vector': primary_vector,
+            'attack_type_distribution': attack_type_counts,
+            'propagation_speed': propagation_speed,
+            'avg_time_between_hops_seconds': avg_time_between_hops,
+            'total_duration_seconds': total_duration,
+            'attack_timeline': [
+                {
+                    'timestamp': edge['timestamp'],
+                    'source': edge['source'],
+                    'target': edge['target'],
+                    'attack_type': edge['attack_type']
+                }
+                for edge in attack_sequence
+            ]
+        }
+
+    def _log_iot_lateral_event(self, event: dict):
+        """Log IoT lateral movement event to database."""
+        try:
+            import uuid as uuid_module
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+
+            # Log as special threat type
+            event_id = f"iot-lateral-{uuid_module.uuid4().hex[:8]}"
+            timestamp = datetime.now().isoformat()
+
+            cursor.execute("""
+                INSERT INTO threats (
+                    id, timestamp, type, severity, source_ip, target_ip,
+                    target_device, protocol, detected_by, raw_data
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                event_id,
+                timestamp,
+                event['alert_type'],
+                event['severity'],
+                event['source_ip'],
+                0,  # source_port
+                event['dest_ip'],
+                0,  # target_port
+                f"{event['source_device_type']} -> {event['dest_device_type']}",
+                "tcp",
+                "attack_chain_tracker",
+                json.dumps({
+                    'confidence': event['confidence'],
+                    'recommended_action': event['recommended_action'],
+                    'threat_level': event.get('threat_level')
+                })
+            ))
+
+            conn.commit()
+            conn.close()
+
+            logger.info(f"Logged IoT lateral movement event: {event_id}")
+
+        except Exception as e:
+            logger.error(f"Failed to log IoT lateral movement event: {e}")
+
+    def get_iot_compromise_statistics(self) -> dict:
+        """Get statistics on IoT device compromises."""
+        iot_compromises = 0
+        iot_chains = 0
+
+        for chain_data in self.chains.values():
+            if not chain_data.get('is_active'):
+                continue
+
+            # Check if chain involves IoT devices
+            attack_sequence = chain_data.get('attack_sequence', [])
+            for edge in attack_sequence:
+                if edge.get('attack_type') == 'IOT_LATERAL_MOVEMENT':
+                    iot_compromises += 1
+                    iot_chains += 1
+                    break  # Count chain once
+
+        return {
+            'total_iot_lateral_events': iot_compromises,
+            'total_iot_chains': iot_chains,
+            'active_chains': len([c for c in self.chains.values() if c.get('is_active')])
+        }

@@ -28,7 +28,6 @@ const translations = {
         loading: 'Loading...',
         threat_activity: 'Threat Activity',
         live_events: 'Live Events',
-        simulate: 'Simulate Attack',
         waiting: 'Waiting for events...',
         active_honeypots: 'Active Honeypots',
         deploy: 'Deploy',
@@ -60,7 +59,6 @@ const translations = {
         loading: 'लोड हो रहा है...',
         threat_activity: 'खतरा गतिविधि',
         live_events: 'लाइव इवेंट्स',
-        simulate: 'हमला सिमुलेट करें',
         waiting: 'इवेंट्स का इंतजार...',
         active_honeypots: 'सक्रिय हनीपॉट',
         deploy: 'तैनात करें',
@@ -646,20 +644,6 @@ async function deployHoneypot() {
         }
     } catch (error) {
         console.error('Failed to deploy honeypot:', error);
-    }
-}
-
-async function simulateThreat() {
-    try {
-        const response = await fetch(`${API_BASE}/api/simulate/threat`, {
-            method: 'POST'
-        });
-        const data = await response.json();
-        if (data.success) {
-            addEvent('warning', 'Simulated threat generated');
-        }
-    } catch (error) {
-        console.error('Failed to simulate threat:', error);
     }
 }
 

@@ -1698,6 +1698,335 @@ expand-hosts
 
         return stats
 
+    def create_device_chain(
+        self,
+        device_mac: str,
+        device_ip: str,
+        device_type: str = "unknown",
+        policy_engine=None
+    ) -> bool:
+        """
+        Create per-device iptables chain with policy-based rules.
+
+        Args:
+            device_mac: Device MAC address
+            device_ip: Device IP address
+            device_type: Device type (camera, smart_plug, etc.)
+            policy_engine: DevicePolicyEngine instance
+
+        Returns:
+            True if successful
+        """
+        try:
+            # Generate chain name from MAC
+            device_id = device_mac.replace(":", "").lower()[:12]
+            chain_name = f"RAKSHAK_DEVICE_{device_id}"
+
+            # Create chain
+            subprocess.run(
+                ["iptables", "-t", "filter", "-N", chain_name],
+                capture_output=True
+            )
+
+            # Flush existing rules (in case chain already exists)
+            subprocess.run(
+                ["iptables", "-t", "filter", "-F", chain_name],
+                capture_output=True
+            )
+
+            # Get device policy
+            if policy_engine:
+                policy = policy_engine.get_policy(device_type)
+            else:
+                # Default restrictive policy if no engine provided
+                policy = None
+
+            # Add jump rule from FORWARD chain
+            subprocess.run([
+                "iptables", "-A", "FORWARD",
+                "-s", device_ip,
+                "-j", chain_name,
+                "-m", "comment", "--comment", f"per-device-{device_id}"
+            ], check=True, capture_output=True)
+
+            # Apply policy-based rules
+            if policy:
+                self._apply_policy_rules(chain_name, device_ip, device_mac, policy)
+            else:
+                # Default: allow HTTPS and DNS only
+                subprocess.run([
+                    "iptables", "-A", chain_name,
+                    "-p", "tcp", "--dport", "443",
+                    "-j", "ACCEPT"
+                ], capture_output=True)
+
+                subprocess.run([
+                    "iptables", "-A", chain_name,
+                    "-p", "udp", "--dport", "53",
+                    "-j", "ACCEPT"
+                ], capture_output=True)
+
+            # Default DROP at end of chain
+            subprocess.run([
+                "iptables", "-A", chain_name,
+                "-j", "LOG", "--log-prefix", f"[RAKSHAK-DROP-{device_id}] ",
+                "--log-level", "4"
+            ], capture_output=True)
+
+            subprocess.run([
+                "iptables", "-A", chain_name,
+                "-j", "DROP"
+            ], capture_output=True)
+
+            logger.info(f"Created device chain {chain_name} for {device_ip} (type={device_type})")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to create device chain for {device_mac}: {e}")
+            return False
+
+    def _apply_policy_rules(
+        self,
+        chain_name: str,
+        device_ip: str,
+        device_mac: str,
+        policy
+    ):
+        """Apply policy-based firewall rules to device chain."""
+        device_id = device_mac.replace(":", "").lower()[:12]
+        ipset_name = f"rakshak_allowed_{device_id}"
+
+        # CRITICAL: Block IoT-to-IoT lateral movement
+        if not policy.allow_iot_lateral:
+            # Get IoT zone network (assuming 10.42.0.0/25)
+            iot_network = self.full_config.get("zero_trust", {}).get("networks", {}).get("iot", "10.42.0.0/25")
+
+            subprocess.run([
+                "iptables", "-A", chain_name,
+                "-d", iot_network,
+                "-j", "LOG", "--log-prefix", f"[IOT-LATERAL-BLOCK-{device_id}] ",
+                "--log-level", "4"
+            ], capture_output=True)
+
+            subprocess.run([
+                "iptables", "-A", chain_name,
+                "-d", iot_network,
+                "-j", "DROP",
+                "-m", "comment", "--comment", "block-iot-lateral"
+            ], capture_output=True)
+
+            logger.debug(f"Blocked IoT lateral movement for {device_ip}")
+
+        # Allow DNS (almost all devices need this)
+        subprocess.run([
+            "iptables", "-A", chain_name,
+            "-p", "udp", "--dport", "53",
+            "-j", "ACCEPT",
+            "-m", "comment", "--comment", "allow-dns"
+        ], capture_output=True)
+
+        # Allow NTP (time sync)
+        subprocess.run([
+            "iptables", "-A", chain_name,
+            "-p", "udp", "--dport", "123",
+            "-j", "ACCEPT",
+            "-m", "comment", "--comment", "allow-ntp"
+        ], capture_output=True)
+
+        # Apply permitted ports
+        for port_rule in policy.permitted_ports:
+            if port_rule.port == 0:
+                # Allow all ports for this protocol
+                subprocess.run([
+                    "iptables", "-A", chain_name,
+                    "-p", port_rule.protocol,
+                    "-j", "ACCEPT",
+                    "-m", "comment", "--comment", f"allow-{port_rule.protocol}"
+                ], capture_output=True)
+            else:
+                # Specific port
+                subprocess.run([
+                    "iptables", "-A", chain_name,
+                    "-p", port_rule.protocol,
+                    "--dport", str(port_rule.port),
+                    "-j", "ACCEPT",
+                    "-m", "comment", "--comment", f"allow-{port_rule.protocol}-{port_rule.port}"
+                ], capture_output=True)
+
+        # DNS whitelist enforcement (if ipset exists)
+        result = subprocess.run(
+            ["ipset", "list", ipset_name],
+            capture_output=True
+        )
+
+        if result.returncode == 0:
+            # Allow traffic to whitelisted IPs only (for HTTPS)
+            subprocess.run([
+                "iptables", "-A", chain_name,
+                "-p", "tcp", "--dport", "443",
+                "-m", "set", "--match-set", ipset_name, "dst",
+                "-j", "ACCEPT",
+                "-m", "comment", "--comment", "dns-whitelist"
+            ], capture_output=True)
+
+            logger.debug(f"Applied DNS whitelist ipset {ipset_name} for {device_ip}")
+
+        # Rate limiting
+        if policy.rate_limits:
+            # Connection rate limit
+            subprocess.run([
+                "iptables", "-I", chain_name, "1",
+                "-m", "connlimit",
+                "--connlimit-above", str(policy.rate_limits.max_connections_per_second),
+                "--connlimit-mask", "32",
+                "-j", "DROP",
+                "-m", "comment", "--comment", "rate-limit-connections"
+            ], capture_output=True)
+
+            # Bandwidth rate limit (using hashlimit)
+            subprocess.run([
+                "iptables", "-I", chain_name, "1",
+                "-m", "hashlimit",
+                "--hashlimit-above", f"{policy.rate_limits.max_bandwidth_mbps}mb/sec",
+                "--hashlimit-name", f"bw_{device_id}",
+                "-j", "DROP",
+                "-m", "comment", "--comment", "rate-limit-bandwidth"
+            ], capture_output=True)
+
+        # LAN access control
+        if not policy.allow_lan:
+            # Block LAN except gateway
+            lan_network = self.config.lan_network
+            subprocess.run([
+                "iptables", "-I", chain_name, "1",
+                "-d", lan_network,
+                "!", "-d", self.config.lan_ip,  # Except gateway
+                "-j", "DROP",
+                "-m", "comment", "--comment", "block-lan"
+            ], capture_output=True)
+
+    def apply_device_policy(
+        self,
+        device_mac: str,
+        device_ip: str,
+        device_type: str,
+        policy_engine
+    ) -> bool:
+        """
+        Apply or update device policy.
+
+        Args:
+            device_mac: Device MAC address
+            device_ip: Device IP address
+            device_type: Device type
+            policy_engine: DevicePolicyEngine instance
+
+        Returns:
+            True if successful
+        """
+        # Remove existing chain if present
+        self.remove_device_chain(device_mac, device_ip)
+
+        # Create new chain with policy
+        return self.create_device_chain(device_mac, device_ip, device_type, policy_engine)
+
+    def remove_device_chain(self, device_mac: str, device_ip: str) -> bool:
+        """
+        Remove per-device chain.
+
+        Args:
+            device_mac: Device MAC address
+            device_ip: Device IP address
+
+        Returns:
+            True if successful
+        """
+        try:
+            device_id = device_mac.replace(":", "").lower()[:12]
+            chain_name = f"RAKSHAK_DEVICE_{device_id}"
+
+            # Remove jump rule from FORWARD chain
+            for _ in range(10):
+                result = subprocess.run([
+                    "iptables", "-D", "FORWARD",
+                    "-s", device_ip,
+                    "-j", chain_name
+                ], capture_output=True)
+                if result.returncode != 0:
+                    break
+
+            # Flush chain
+            subprocess.run(
+                ["iptables", "-F", chain_name],
+                capture_output=True
+            )
+
+            # Delete chain
+            subprocess.run(
+                ["iptables", "-X", chain_name],
+                capture_output=True
+            )
+
+            logger.debug(f"Removed device chain {chain_name}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to remove device chain for {device_mac}: {e}")
+            return False
+
+    def setup_iot_lateral_block(self, iot_network: str = "10.42.0.0/25") -> bool:
+        """
+        Setup global IoT lateral movement blocking.
+
+        CRITICAL: Prevents compromised IoT devices from attacking other IoT devices.
+
+        Args:
+            iot_network: IoT zone network CIDR
+
+        Returns:
+            True if successful
+        """
+        try:
+            # Create specific chain for IoT lateral blocking
+            subprocess.run(
+                ["iptables", "-N", "RAKSHAK_IOT_LATERAL"],
+                capture_output=True
+            )
+
+            subprocess.run(
+                ["iptables", "-F", "RAKSHAK_IOT_LATERAL"],
+                capture_output=True
+            )
+
+            # Block IoT-to-IoT traffic
+            subprocess.run([
+                "iptables", "-A", "RAKSHAK_IOT_LATERAL",
+                "-s", iot_network,
+                "-d", iot_network,
+                "-j", "LOG", "--log-prefix", "[CRITICAL-IOT-LATERAL] ",
+                "--log-level", "3"
+            ], check=True, capture_output=True)
+
+            subprocess.run([
+                "iptables", "-A", "RAKSHAK_IOT_LATERAL",
+                "-s", iot_network,
+                "-d", iot_network,
+                "-j", "DROP"
+            ], check=True, capture_output=True)
+
+            # Insert into FORWARD chain (high priority)
+            subprocess.run([
+                "iptables", "-I", "FORWARD", "1",
+                "-j", "RAKSHAK_IOT_LATERAL"
+            ], check=True, capture_output=True)
+
+            logger.critical(f"IoT lateral movement blocking enabled for {iot_network}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to setup IoT lateral blocking: {e}")
+            return False
+
     def get_status(self) -> Dict:
         """Get gateway status"""
         status = {

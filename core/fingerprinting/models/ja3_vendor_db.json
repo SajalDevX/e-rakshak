@@ -1,0 +1,82 @@
+{
+  "6734f37431670b3ab4292b8f60f29984": {
+    "vendor": "Amazon",
+    "device_type": "alexa",
+    "os": "Fire OS",
+    "confidence": 0.95,
+    "common_devices": ["Echo Dot", "Echo Show", "Fire TV Stick"],
+    "last_updated": "2026-01-18"
+  },
+  "a0e9f5d64349fb13191bc781f81f42e1": {
+    "vendor": "Wyze Labs",
+    "device_type": "camera",
+    "os": "Linux 3.4.35",
+    "confidence": 0.90,
+    "common_devices": ["Wyze Cam v2", "Wyze Cam v3"],
+    "last_updated": "2026-01-18"
+  },
+  "fd6925871ae55e7e6dc2e3e75e896aa4": {
+    "vendor": "Google",
+    "device_type": "smart_speaker",
+    "os": "Cast OS",
+    "confidence": 0.92,
+    "common_devices": ["Google Home", "Nest Mini", "Chromecast"],
+    "last_updated": "2026-01-18"
+  },
+  "579ccef312d18482fc42e2b822ca2430": {
+    "vendor": "Apple",
+    "device_type": "smart_speaker",
+    "os": "audioOS",
+    "confidence": 0.93,
+    "common_devices": ["HomePod", "HomePod mini"],
+    "last_updated": "2026-01-18"
+  },
+  "e7d705a3286e19ea42f587b344ee6865": {
+    "vendor": "Ring",
+    "device_type": "doorbell",
+    "os": "Linux",
+    "confidence": 0.88,
+    "common_devices": ["Ring Video Doorbell", "Ring Doorbell Pro"],
+    "last_updated": "2026-01-18"
+  },
+  "4e5458f219e84c7b23f26fb65cbf7c70": {
+    "vendor": "TP-Link",
+    "device_type": "smart_plug",
+    "os": "Embedded Linux",
+    "confidence": 0.85,
+    "common_devices": ["Kasa Smart Plug", "TP-Link HS100"],
+    "last_updated": "2026-01-18"
+  },
+  "ada70206e40642a3e4461f35503241d5": {
+    "vendor": "Philips",
+    "device_type": "smart_bulb",
+    "os": "Embedded",
+    "confidence": 0.87,
+    "common_devices": ["Philips Hue", "Hue Bridge"],
+    "last_updated": "2026-01-18"
+  },
+  "b32309a26951912be7dba376398abc3b": {
+    "vendor": "Nest",
+    "device_type": "thermostat",
+    "os": "Nest OS",
+    "confidence": 0.91,
+    "common_devices": ["Nest Thermostat", "Nest Learning Thermostat"],
+    "last_updated": "2026-01-18"
+  },
+  "51c64c77e60f3980eea90869b68c58a8": {
+    "vendor": "Samsung",
+    "device_type": "smart_tv",
+    "os": "Tizen",
+    "confidence": 0.89,
+    "common_devices": ["Samsung Smart TV", "Samsung QLED"],
+    "last_updated": "2026-01-18"
+  },
+  "72a589da586844d7f0818ce684948eea": {
+    "vendor": "Hikvision",
+    "device_type": "camera",
+    "os": "Embedded Linux",
+    "confidence": 0.94,
+    "common_devices": ["Hikvision IP Camera", "Hikvision NVR"],
+    "last_updated": "2026-01-18"
+  }
+}

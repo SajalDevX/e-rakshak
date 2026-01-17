@@ -749,21 +749,34 @@ class NetworkScanner:
                 if ip not in current_lease_ips:
                     device = self.devices[ip]
 
-                    # Check if device was recently seen (within 30 seconds)
+                    # ENHANCED FIX: Check if device was recently seen by ANY method
+                    # This includes passive discovery (SSDP, ARP, ONVIF) and static IPs
                     recently_seen = False
+                    inactive_timeout = 300  # 5 minutes (was 30 seconds - too aggressive)
+
                     try:
                         last_seen = datetime.fromisoformat(device.last_seen)
                         time_since_seen = (datetime.now() - last_seen).total_seconds()
-                        recently_seen = time_since_seen < 30  # Give 30 seconds for DHCP lease
+                        recently_seen = time_since_seen < inactive_timeout
                     except (ValueError, TypeError):
                         pass
 
                     # GRACE PERIOD FIX: Don't mark inactive if:
                     # 1. During startup grace period, OR
-                    # 2. Device was recently seen by passive discovery
-                    if not startup_grace_active and not recently_seen and device.status == "active":
+                    # 2. Device was recently seen by passive discovery or any method, OR
+                    # 3. Device is isolated (managed by admin)
+                    should_mark_inactive = (
+                        not startup_grace_active and
+                        not recently_seen and
+                        device.status == "active"
+                    )
+
+                    if should_mark_inactive:
                         device.status = "inactive"
-                        logger.info(f"Device {ip} marked as inactive (disconnected)")
+                        logger.info(
+                            f"Device {ip} marked as inactive "
+                            f"(no activity for {inactive_timeout}s via DHCP or passive discovery)"
+                        )
 
                         # REAL-TIME FIX: Emit status change event
                         if self.orchestrator:
@@ -853,7 +866,7 @@ class NetworkScanner:
         logger.debug(f"Discovered {len(devices)} devices from DHCP leases")
         return devices
 
-    def cleanup_stale_devices(self, inactive_threshold_seconds: int = 300) -> int:
+    def cleanup_stale_devices(self, inactive_threshold_seconds: int = 1800) -> int:
         """
         Remove devices that have been inactive for longer than threshold.
 
@@ -861,7 +874,7 @@ class NetworkScanner:
         the network or change IP addresses.
 
         Args:
-            inactive_threshold_seconds: Remove devices inactive for longer than this (default: 5 min)
+            inactive_threshold_seconds: Remove devices inactive for longer than this (default: 30 min)
 
         Returns:
             Number of devices removed

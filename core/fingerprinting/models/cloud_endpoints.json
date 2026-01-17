@@ -1,0 +1,159 @@
+{
+  "tuya_devices": {
+    "domains": [
+      "*.tuya.com",
+      "*.tuyaus.com",
+      "*.tuyacn.com",
+      "*.tuyaeu.com",
+      "a1.tuyaus.com",
+      "m1.tuyacn.com"
+    ],
+    "vendor": "Tuya",
+    "device_types": ["smart_plug", "smart_bulb", "smart_switch", "camera"],
+    "confidence": 0.90,
+    "notes": "Tuya Smart platform - powers many white-label IoT devices",
+    "last_updated": "2026-01-18"
+  },
+  "hikvision_devices": {
+    "domains": [
+      "*.hik-connect.com",
+      "*.hikvision.com",
+      "*.ezvizlife.com",
+      "dev.hik-connect.com",
+      "api.hik-connect.com"
+    ],
+    "vendor": "Hikvision",
+    "device_types": ["camera", "nvr", "dvr"],
+    "confidence": 0.95,
+    "notes": "Hikvision IP cameras and NVRs",
+    "last_updated": "2026-01-18"
+  },
+  "xiaomi_devices": {
+    "domains": [
+      "*.mi.com",
+      "*.xiaomi.com",
+      "*.mi-img.com",
+      "api.io.mi.com",
+      "*.miwifi.com"
+    ],
+    "vendor": "Xiaomi",
+    "device_types": ["camera", "smart_bulb", "sensor", "vacuum", "router"],
+    "confidence": 0.88,
+    "notes": "Xiaomi Mi Home ecosystem devices",
+    "last_updated": "2026-01-18"
+  },
+  "ring_devices": {
+    "domains": [
+      "*.ring.com",
+      "api.ring.com",
+      "ring-device-api.ring.com",
+      "*.ring-iot.com"
+    ],
+    "vendor": "Ring",
+    "device_types": ["doorbell", "camera", "security_system"],
+    "confidence": 0.92,
+    "notes": "Amazon Ring doorbells and security cameras",
+    "last_updated": "2026-01-18"
+  },
+  "wyze_devices": {
+    "domains": [
+      "*.wyze.com",
+      "*.wyzecam.com",
+      "api.wyze.com",
+      "api.wyzecam.com"
+    ],
+    "vendor": "Wyze Labs",
+    "device_types": ["camera", "smart_plug", "sensor", "bulb"],
+    "confidence": 0.89,
+    "notes": "Wyze smart home devices",
+    "last_updated": "2026-01-18"
+  },
+  "nest_devices": {
+    "domains": [
+      "*.nest.com",
+      "*.dropcam.com",
+      "home.nest.com",
+      "*.googlevideo.com"
+    ],
+    "vendor": "Google Nest",
+    "device_types": ["thermostat", "camera", "doorbell", "smart_speaker"],
+    "confidence": 0.91,
+    "notes": "Google Nest ecosystem (thermostats, cameras, speakers)",
+    "last_updated": "2026-01-18"
+  },
+  "amazon_alexa": {
+    "domains": [
+      "*.amazon.com",
+      "*.amazonaws.com",
+      "alexa-voice-service.amazon.com",
+      "*.cloudfront.net"
+    ],
+    "vendor": "Amazon",
+    "device_types": ["alexa", "smart_speaker", "fire_tv"],
+    "confidence": 0.85,
+    "notes": "Amazon Alexa devices (Echo, Fire TV) - overlaps with AWS",
+    "last_updated": "2026-01-18"
+  },
+  "google_home": {
+    "domains": [
+      "*.googleapis.com",
+      "*.google.com",
+      "*.gstatic.com",
+      "home-pa.googleapis.com"
+    ],
+    "vendor": "Google",
+    "device_types": ["smart_speaker", "chromecast"],
+    "confidence": 0.83,
+    "notes": "Google Home and Chromecast devices",
+    "last_updated": "2026-01-18"
+  },
+  "tplink_devices": {
+    "domains": [
+      "*.tplinkcloud.com",
+      "*.tp-link.com",
+      "*.kasasmartcam.com",
+      "*.kasaapi.com"
+    ],
+    "vendor": "TP-Link",
+    "device_types": ["smart_plug", "camera", "router", "bulb"],
+    "confidence": 0.87,
+    "notes": "TP-Link Kasa smart devices",
+    "last_updated": "2026-01-18"
+  },
+  "philips_hue": {
+    "domains": [
+      "*.meethue.com",
+      "api.meethue.com",
+      "*.philips-hue.com"
+    ],
+    "vendor": "Philips",
+    "device_types": ["smart_bulb", "light_strip", "hue_bridge"],
+    "confidence": 0.93,
+    "notes": "Philips Hue smart lighting",
+    "last_updated": "2026-01-18"
+  },
+  "samsung_smartthings": {
+    "domains": [
+      "*.smartthings.com",
+      "*.samsung.com",
+      "api.smartthings.com"
+    ],
+    "vendor": "Samsung",
+    "device_types": ["smart_tv", "hub", "sensor", "camera"],
+    "confidence": 0.84,
+    "notes": "Samsung SmartThings ecosystem",
+    "last_updated": "2026-01-18"
+  },
+  "arlo_devices": {
+    "domains": [
+      "*.arlo.com",
+      "*.my.arlo.com",
+      "*.arlocdn.com"
+    ],
+    "vendor": "Arlo",
+    "device_types": ["camera", "doorbell", "security_system"],
+    "confidence": 0.90,
+    "notes": "Arlo security cameras",
+    "last_updated": "2026-01-18"
+  }
+}
