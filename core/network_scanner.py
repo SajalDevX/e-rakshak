@@ -435,7 +435,9 @@ class NetworkScanner:
                 determined_zone = self.trust_manager.get_zone_for_ip(device.ip)
                 if determined_zone:
                     zone = determined_zone
-                    enrollment_status = "pending" if zone == "guest" else "enrolled"
+                    # ZERO TRUST FIX: All new devices start as 'unknown' regardless of zone
+                    # Only manual approval via dashboard should set 'enrolled'
+                    enrollment_status = "unknown"
 
         # Update Device object with zone info
         device.zone = zone
@@ -735,9 +737,22 @@ class NetworkScanner:
             # Mark devices not in current leases as inactive
             for ip in list(self.devices.keys()):
                 if ip not in current_lease_ips:
-                    # GRACE PERIOD FIX: Don't mark inactive during startup
-                    if not startup_grace_active and self.devices[ip].status == "active":
-                        self.devices[ip].status = "inactive"
+                    device = self.devices[ip]
+
+                    # Check if device was recently seen (within 30 seconds)
+                    recently_seen = False
+                    try:
+                        last_seen = datetime.fromisoformat(device.last_seen)
+                        time_since_seen = (datetime.now() - last_seen).total_seconds()
+                        recently_seen = time_since_seen < 30  # Give 30 seconds for DHCP lease
+                    except (ValueError, TypeError):
+                        pass
+
+                    # GRACE PERIOD FIX: Don't mark inactive if:
+                    # 1. During startup grace period, OR
+                    # 2. Device was recently seen by passive discovery
+                    if not startup_grace_active and not recently_seen and device.status == "active":
+                        device.status = "inactive"
                         logger.info(f"Device {ip} marked as inactive (disconnected)")
 
             for mac, lease in leases.items():

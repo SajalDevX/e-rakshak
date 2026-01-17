@@ -2,3 +2,7 @@ __pycache__/
 *.pyc
 *.pyo
 venv/
+# Data files (database, logs)
+data/
+*.db
+*.log
