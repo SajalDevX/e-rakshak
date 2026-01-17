@@ -175,6 +175,13 @@ class NetworkScanner:
 
     def _detect_network_interface(self) -> str:
         """Auto-detect the best network interface."""
+        # If gateway is available, use its LAN interface
+        if self.gateway and hasattr(self.gateway, 'lan_interface'):
+            lan_if = self.gateway.lan_interface
+            if lan_if:
+                logger.info(f"Using gateway LAN interface: {lan_if}")
+                return lan_if
+
         if not NETIFACES_AVAILABLE:
             logger.warning("netifaces not available, using default eth0")
             return self.network_config.get("interface", "eth0")
@@ -182,11 +189,17 @@ class NetworkScanner:
         try:
             interfaces = netifaces.interfaces()
 
-            # Priority order for interface names
-            priority_prefixes = ['eth', 'enp', 'ens', 'wlan', 'wlp', 'eno', 'em']
+            # Exclude virtual/docker interfaces
+            excluded_prefixes = ['br-', 'docker', 'veth', 'virbr', 'lo']
+
+            # Priority order for interface names (USB ethernet first for our setup)
+            priority_prefixes = ['enx', 'eth', 'enp', 'ens', 'eno', 'em', 'wlan', 'wlp', 'wlo']
 
             for prefix in priority_prefixes:
                 for iface in interfaces:
+                    # Skip excluded interfaces
+                    if any(iface.startswith(excl) for excl in excluded_prefixes):
+                        continue
                     if iface.startswith(prefix):
                         # Check if interface has IPv4 address
                         addrs = netifaces.ifaddresses(iface)
@@ -196,13 +209,15 @@ class NetworkScanner:
                                 logger.info(f"Auto-detected network interface: {iface}")
                                 return iface
 
-            # Fallback: find any interface with IPv4 (except loopback)
+            # Fallback: find any interface with IPv4 (except loopback and virtual)
             for iface in interfaces:
-                if iface != 'lo':
-                    addrs = netifaces.ifaddresses(iface)
-                    if netifaces.AF_INET in addrs:
-                        logger.info(f"Using fallback interface: {iface}")
-                        return iface
+                # Skip excluded interfaces
+                if any(iface.startswith(excl) for excl in excluded_prefixes):
+                    continue
+                addrs = netifaces.ifaddresses(iface)
+                if netifaces.AF_INET in addrs:
+                    logger.info(f"Using fallback interface: {iface}")
+                    return iface
 
         except Exception as e:
             logger.error(f"Failed to auto-detect interface: {e}")

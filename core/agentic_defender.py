@@ -332,7 +332,7 @@ class AgenticDefender:
 
         if model_path.exists():
             try:
-                checkpoint = torch.load(model_path, map_location=self.device)
+                checkpoint = torch.load(model_path, map_location=self.device, weights_only=False)
                 self.policy_net.load_state_dict(checkpoint["policy_state_dict"])
                 if self.target_net is not None:
                     self.target_net.load_state_dict(checkpoint["target_state_dict"])
@@ -875,15 +875,16 @@ class AgenticDefender:
             # Log action to threat logger
             if self.threat_logger:
                 self.threat_logger.log_action(
+                    threat_id=threat_info.get("id", "unknown"),
                     action=action,
+                    target=target_ip,
+                    status="success" if result["success"] else "failed",
                     details={
-                        "target": target_ip,
                         "threat_type": threat_info.get("type"),
                         "severity": threat_info.get("severity"),
                         "real_action": result["real_action_taken"],
                         "gateway_mode": result["gateway_mode"]
-                    },
-                    success=result["success"]
+                    }
                 )
 
             # =================================================================

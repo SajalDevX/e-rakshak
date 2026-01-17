@@ -328,6 +328,14 @@ class RakshakGateway:
             # Calculate prefix length from netmask
             prefix = sum(bin(int(x)).count('1') for x in netmask.split('.'))
 
+            # Check if the IP is already assigned
+            result = subprocess.run(
+                ["ip", "addr", "show", lan], capture_output=True, text=True
+            )
+            if f"inet {ip}/{prefix}" in result.stdout:
+                logger.info(f"IP {ip}/{prefix} is already assigned to {lan}")
+                return True
+
             # Bring interface up first
             subprocess.run(
                 ["ip", "link", "set", lan, "up"],
@@ -499,7 +507,7 @@ class RakshakGateway:
             # Allow DNS on LAN
             subprocess.run([
                 "iptables", "-A", "INPUT",
-                "-i", lan, "-p", "udp", "--dport", "53",
+                "-i", lan, "-p", "udp", "--dport", "5353",
                 "-j", "ACCEPT"
             ], capture_output=True)
 
