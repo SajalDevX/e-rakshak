@@ -163,11 +163,15 @@ class NetworkScanner:
         # Device ID counter
         self._device_counter = 0
 
+        # Passive discovery for static IP devices (cameras, NVRs)
+        self.passive_discovery = None
+        self._init_passive_discovery()
+
         # Load simulated devices if in simulation mode
         if self.simulation_mode:
             self._load_simulated_devices()
 
-        logger.info(f"NetworkScanner initialized (simulation={self.simulation_mode})")
+        logger.info(f"NetworkScanner initialized (simulation={self.simulation_mode}, interface={self.interface})")
 
     def _generate_device_id(self) -> str:
         """Generate unique device ID."""
@@ -176,11 +180,18 @@ class NetworkScanner:
 
     def _detect_network_interface(self) -> str:
         """Auto-detect the best network interface."""
-        # If gateway is available, use its LAN interface
-        if self.gateway and hasattr(self.gateway, 'lan_interface'):
-            lan_if = self.gateway.lan_interface
-            if lan_if:
-                logger.info(f"Using gateway LAN interface: {lan_if}")
+        # If gateway is available and bridge mode is enabled, use bridge interface
+        if self.gateway:
+            # Check for bridge mode - use bridge name if enabled
+            if hasattr(self.gateway, 'config') and self.gateway.config.bridge_mode:
+                bridge_name = self.gateway.config.bridge_name
+                logger.info(f"MAYA: Using bridge interface: {bridge_name} (bridge mode enabled)")
+                return bridge_name
+
+            # Fall back to gateway LAN interface (which may already be the bridge)
+            if hasattr(self.gateway, 'config') and self.gateway.config.lan_interface:
+                lan_if = self.gateway.config.lan_interface
+                logger.info(f"MAYA: Using gateway LAN interface: {lan_if}")
                 return lan_if
 
         if not NETIFACES_AVAILABLE:
@@ -250,6 +261,115 @@ class NetworkScanner:
             logger.error(f"Failed to auto-detect network range: {e}")
 
         return "192.168.1.0/24"
+
+    def _init_passive_discovery(self):
+        """Initialize passive discovery for static IP devices."""
+        # Skip in simulation mode
+        if self.simulation_mode:
+            return
+
+        # Check if passive discovery is enabled in config
+        passive_config = self.network_config.get("passive_discovery", {})
+        if not passive_config.get("enabled", True):
+            logger.info("MAYA: Passive discovery disabled in config")
+            return
+
+        # Only enable in gateway/bridge mode for full visibility
+        if not self.gateway:
+            logger.info("MAYA: Passive discovery requires gateway mode")
+            return
+
+        try:
+            from core.passive_discovery import PassiveDiscovery
+
+            self.passive_discovery = PassiveDiscovery(
+                interface=self.interface,
+                ssdp_enabled=passive_config.get("ssdp_enabled", True),
+                onvif_enabled=passive_config.get("onvif_enabled", True),
+                rtsp_probe_enabled=passive_config.get("rtsp_probe_enabled", True),
+                arp_listener_enabled=passive_config.get("arp_listener_enabled", True),
+                on_device_discovered=self._on_passive_device_found
+            )
+            logger.info(f"MAYA: Passive discovery initialized on {self.interface}")
+
+        except ImportError:
+            logger.warning("MAYA: Passive discovery module not available")
+        except Exception as e:
+            logger.error(f"MAYA: Failed to initialize passive discovery: {e}")
+
+    def start_passive_discovery(self):
+        """Start passive discovery listeners."""
+        if self.passive_discovery:
+            self.passive_discovery.start()
+            logger.info("MAYA: Passive discovery started")
+
+    def stop_passive_discovery(self):
+        """Stop passive discovery listeners."""
+        if self.passive_discovery:
+            self.passive_discovery.stop()
+            logger.info("MAYA: Passive discovery stopped")
+
+    def _on_passive_device_found(self, device_info: dict):
+        """
+        Callback when passive discovery finds a device.
+
+        Merges passively discovered devices (static IPs) with DHCP-tracked devices.
+        """
+        ip = device_info.get("ip")
+        if not ip:
+            return
+
+        # Skip if already known from DHCP
+        with self._devices_lock:
+            if ip in self.devices:
+                # Update existing device with additional info from passive discovery
+                device = self.devices[ip]
+                if device_info.get("mac") and device.mac == "unknown":
+                    device.mac = device_info["mac"]
+                if device_info.get("device_type") and device.device_type == "unknown":
+                    device.device_type = device_info["device_type"]
+                if device_info.get("manufacturer") and device.manufacturer == "unknown":
+                    device.manufacturer = device_info["manufacturer"]
+                # Add discovered services
+                for svc in device_info.get("services", []):
+                    if svc not in device.services:
+                        device.services.append(svc)
+                for port in device_info.get("open_ports", []):
+                    if port not in device.open_ports:
+                        device.open_ports.append(port)
+                device.last_seen = datetime.now().isoformat()
+                logger.debug(f"MAYA: Updated device {ip} with passive discovery info")
+                return
+
+            # New device - create entry for static IP device
+            device = Device(
+                id=self._generate_device_id(),
+                ip=ip,
+                mac=device_info.get("mac", "unknown"),
+                hostname=device_info.get("hostname", ""),
+                device_type=device_info.get("device_type", "unknown"),
+                manufacturer=device_info.get("manufacturer", "unknown"),
+                services=device_info.get("services", []),
+                open_ports=device_info.get("open_ports", []),
+                first_seen=datetime.now().isoformat(),
+                last_seen=datetime.now().isoformat(),
+                status="active"
+            )
+
+            # Calculate risk score
+            device.risk_score = self._calculate_risk_score(device)
+
+            self.devices[ip] = device
+            if device.mac and device.mac != "unknown":
+                self._mac_to_ip[device.mac] = ip
+
+            logger.info(f"MAYA: Discovered static IP device: {ip} ({device.device_type}, {device.manufacturer})")
+
+    def get_passive_discovery_devices(self) -> Dict[str, dict]:
+        """Get devices discovered via passive methods."""
+        if self.passive_discovery:
+            return self.passive_discovery.get_discovered_devices()
+        return {}
 
     def _load_simulated_devices(self):
         """Load simulated devices from config."""

@@ -369,6 +369,8 @@ class RakshakOrchestrator:
             console.print("[bold cyan]" + "=" * 60 + "[/bold cyan]\n")
             console.print(f"  WAN Interface: {self.gateway.config.wan_interface}")
             console.print(f"  LAN Interface: {self.gateway.config.lan_interface}")
+            if self.gateway.config.bridge_mode:
+                console.print(f"  Bridge Mode:   ENABLED ({self.gateway.config.bridge_name})")
             console.print(f"  Gateway IP:    {self.gateway.config.lan_ip}")
             console.print(f"  Jetson:        {self.gateway.is_jetson}")
             console.print("")
@@ -386,6 +388,11 @@ class RakshakOrchestrator:
             # Start KAVACH (ARP Interceptor) for LAN-to-LAN protection
             if ARP_INTERCEPTOR_AVAILABLE:
                 self._start_arp_interceptor()
+
+            # Start passive discovery for static IP devices (cameras, NVRs)
+            if self.network_scanner.passive_discovery:
+                self.network_scanner.start_passive_discovery()
+                console.print("[bold cyan]MAYA: Passive discovery active (SSDP, ONVIF, ARP)[/bold cyan]")
 
         console.print(f"[bold green]RAKSHAK Started in {mode} mode[/bold green]")
         console.print(f"[dim]Dashboard: http://localhost:{self.config['api']['port']}[/dim]\n")
@@ -422,6 +429,11 @@ class RakshakOrchestrator:
         logger.info("Stopping RAKSHAK...")
         self.running = False
         self.deception_engine.stop_all_honeypots()
+
+        # Stop passive discovery if active
+        if self.network_scanner.passive_discovery:
+            logger.info("Stopping MAYA passive discovery...")
+            self.network_scanner.stop_passive_discovery()
 
         # Stop ARP interceptor if active (restores ARP tables)
         if self.arp_interceptor:

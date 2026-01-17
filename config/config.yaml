@@ -81,6 +81,22 @@ network:
     - "mqtt"
     - "rtsp"
 
+  # ---------------------------------------------------------------------------
+  # Passive Discovery (for static IP devices like cameras, NVRs)
+  # ---------------------------------------------------------------------------
+  # Works best with bridge mode (br0) enabled.
+  # Discovers devices that don't use DHCP via:
+  # - SSDP (UDP 1900): UPnP device announcements
+  # - ONVIF (UDP 3702): IP camera/NVR discovery
+  # - RTSP (TCP 554): Video stream detection
+  # - ARP listener: Passive ARP who-has/is-at monitoring
+  passive_discovery:
+    enabled: true                     # Enable passive discovery
+    ssdp_enabled: true                # Listen for SSDP/UPnP announcements
+    onvif_enabled: true               # Listen for ONVIF/WS-Discovery
+    rtsp_probe_enabled: true          # Probe for RTSP streams
+    arp_listener_enabled: true        # Listen for ARP traffic
+
 # -----------------------------------------------------------------------------
 # Agentic Defender (KAAL) Settings
 # -----------------------------------------------------------------------------
@@ -464,6 +480,23 @@ gateway:
       telnet: 2323
       ssh: 2222
       http: 8080
+
+  # ---------------------------------------------------------------------------
+  # Layer-2 Bridge Mode (OPTION-1: Full Layer-2 Bridge + Layer-3 Gateway)
+  # ---------------------------------------------------------------------------
+  # When enabled, RAKSHAK creates a Linux bridge (br0) with the LAN interface
+  # as a member. This provides:
+  # - 100% device visibility (sees all ARP, broadcast traffic)
+  # - Passive discovery of static IP devices (cameras, NVRs)
+  # - Layer-3 gateway functionality (NAT, firewall) on bridge interface
+  bridge:
+    enabled: true                     # Enable bridge mode
+    name: "br0"                       # Bridge interface name
+    members: []                       # If empty, uses lan_interface automatically
+                                      # Example: ["eth1"] to explicitly specify
+    nf_call_iptables: true            # Apply iptables to bridged traffic
+    nf_call_arptables: true           # Apply arptables to bridged traffic
+    proxy_arp: true                   # Enable proxy ARP on bridge
 
   # ---------------------------------------------------------------------------
   # LAN-to-LAN Interception (KAVACH)

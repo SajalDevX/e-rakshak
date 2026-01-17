@@ -104,6 +104,13 @@ class GatewayConfig:
     usb_ethernet_patterns: List[str] = field(default_factory=lambda: ["eth1", "enx*", "enp*s*u*"])
     # LAN-to-LAN interception (KAVACH)
     lan_interception_enabled: bool = False
+    # Bridge mode configuration (Layer-2 Bridge + Layer-3 Gateway)
+    bridge_mode: bool = False
+    bridge_name: str = "br0"
+    bridge_members: List[str] = field(default_factory=list)
+    bridge_nf_call_iptables: bool = True
+    bridge_nf_call_arptables: bool = True
+    proxy_arp_enabled: bool = True
 
 
 class RakshakGateway:
@@ -123,6 +130,7 @@ class RakshakGateway:
         self.is_running = False
         self.is_gateway_mode = False
         self.is_jetson = False
+        self._original_lan_interface = None  # For bridge mode rollback
 
         # Paths
         self.dnsmasq_config_path = Path("/etc/dnsmasq.d/rakshak.conf")
@@ -359,6 +367,176 @@ class RakshakGateway:
 
         except Exception as e:
             logger.error(f"Failed to configure LAN interface: {e}")
+            return False
+
+    def setup_bridge(self) -> bool:
+        """
+        Create and configure Linux bridge for Layer-2 + Layer-3 operation.
+
+        This enables:
+        - Transparent Layer-2 forwarding (sees all ARP, broadcast traffic)
+        - Layer-3 gateway functionality (NAT, firewall)
+        - Passive discovery of static IP devices via SSDP, ONVIF, ARP
+
+        Returns:
+            True if bridge setup successful, False otherwise.
+        """
+        if not self.config.bridge_mode:
+            logger.info("Bridge mode disabled, using direct interface")
+            return True
+
+        bridge = self.config.bridge_name
+        members = self.config.bridge_members or [self.config.lan_interface]
+
+        try:
+            # Save original interface for rollback
+            self._original_lan_interface = self.config.lan_interface
+
+            # Step 1: Load bridge kernel module
+            subprocess.run(["modprobe", "br_netfilter"], capture_output=True)
+            subprocess.run(["modprobe", "bridge"], capture_output=True)
+
+            # Step 2: Enable kernel settings for bridge
+            kernel_settings = [
+                ("net.ipv4.ip_forward", "1"),
+                ("net.bridge.bridge-nf-call-iptables", "1" if self.config.bridge_nf_call_iptables else "0"),
+                ("net.bridge.bridge-nf-call-arptables", "1" if self.config.bridge_nf_call_arptables else "0"),
+                ("net.ipv4.conf.all.proxy_arp", "1" if self.config.proxy_arp_enabled else "0"),
+            ]
+
+            for key, value in kernel_settings:
+                result = subprocess.run(
+                    ["sysctl", "-w", f"{key}={value}"],
+                    capture_output=True
+                )
+                if result.returncode != 0:
+                    logger.warning(f"Failed to set {key}={value} (may need bridge to exist first)")
+
+            # Step 3: Check if bridge already exists
+            result = subprocess.run(["ip", "link", "show", bridge], capture_output=True)
+            bridge_exists = result.returncode == 0
+
+            if not bridge_exists:
+                # Step 4: Remove IP from member interface(s)
+                for member in members:
+                    subprocess.run(["ip", "addr", "flush", "dev", member], capture_output=True)
+
+                # Step 5: Create bridge
+                subprocess.run(
+                    ["ip", "link", "add", "name", bridge, "type", "bridge"],
+                    check=True, capture_output=True
+                )
+                logger.info(f"Bridge {bridge} created")
+
+                # Step 6: Add member interface(s) to bridge
+                for member in members:
+                    subprocess.run(
+                        ["ip", "link", "set", member, "master", bridge],
+                        check=True, capture_output=True
+                    )
+                    subprocess.run(
+                        ["ip", "link", "set", member, "up"],
+                        check=True, capture_output=True
+                    )
+                    logger.info(f"Added {member} to bridge {bridge}")
+
+                # Step 7: Bring bridge up
+                subprocess.run(
+                    ["ip", "link", "set", bridge, "up"],
+                    check=True, capture_output=True
+                )
+
+            # Step 8: Assign IP to bridge
+            prefix = sum(bin(int(x)).count('1') for x in self.config.lan_netmask.split('.'))
+            ip_cidr = f"{self.config.lan_ip}/{prefix}"
+
+            # Check if IP already assigned
+            result = subprocess.run(
+                ["ip", "addr", "show", bridge], capture_output=True, text=True
+            )
+            if ip_cidr not in result.stdout:
+                subprocess.run(
+                    ["ip", "addr", "add", ip_cidr, "dev", bridge],
+                    check=True, capture_output=True
+                )
+                logger.info(f"Assigned {ip_cidr} to bridge {bridge}")
+
+            # Step 9: Update lan_interface to use bridge
+            self.config.lan_interface = bridge
+
+            # Step 10: Re-apply bridge-nf settings now that bridge exists
+            for key, value in kernel_settings:
+                subprocess.run(["sysctl", "-w", f"{key}={value}"], capture_output=True)
+
+            # Also set proxy_arp on the bridge interface specifically
+            subprocess.run(
+                ["sysctl", "-w", f"net.ipv4.conf.{bridge}.proxy_arp=1"],
+                capture_output=True
+            )
+
+            logger.info(f"Bridge {bridge} configured with members {members}")
+            logger.info(f"Bridge IP: {self.config.lan_ip}/{prefix}")
+            return True
+
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Failed to setup bridge: {e}")
+            return False
+        except Exception as e:
+            logger.error(f"Bridge setup error: {e}")
+            return False
+
+    def teardown_bridge(self) -> bool:
+        """
+        Remove Linux bridge and restore direct interface configuration.
+
+        Returns:
+            True if teardown successful, False otherwise.
+        """
+        if not self.config.bridge_mode:
+            return True
+
+        bridge = self.config.bridge_name
+
+        try:
+            # Determine original LAN interface
+            if self._original_lan_interface:
+                original_lan = self._original_lan_interface
+            elif self.config.bridge_members:
+                original_lan = self.config.bridge_members[0]
+            else:
+                original_lan = "eth1"
+
+            logger.info(f"Tearing down bridge {bridge}, restoring to {original_lan}")
+
+            # Step 1: Flush IP from bridge
+            subprocess.run(["ip", "addr", "flush", "dev", bridge], capture_output=True)
+
+            # Step 2: Remove members from bridge
+            members = self.config.bridge_members or [original_lan]
+            for member in members:
+                subprocess.run(["ip", "link", "set", member, "nomaster"], capture_output=True)
+
+            # Step 3: Delete bridge
+            subprocess.run(["ip", "link", "set", bridge, "down"], capture_output=True)
+            subprocess.run(["ip", "link", "delete", bridge, "type", "bridge"], capture_output=True)
+
+            # Step 4: Restore IP to original interface
+            prefix = sum(bin(int(x)).count('1') for x in self.config.lan_netmask.split('.'))
+            subprocess.run(
+                ["ip", "addr", "add", f"{self.config.lan_ip}/{prefix}", "dev", original_lan],
+                capture_output=True
+            )
+            subprocess.run(["ip", "link", "set", original_lan, "up"], capture_output=True)
+
+            # Step 5: Restore lan_interface config
+            self.config.lan_interface = original_lan
+            self._original_lan_interface = None
+
+            logger.info(f"Bridge {bridge} removed, restored to {original_lan}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Bridge teardown error: {e}")
             return False
 
     def setup_firewall_chains(self) -> bool:
@@ -700,27 +878,39 @@ expand-hosts
                 logger.error("Failed to auto-detect USB ethernet adapter")
                 return False
 
-        # Step 2: Enable IP forwarding
+        # Step 2: Setup bridge if enabled (before IP forwarding)
+        if self.config.bridge_mode:
+            logger.info("Setting up Layer-2 bridge...")
+            if not self.setup_bridge():
+                logger.warning("Bridge setup failed, falling back to direct interface mode")
+                self.config.bridge_mode = False
+            else:
+                logger.info(f"Bridge mode active: {self.config.bridge_name}")
+
+        # Step 3: Enable IP forwarding
         logger.info("Enabling IP forwarding...")
         if not self.enable_ip_forwarding():
             return False
 
-        # Step 3: Configure LAN interface
-        logger.info(f"Configuring LAN interface {self.config.lan_interface}...")
-        if not self.configure_lan_interface():
-            return False
+        # Step 4: Configure LAN interface (skipped if bridge mode - IP already on bridge)
+        if not self.config.bridge_mode:
+            logger.info(f"Configuring LAN interface {self.config.lan_interface}...")
+            if not self.configure_lan_interface():
+                return False
+        else:
+            logger.info(f"LAN interface is bridge {self.config.lan_interface} (already configured)")
 
-        # Step 4: Setup firewall chains
+        # Step 5: Setup firewall chains
         logger.info("Setting up firewall chains...")
         if not self.setup_firewall_chains():
             return False
 
-        # Step 5: Setup NAT
+        # Step 6: Setup NAT
         logger.info("Setting up NAT rules...")
         if not self.setup_nat():
             return False
 
-        # Step 6: Configure DHCP/DNS
+        # Step 7: Configure DHCP/DNS
         logger.info("Configuring DHCP server...")
         if not self.configure_dnsmasq():
             return False
@@ -728,13 +918,17 @@ expand-hosts
         self.is_running = True
         self.is_gateway_mode = True
 
-        # Step 7: Start DHCP lease monitor
+        # Step 8: Start DHCP lease monitor
         self._start_lease_monitor()
 
         logger.info("=" * 60)
         logger.info("RAKSHAK Gateway ACTIVE")
         logger.info(f"  WAN Interface: {self.config.wan_interface}")
         logger.info(f"  LAN Interface: {self.config.lan_interface}")
+        if self.config.bridge_mode:
+            logger.info(f"  Bridge Mode: ENABLED ({self.config.bridge_name})")
+            if self._original_lan_interface:
+                logger.info(f"  Bridge Members: {self._original_lan_interface}")
         logger.info(f"  Gateway IP: {self.config.lan_ip}")
         logger.info(f"  DHCP Range: {self.config.dhcp_range_start} - {self.config.dhcp_range_end}")
         logger.info(f"  Jetson Platform: {self.is_jetson}")
@@ -751,8 +945,9 @@ expand-hosts
         2. Remove all isolation rules
         3. Remove all redirection rules
         4. Remove firewall chains
-        5. Stop dnsmasq
-        6. Remove configuration files
+        5. Teardown bridge (if bridge mode)
+        6. Stop dnsmasq
+        7. Remove configuration files
         """
         logger.info("Stopping RAKSHAK Gateway...")
 
@@ -769,6 +964,11 @@ expand-hosts
 
             # Cleanup firewall chains
             self.cleanup_firewall_chains()
+
+            # Teardown bridge if active
+            if self.config.bridge_mode:
+                logger.info("Tearing down bridge...")
+                self.teardown_bridge()
 
             # Flush NAT rules
             subprocess.run(["iptables", "-t", "nat", "-F"], capture_output=True)
@@ -1247,7 +1447,7 @@ expand-hosts
 
     def get_status(self) -> Dict:
         """Get gateway status"""
-        return {
+        status = {
             "is_running": self.is_running,
             "is_gateway_mode": self.is_gateway_mode,
             "is_jetson": self.is_jetson,
@@ -1261,6 +1461,16 @@ expand-hosts
             "traffic_stats": self.get_traffic_stats()
         }
 
+        # Add bridge mode information
+        if self.config.bridge_mode:
+            status["bridge_mode"] = True
+            status["bridge_name"] = self.config.bridge_name
+            status["bridge_members"] = self.config.bridge_members
+        else:
+            status["bridge_mode"] = False
+
+        return status
+
 
 # Convenience function to create gateway with config from YAML
 def create_gateway_from_config(config_dict: Dict) -> RakshakGateway:
@@ -1273,9 +1483,18 @@ def create_gateway_from_config(config_dict: Dict) -> RakshakGateway:
     # Handle lan_interception config
     lan_interception_config = gateway_config.get("lan_interception", {})
 
+    # Handle bridge mode config
+    bridge_config = gateway_config.get("bridge", {})
+
+    # Determine bridge members - default to lan_interface if not specified
+    lan_interface = gateway_config.get("lan_interface", "eth1")
+    bridge_members = bridge_config.get("members", [])
+    if not bridge_members and bridge_config.get("enabled", False):
+        bridge_members = [lan_interface]
+
     config = GatewayConfig(
         wan_interface=gateway_config.get("wan_interface", "eth0"),
-        lan_interface=gateway_config.get("lan_interface", "eth1"),
+        lan_interface=lan_interface,
         lan_ip=gateway_config.get("lan_ip", "192.168.100.1"),
         lan_netmask=gateway_config.get("lan_netmask", "255.255.255.0"),
         lan_network=gateway_config.get("lan_network", "192.168.100.0/24"),
@@ -1286,7 +1505,14 @@ def create_gateway_from_config(config_dict: Dict) -> RakshakGateway:
         dns_servers=gateway_config.get("dns", {}).get("servers", gateway_config.get("dns_servers", ["8.8.8.8", "1.1.1.1"])),
         auto_detect_interfaces=gateway_config.get("auto_detect_interfaces", True),
         usb_ethernet_patterns=gateway_config.get("usb_ethernet_patterns", ["eth1", "enx*", "enp*s*u*"]),
-        lan_interception_enabled=lan_interception_config.get("enabled", False)
+        lan_interception_enabled=lan_interception_config.get("enabled", False),
+        # Bridge mode configuration
+        bridge_mode=bridge_config.get("enabled", False),
+        bridge_name=bridge_config.get("name", "br0"),
+        bridge_members=bridge_members,
+        bridge_nf_call_iptables=bridge_config.get("nf_call_iptables", True),
+        bridge_nf_call_arptables=bridge_config.get("nf_call_arptables", True),
+        proxy_arp_enabled=bridge_config.get("proxy_arp", True)
     )
 
     return RakshakGateway(config)
