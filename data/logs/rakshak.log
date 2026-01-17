@@ -5216,3 +5216,267 @@ Check the documentation of torch.load to learn more about types accepted by defa
 2026-01-17 12:51:48 | INFO     | core.gateway | RAKSHAK Gateway stopped successfully
 2026-01-17 12:51:48 | INFO     | core.packet_filter | PacketFilter stopped
 2026-01-17 12:51:48 | INFO     | __main__ | RAKSHAK stopped
+2026-01-17 14:42:52 | INFO     | __main__ | Initializing RAKSHAK components...
+2026-01-17 14:42:52 | INFO     | __main__ | Initializing GATEWAY MODE...
+2026-01-17 14:42:52 | INFO     | core.gateway | RakshakGateway initialized
+2026-01-17 14:42:52 | INFO     | core.packet_filter | PacketFilter initialized
+2026-01-17 14:42:52 | INFO     | __main__ | Gateway mode components initialized
+2026-01-17 14:42:52 | INFO     | core.threat_logger | ThreatLogger initialized
+2026-01-17 14:42:52 | INFO     | core.llm_honeypot | Ollama initialized with model: mistral:7b
+2026-01-17 14:42:52 | INFO     | core.llm_honeypot | LLMHoneypot initialized (LLM available: True, backend: ollama)
+2026-01-17 14:42:52 | INFO     | core.ids_classifier | IDS model loaded successfully: 15 attack classes
+2026-01-17 14:42:52 | INFO     | __main__ | IDS classifier loaded successfully
+2026-01-17 14:42:52 | INFO     | core.network_scanner | Auto-detected network interface: enx207bd51a6a7d
+2026-01-17 14:42:52 | INFO     | core.network_scanner | Auto-detected network range: 10.42.0.0/24
+2026-01-17 14:42:52 | INFO     | core.network_scanner | NetworkScanner initialized (simulation=False)
+2026-01-17 14:42:52 | INFO     | core.deception_engine | DeceptionEngine initialized (enabled=True)
+2026-01-17 14:42:52 | INFO     | core.event_store | Auto-export started: every 3600s to data/events/
+2026-01-17 14:42:52 | INFO     | core.event_store | MemoryEventStore initialized (max_size=10000)
+2026-01-17 14:42:52 | INFO     | core.event_bus | LocalEventPublisher initialized
+2026-01-17 14:42:52 | INFO     | core.event_bus | AsyncEventPublisher initialized (queue_size=1000)
+2026-01-17 14:42:52 | INFO     | core.agentic_defender | Event publisher initialized for offline RL
+2026-01-17 14:42:52 | INFO     | core.agentic_defender | Loaded pre-trained model from models/kaal_policy.pth
+2026-01-17 14:42:52 | INFO     | core.agentic_defender | AgenticDefender initialized (mode=INFERENCE-ONLY, device=cuda)
+2026-01-17 14:42:52 | INFO     | core.agentic_defender | Gateway integration enabled for real device isolation
+2026-01-17 14:42:52 | INFO     | core.agentic_defender | Packet filter integration enabled
+2026-01-17 14:42:52 | INFO     | api.app | Flask app created successfully
+2026-01-17 14:42:52 | INFO     | __main__ | RAKSHAK components initialized successfully
+2026-01-17 14:42:52 | INFO     | __main__ | Starting RAKSHAK in GATEWAY mode...
+2026-01-17 14:42:52 | INFO     | __main__ | Starting gateway...
+2026-01-17 14:42:52 | INFO     | core.gateway | ============================================================
+2026-01-17 14:42:52 | INFO     | core.gateway | Starting RAKSHAK Inline Security Gateway
+2026-01-17 14:42:52 | INFO     | core.gateway | ============================================================
+2026-01-17 14:42:52 | INFO     | core.gateway | Detected interfaces: ['eno1', 'wlo1', 'br-4d548e8a4c39', 'enx207bd51a6a7d', 'enx9af1910e7084']
+2026-01-17 14:42:52 | INFO     | core.gateway | Non-Jetson platform (standard Linux)
+2026-01-17 14:42:52 | INFO     | core.gateway | Enabling IP forwarding...
+2026-01-17 14:42:52 | INFO     | core.gateway | IP forwarding enabled
+2026-01-17 14:42:52 | INFO     | core.gateway | Configuring LAN interface enx207bd51a6a7d...
+2026-01-17 14:42:52 | INFO     | core.gateway | IP 10.42.0.1/24 is already assigned to enx207bd51a6a7d
+2026-01-17 14:42:52 | INFO     | core.gateway | Setting up firewall chains...
+2026-01-17 14:42:52 | INFO     | core.gateway | RAKSHAK firewall chains configured
+2026-01-17 14:42:52 | INFO     | core.gateway | Setting up NAT rules...
+2026-01-17 14:42:52 | INFO     | core.gateway | DHCP disabled - preserving NetworkManager NAT rules
+2026-01-17 14:42:52 | WARNING  | core.gateway | No MASQUERADE rule found - internet may not work
+2026-01-17 14:42:52 | INFO     | core.gateway | KAVACH: LAN-to-LAN forwarding enabled
+2026-01-17 14:42:52 | INFO     | core.gateway | NAT rules configured
+2026-01-17 14:42:52 | INFO     | core.gateway | Configuring DHCP server...
+2026-01-17 14:42:52 | INFO     | core.gateway | DHCP disabled - skipping dnsmasq configuration (NetworkManager mode)
+2026-01-17 14:42:52 | INFO     | core.gateway | DHCP lease monitor started
+2026-01-17 14:42:52 | INFO     | core.gateway | ============================================================
+2026-01-17 14:42:52 | INFO     | core.gateway | RAKSHAK Gateway ACTIVE
+2026-01-17 14:42:52 | INFO     | core.gateway |   WAN Interface: wlo1
+2026-01-17 14:42:52 | INFO     | core.gateway |   LAN Interface: enx207bd51a6a7d
+2026-01-17 14:42:52 | INFO     | core.gateway |   Gateway IP: 10.42.0.1
+2026-01-17 14:42:52 | INFO     | core.gateway |   DHCP Range: 10.42.0.10 - 10.42.0.254
+2026-01-17 14:42:52 | INFO     | core.gateway |   Jetson Platform: False
+2026-01-17 14:42:52 | INFO     | core.gateway | ============================================================
+2026-01-17 14:42:52 | INFO     | core.packet_filter | Dashboard access monitor started
+2026-01-17 14:42:52 | INFO     | core.deception_engine | Deployed honeypot HP-0001 (telnet:21)
+2026-01-17 14:42:52 | INFO     | core.packet_filter | Monitoring /var/log/kern.log for dashboard access
+2026-01-17 14:42:52 | INFO     | core.deception_engine | Telnet honeypot HP-0001 listening on port 21
+2026-01-17 14:42:52 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:21 | success
+2026-01-17 14:42:52 | INFO     | __main__ | TRAP: Deployed telnet honeypot on port 21 (tp_link)
+2026-01-17 14:42:52 | INFO     | core.deception_engine | Deployed honeypot HP-0002 (telnet:23)
+2026-01-17 14:42:52 | INFO     | core.deception_engine | Telnet honeypot HP-0002 listening on port 23
+2026-01-17 14:42:52 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:23 | success
+2026-01-17 14:42:52 | INFO     | __main__ | TRAP: Deployed telnet honeypot on port 23 (wyze_cam)
+2026-01-17 14:42:52 | INFO     | core.deception_engine | Deployed honeypot HP-0003 (http:80)
+2026-01-17 14:42:52 | INFO     | core.deception_engine | HTTP honeypot HP-0003 listening on port 80
+2026-01-17 14:42:52 | INFO     | core.threat_logger | ACTION: deploy_honeypot | http:80 | success
+2026-01-17 14:42:52 | INFO     | __main__ | TRAP: Deployed http honeypot on port 80 (samsung_tv)
+2026-01-17 14:42:52 | INFO     | core.deception_engine | Deployed honeypot HP-0004 (http:8080)
+2026-01-17 14:42:52 | INFO     | core.deception_engine | HTTP honeypot HP-0004 listening on port 8080
+2026-01-17 14:42:52 | INFO     | core.threat_logger | ACTION: deploy_honeypot | http:8080 | success
+2026-01-17 14:42:52 | INFO     | __main__ | TRAP: Deployed http honeypot on port 8080 (tp_link)
+2026-01-17 14:42:52 | INFO     | core.deception_engine | Deployed honeypot HP-0005 (telnet:22)
+2026-01-17 14:42:52 | INFO     | core.deception_engine | Telnet honeypot HP-0005 listening on port 22
+2026-01-17 14:42:52 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:22 | success
+2026-01-17 14:42:52 | INFO     | __main__ | TRAP: Deployed telnet honeypot on port 22 (nest)
+2026-01-17 14:42:52 | INFO     | core.arp_interceptor | KAVACH: Initialized on enx207bd51a6a7d (MAC: 20:7b:d5:1a:6a:7d)
+2026-01-17 14:42:52 | INFO     | core.arp_interceptor | KAVACH: ARP interceptor started on enx207bd51a6a7d
+2026-01-17 14:42:52 | INFO     | core.arp_interceptor | KAVACH: Gateway 10.42.0.1 (20:7b:d5:1a:6a:7d)
+2026-01-17 14:44:18 | INFO     | core.arp_interceptor | KAVACH: Tracking device 10.42.0.72 (e4:c3:2a:5d:69:5a)
+2026-01-17 14:44:18 | INFO     | core.arp_interceptor | KAVACH: Tracking device 10.42.0.71 (3e:2a:b7:ec:12:6b)
+2026-01-17 14:49:09 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 14:49:09 | INFO     | core.deception_engine | Stopped all honeypots and removed NAT redirections
+2026-01-17 14:49:09 | INFO     | __main__ | Stopping KAVACH ARP interceptor...
+2026-01-17 14:49:10 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 14:49:10 | INFO     | core.deception_engine | Stopped all honeypots and removed NAT redirections
+2026-01-17 14:49:10 | INFO     | __main__ | Stopping KAVACH ARP interceptor...
+2026-01-17 14:49:10 | INFO     | __main__ | Stopping gateway...
+2026-01-17 14:49:10 | INFO     | core.gateway | Stopping RAKSHAK Gateway...
+2026-01-17 14:49:10 | INFO     | core.gateway | RAKSHAK firewall chains removed
+2026-01-17 14:49:10 | INFO     | core.gateway | RAKSHAK Gateway stopped successfully
+2026-01-17 14:49:10 | INFO     | core.packet_filter | PacketFilter stopped
+2026-01-17 14:49:10 | INFO     | __main__ | RAKSHAK stopped
+2026-01-17 14:50:31 | INFO     | __main__ | Initializing RAKSHAK components...
+2026-01-17 14:50:31 | INFO     | __main__ | Initializing GATEWAY MODE...
+2026-01-17 14:50:31 | INFO     | core.gateway | RakshakGateway initialized
+2026-01-17 14:50:31 | INFO     | core.packet_filter | PacketFilter initialized
+2026-01-17 14:50:31 | INFO     | __main__ | Gateway mode components initialized
+2026-01-17 14:50:31 | INFO     | core.threat_logger | ThreatLogger initialized
+2026-01-17 14:50:31 | INFO     | core.llm_honeypot | Ollama initialized with model: mistral:7b
+2026-01-17 14:50:31 | INFO     | core.llm_honeypot | LLMHoneypot initialized (LLM available: True, backend: ollama)
+2026-01-17 14:50:31 | INFO     | core.ids_classifier | IDS model loaded successfully: 15 attack classes
+2026-01-17 14:50:31 | INFO     | __main__ | IDS classifier loaded successfully
+2026-01-17 14:50:31 | INFO     | core.network_scanner | MAYA: Using bridge interface: br0 (bridge mode enabled)
+2026-01-17 14:50:31 | INFO     | core.network_scanner | Auto-detected network range: 10.42.0.0/24
+2026-01-17 14:50:31 | INFO     | core.passive_discovery | PassiveDiscovery initialized on br0
+2026-01-17 14:50:31 | INFO     | core.network_scanner | MAYA: Passive discovery initialized on br0
+2026-01-17 14:50:31 | INFO     | core.network_scanner | NetworkScanner initialized (simulation=False, interface=br0)
+2026-01-17 14:50:31 | INFO     | core.deception_engine | DeceptionEngine initialized (enabled=True)
+2026-01-17 14:50:31 | INFO     | core.event_store | Auto-export started: every 3600s to data/events/
+2026-01-17 14:50:31 | INFO     | core.event_store | MemoryEventStore initialized (max_size=10000)
+2026-01-17 14:50:31 | INFO     | core.event_bus | LocalEventPublisher initialized
+2026-01-17 14:50:31 | INFO     | core.event_bus | AsyncEventPublisher initialized (queue_size=1000)
+2026-01-17 14:50:31 | INFO     | core.agentic_defender | Event publisher initialized for offline RL
+2026-01-17 14:50:31 | INFO     | core.agentic_defender | Loaded pre-trained model from models/kaal_policy.pth
+2026-01-17 14:50:31 | INFO     | core.agentic_defender | AgenticDefender initialized (mode=INFERENCE-ONLY, device=cuda)
+2026-01-17 14:50:31 | INFO     | core.agentic_defender | Gateway integration enabled for real device isolation
+2026-01-17 14:50:31 | INFO     | core.agentic_defender | Packet filter integration enabled
+2026-01-17 14:50:31 | INFO     | api.app | Flask app created successfully
+2026-01-17 14:50:31 | INFO     | __main__ | RAKSHAK components initialized successfully
+2026-01-17 14:50:31 | INFO     | __main__ | Starting RAKSHAK in GATEWAY mode...
+2026-01-17 14:50:31 | INFO     | __main__ | Starting gateway...
+2026-01-17 14:50:31 | INFO     | core.gateway | ============================================================
+2026-01-17 14:50:31 | INFO     | core.gateway | Starting RAKSHAK Inline Security Gateway
+2026-01-17 14:50:31 | INFO     | core.gateway | ============================================================
+2026-01-17 14:50:31 | INFO     | core.gateway | Detected interfaces: ['eno1', 'wlo1', 'br-4d548e8a4c39', 'enx207bd51a6a7d', 'enx9af1910e7084', 'br0']
+2026-01-17 14:50:31 | INFO     | core.gateway | Non-Jetson platform (standard Linux)
+2026-01-17 14:50:31 | INFO     | core.gateway | Setting up Layer-2 bridge...
+2026-01-17 14:50:31 | INFO     | core.gateway | Bridge br0 configured with members ['enx207bd51a6a7d']
+2026-01-17 14:50:31 | INFO     | core.gateway | Bridge IP: 10.42.0.1/24
+2026-01-17 14:50:31 | INFO     | core.gateway | Bridge mode active: br0
+2026-01-17 14:50:31 | INFO     | core.gateway | Enabling IP forwarding...
+2026-01-17 14:50:31 | INFO     | core.gateway | IP forwarding enabled
+2026-01-17 14:50:31 | INFO     | core.gateway | LAN interface is bridge br0 (already configured)
+2026-01-17 14:50:31 | INFO     | core.gateway | Setting up firewall chains...
+2026-01-17 14:50:31 | INFO     | core.gateway | RAKSHAK firewall chains configured
+2026-01-17 14:50:31 | INFO     | core.gateway | Setting up NAT rules...
+2026-01-17 14:50:31 | INFO     | core.gateway | DHCP disabled - preserving NetworkManager NAT rules
+2026-01-17 14:50:31 | INFO     | core.gateway | NetworkManager NAT (MASQUERADE) detected
+2026-01-17 14:50:31 | INFO     | core.gateway | KAVACH: LAN-to-LAN forwarding enabled
+2026-01-17 14:50:31 | INFO     | core.gateway | NAT rules configured
+2026-01-17 14:50:31 | INFO     | core.gateway | Configuring DHCP server...
+2026-01-17 14:50:31 | INFO     | core.gateway | DHCP disabled - skipping dnsmasq configuration (NetworkManager mode)
+2026-01-17 14:50:31 | INFO     | core.gateway | DHCP lease monitor started
+2026-01-17 14:50:31 | INFO     | core.gateway | ============================================================
+2026-01-17 14:50:31 | INFO     | core.gateway | RAKSHAK Gateway ACTIVE
+2026-01-17 14:50:31 | INFO     | core.gateway |   WAN Interface: wlo1
+2026-01-17 14:50:31 | INFO     | core.gateway |   LAN Interface: br0
+2026-01-17 14:50:31 | INFO     | core.gateway |   Bridge Mode: ENABLED (br0)
+2026-01-17 14:50:31 | INFO     | core.gateway |   Bridge Members: enx207bd51a6a7d
+2026-01-17 14:50:31 | INFO     | core.gateway |   Gateway IP: 10.42.0.1
+2026-01-17 14:50:31 | INFO     | core.gateway |   DHCP Range: 10.42.0.10 - 10.42.0.254
+2026-01-17 14:50:31 | INFO     | core.gateway |   Jetson Platform: False
+2026-01-17 14:50:31 | INFO     | core.gateway | ============================================================
+2026-01-17 14:50:31 | INFO     | core.packet_filter | Dashboard access monitor started
+2026-01-17 14:50:31 | INFO     | core.deception_engine | Deployed honeypot HP-0001 (telnet:21)
+2026-01-17 14:50:31 | INFO     | core.deception_engine | Telnet honeypot HP-0001 listening on port 21
+2026-01-17 14:50:31 | INFO     | core.packet_filter | Monitoring /var/log/kern.log for dashboard access
+2026-01-17 14:50:31 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:21 | success
+2026-01-17 14:50:31 | INFO     | __main__ | TRAP: Deployed telnet honeypot on port 21 (tp_link)
+2026-01-17 14:50:31 | INFO     | core.deception_engine | Deployed honeypot HP-0002 (telnet:23)
+2026-01-17 14:50:31 | INFO     | core.deception_engine | Telnet honeypot HP-0002 listening on port 23
+2026-01-17 14:50:31 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:23 | success
+2026-01-17 14:50:31 | INFO     | __main__ | TRAP: Deployed telnet honeypot on port 23 (wyze_cam)
+2026-01-17 14:50:31 | INFO     | core.deception_engine | Deployed honeypot HP-0003 (http:80)
+2026-01-17 14:50:31 | INFO     | core.deception_engine | HTTP honeypot HP-0003 listening on port 80
+2026-01-17 14:50:31 | INFO     | core.threat_logger | ACTION: deploy_honeypot | http:80 | success
+2026-01-17 14:50:31 | INFO     | __main__ | TRAP: Deployed http honeypot on port 80 (samsung_tv)
+2026-01-17 14:50:31 | INFO     | core.deception_engine | Deployed honeypot HP-0004 (http:8080)
+2026-01-17 14:50:31 | INFO     | core.deception_engine | HTTP honeypot HP-0004 listening on port 8080
+2026-01-17 14:50:31 | INFO     | core.threat_logger | ACTION: deploy_honeypot | http:8080 | success
+2026-01-17 14:50:31 | INFO     | __main__ | TRAP: Deployed http honeypot on port 8080 (tp_link)
+2026-01-17 14:50:31 | INFO     | core.deception_engine | Deployed honeypot HP-0005 (telnet:22)
+2026-01-17 14:50:31 | INFO     | core.deception_engine | Telnet honeypot HP-0005 listening on port 22
+2026-01-17 14:50:31 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:22 | success
+2026-01-17 14:50:31 | INFO     | __main__ | TRAP: Deployed telnet honeypot on port 22 (nest)
+2026-01-17 14:50:31 | INFO     | core.arp_interceptor | KAVACH: Initialized on enx207bd51a6a7d (MAC: 20:7b:d5:1a:6a:7d)
+2026-01-17 14:50:31 | INFO     | core.arp_interceptor | KAVACH: ARP interceptor started on enx207bd51a6a7d
+2026-01-17 14:50:31 | INFO     | core.arp_interceptor | KAVACH: Gateway 10.42.0.1 (20:7b:d5:1a:6a:7d)
+2026-01-17 14:50:31 | INFO     | core.passive_discovery | SSDP listener started on UDP 1900
+2026-01-17 14:50:31 | INFO     | core.passive_discovery | ONVIF listener started on UDP 3702
+2026-01-17 14:50:31 | INFO     | core.passive_discovery | ARP listener started on br0
+2026-01-17 14:50:31 | INFO     | core.passive_discovery | RTSP prober started
+2026-01-17 14:50:31 | INFO     | core.passive_discovery | Passive discovery started
+2026-01-17 14:50:31 | INFO     | core.network_scanner | MAYA: Passive discovery started
+2026-01-17 14:50:31 | INFO     | core.passive_discovery | Passive discovery: 10.42.0.1 via arp_request (unknown, unknown)
+2026-01-17 14:51:57 | INFO     | core.network_scanner | MAYA: Discovered static IP device: 10.42.0.1 (unknown, unknown)
+2026-01-17 14:51:57 | INFO     | core.arp_interceptor | KAVACH: Tracking device 10.42.0.72 (e4:c3:2a:5d:69:5a)
+2026-01-17 14:51:57 | INFO     | core.passive_discovery | Passive discovery: 10.42.0.41 via arp_request (unknown, unknown)
+2026-01-17 14:51:57 | INFO     | core.arp_interceptor | KAVACH: Tracking device 10.42.0.71 (3e:2a:b7:ec:12:6b)
+2026-01-17 14:51:57 | INFO     | core.network_scanner | MAYA: Discovered static IP device: 10.42.0.41 (unknown, unknown)
+2026-01-17 14:51:57 | INFO     | core.passive_discovery | Passive discovery: 10.42.0.72 via arp_reply (unknown, unknown)
+2026-01-17 14:51:57 | INFO     | core.passive_discovery | Passive discovery: 10.42.0.71 via arp_reply (unknown, unknown)
+2026-01-17 14:51:57 | INFO     | core.passive_discovery | Passive discovery: 10.42.0.87 via arp_reply (unknown, unknown)
+2026-01-17 14:51:57 | INFO     | core.network_scanner | MAYA: Discovered static IP device: 10.42.0.87 (unknown, unknown)
+2026-01-17 14:51:57 | INFO     | core.passive_discovery | Passive discovery: 10.42.0.27 via arp_reply (unknown, unknown)
+2026-01-17 14:51:57 | INFO     | core.network_scanner | MAYA: Discovered static IP device: 10.42.0.27 (unknown, unknown)
+2026-01-17 14:52:32 | INFO     | core.passive_discovery | RTSP service found on 10.42.0.27:554
+2026-01-17 14:52:39 | CRITICAL | core.gateway | Device 10.42.0.66 FULLY ISOLATED - Isolated via NetworkScanner
+2026-01-17 14:52:39 | WARNING  | core.network_scanner | Device 10.42.0.66 ISOLATED via gateway (REAL)
+2026-01-17 14:52:39 | INFO     | core.threat_logger | ACTION: isolate_device | 10.42.0.66 | success
+2026-01-17 14:52:39 | CRITICAL | core.gateway | Device 10.42.0.166 FULLY ISOLATED - Isolated via NetworkScanner
+2026-01-17 14:52:39 | WARNING  | core.network_scanner | Device 10.42.0.166 ISOLATED via gateway (REAL)
+2026-01-17 14:52:39 | INFO     | core.threat_logger | ACTION: isolate_device | 10.42.0.166 | success
+2026-01-17 14:52:40 | CRITICAL | core.gateway | Device 10.42.0.72 FULLY ISOLATED - Isolated via NetworkScanner
+2026-01-17 14:52:40 | WARNING  | core.network_scanner | Device 10.42.0.72 ISOLATED via gateway (REAL)
+2026-01-17 14:52:40 | INFO     | core.threat_logger | ACTION: isolate_device | 10.42.0.72 | success
+2026-01-17 14:52:40 | CRITICAL | core.gateway | Device 10.42.0.223 FULLY ISOLATED - Isolated via NetworkScanner
+2026-01-17 14:52:40 | WARNING  | core.network_scanner | Device 10.42.0.223 ISOLATED via gateway (REAL)
+2026-01-17 14:52:40 | INFO     | core.threat_logger | ACTION: isolate_device | 10.42.0.223 | success
+2026-01-17 14:52:41 | CRITICAL | core.gateway | Device 10.42.0.71 FULLY ISOLATED - Isolated via NetworkScanner
+2026-01-17 14:52:41 | WARNING  | core.network_scanner | Device 10.42.0.71 ISOLATED via gateway (REAL)
+2026-01-17 14:52:41 | INFO     | core.threat_logger | ACTION: isolate_device | 10.42.0.71 | success
+2026-01-17 14:52:42 | CRITICAL | core.gateway | Device 10.42.0.1 FULLY ISOLATED - Isolated via NetworkScanner
+2026-01-17 14:52:42 | WARNING  | core.network_scanner | Device 10.42.0.1 ISOLATED via gateway (REAL)
+2026-01-17 14:52:42 | INFO     | core.threat_logger | ACTION: isolate_device | 10.42.0.1 | success
+2026-01-17 14:52:43 | CRITICAL | core.gateway | Device 10.42.0.87 FULLY ISOLATED - Isolated via NetworkScanner
+2026-01-17 14:52:43 | WARNING  | core.network_scanner | Device 10.42.0.87 ISOLATED via gateway (REAL)
+2026-01-17 14:52:43 | INFO     | core.threat_logger | ACTION: isolate_device | 10.42.0.87 | success
+2026-01-17 14:52:43 | CRITICAL | core.gateway | Device 10.42.0.27 FULLY ISOLATED - Isolated via NetworkScanner
+2026-01-17 14:52:43 | WARNING  | core.network_scanner | Device 10.42.0.27 ISOLATED via gateway (REAL)
+2026-01-17 14:52:43 | INFO     | core.threat_logger | ACTION: isolate_device | 10.42.0.27 | success
+2026-01-17 14:52:44 | CRITICAL | core.gateway | Device 10.42.0.41 FULLY ISOLATED - Isolated via NetworkScanner
+2026-01-17 14:52:44 | WARNING  | core.network_scanner | Device 10.42.0.41 ISOLATED via gateway (REAL)
+2026-01-17 14:52:44 | INFO     | core.threat_logger | ACTION: isolate_device | 10.42.0.41 | success
+2026-01-17 14:54:29 | INFO     | core.deception_engine | HTTP connection from 10.42.0.71:44888
+2026-01-17 14:54:29 | WARNING  | core.threat_logger | THREAT: http_probe | medium | 10.42.0.71 -> HTTP Honeypot HP-0003
+2026-01-17 14:54:29 | INFO     | __main__ | Processing threat: http_probe from 10.42.0.71
+2026-01-17 14:54:29 | INFO     | __main__ | KAAL decided: ALERT_USER
+2026-01-17 14:54:29 | WARNING  | core.agentic_defender | KAAL: Alert - Threat detected from 10.42.0.71
+2026-01-17 14:54:29 | INFO     | core.threat_logger | ACTION: ALERT_USER | 10.42.0.71 | success
+2026-01-17 14:54:29 | INFO     | __main__ | Action logged (no gateway): ALERT_USER
+2026-01-17 14:54:29 | INFO     | __main__ | Action: Alerting user
+2026-01-17 14:54:29 | INFO     | core.threat_logger | ACTION: ALERT_USER | 10.42.0.71 | decided
+2026-01-17 15:01:18 | INFO     | core.passive_discovery | Passive discovery: 10.42.0.73 via arp_request (unknown, unknown)
+2026-01-17 15:01:18 | INFO     | core.network_scanner | MAYA: Discovered static IP device: 10.42.0.73 (unknown, unknown)
+2026-01-17 15:01:57 | INFO     | core.arp_interceptor | KAVACH: Tracking device 10.42.0.73 (e4:c3:2a:5d:69:5a)
+2026-01-17 15:39:29 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 15:39:29 | INFO     | core.deception_engine | Stopped all honeypots and removed NAT redirections
+2026-01-17 15:39:29 | INFO     | __main__ | Stopping MAYA passive discovery...
+2026-01-17 15:39:30 | INFO     | core.passive_discovery | Passive discovery stopped
+2026-01-17 15:39:30 | INFO     | core.network_scanner | MAYA: Passive discovery stopped
+2026-01-17 15:39:30 | INFO     | __main__ | Stopping KAVACH ARP interceptor...
+2026-01-17 15:39:32 | INFO     | core.arp_interceptor | KAVACH: Restoring original ARP entries...
+2026-01-17 15:39:33 | INFO     | core.arp_interceptor | KAVACH: ARP tables restored
+2026-01-17 15:39:33 | INFO     | core.arp_interceptor | KAVACH: ARP interceptor stopped, ARP tables restored
+2026-01-17 15:39:33 | INFO     | __main__ | Stopping gateway...
+2026-01-17 15:39:33 | INFO     | core.gateway | Stopping RAKSHAK Gateway...
+2026-01-17 15:39:33 | INFO     | core.gateway | Device 10.42.0.66 isolation removed
+2026-01-17 15:39:33 | INFO     | core.gateway | Device 10.42.0.166 isolation removed
+2026-01-17 15:39:33 | INFO     | core.gateway | Device 10.42.0.72 isolation removed
+2026-01-17 15:39:33 | INFO     | core.gateway | Device 10.42.0.223 isolation removed
+2026-01-17 15:39:33 | INFO     | core.gateway | Device 10.42.0.71 isolation removed
+2026-01-17 15:39:33 | INFO     | core.gateway | Device 10.42.0.1 isolation removed
+2026-01-17 15:39:33 | INFO     | core.gateway | Device 10.42.0.87 isolation removed
+2026-01-17 15:39:33 | INFO     | core.gateway | Device 10.42.0.27 isolation removed
+2026-01-17 15:39:33 | INFO     | core.gateway | Device 10.42.0.41 isolation removed
+2026-01-17 15:39:33 | INFO     | core.gateway | RAKSHAK firewall chains removed
+2026-01-17 15:39:33 | INFO     | core.gateway | Tearing down bridge...
+2026-01-17 15:39:33 | INFO     | core.gateway | Tearing down bridge br0, restoring to enx207bd51a6a7d
+2026-01-17 15:39:33 | INFO     | core.gateway | Bridge br0 removed, restored to enx207bd51a6a7d
+2026-01-17 15:39:33 | INFO     | core.gateway | RAKSHAK Gateway stopped successfully
+2026-01-17 15:39:33 | INFO     | core.packet_filter | PacketFilter stopped
+2026-01-17 15:39:33 | INFO     | __main__ | RAKSHAK stopped
