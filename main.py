@@ -306,6 +306,11 @@ class RakshakOrchestrator:
         # Flask app for dashboard
         self.app = create_app(config, self)
 
+        # Import and assign socketio immediately (before threads start)
+        # This fixes the race condition where threat processor starts before socketio is available
+        from api.app import socketio
+        self.socketio = socketio
+
         logger.info("RAKSHAK components initialized successfully")
 
     def _init_gateway_mode(self):

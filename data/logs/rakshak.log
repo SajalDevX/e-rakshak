@@ -2374,3 +2374,1235 @@ Check the documentation of torch.load to learn more about types accepted by defa
 2026-01-17 08:26:13 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
 2026-01-17 08:26:18 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
 2026-01-17 08:26:23 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:26:28 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:26:33 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:26:38 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:26:40 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:26:43 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:26:48 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:26:53 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:26:58 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:27:00 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:27:00 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:27:00 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:27:03 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:27:08 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:27:10 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:27:13 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:27:18 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:27:23 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:27:28 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:27:29 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 08:27:29 | INFO     | core.deception_engine | Stopped all honeypots and removed NAT redirections
+2026-01-17 08:27:29 | INFO     | __main__ | Stopping gateway...
+2026-01-17 08:27:29 | INFO     | core.gateway | Stopping RAKSHAK Gateway...
+2026-01-17 08:27:29 | INFO     | core.gateway | Device 10.239.137.227 isolation removed
+2026-01-17 08:27:29 | INFO     | core.gateway | RAKSHAK firewall chains removed
+2026-01-17 08:27:30 | INFO     | core.gateway | RAKSHAK Gateway stopped successfully
+2026-01-17 08:27:30 | INFO     | core.packet_filter | PacketFilter stopped
+2026-01-17 08:27:30 | INFO     | __main__ | RAKSHAK stopped
+2026-01-17 08:27:30 | DEBUG    | api.app | WebSocket client disconnected
+2026-01-17 08:27:44 | INFO     | __main__ | Initializing RAKSHAK components...
+2026-01-17 08:27:44 | INFO     | __main__ | Initializing GATEWAY MODE...
+2026-01-17 08:27:44 | INFO     | core.gateway | RakshakGateway initialized
+2026-01-17 08:27:44 | INFO     | core.packet_filter | PacketFilter initialized
+2026-01-17 08:27:44 | INFO     | __main__ | Gateway mode components initialized
+2026-01-17 08:27:44 | DEBUG    | core.threat_logger | Database initialized at data/rakshak.db
+2026-01-17 08:27:44 | INFO     | core.threat_logger | ThreatLogger initialized
+2026-01-17 08:27:44 | INFO     | core.llm_honeypot | Ollama initialized with model: mistral:7b
+2026-01-17 08:27:44 | INFO     | core.llm_honeypot | LLMHoneypot initialized (LLM available: True, backend: ollama)
+2026-01-17 08:27:44 | INFO     | core.ids_classifier | IDS model loaded successfully: 15 attack classes
+2026-01-17 08:27:44 | INFO     | __main__ | IDS classifier loaded successfully
+2026-01-17 08:27:44 | INFO     | core.network_scanner | Auto-detected network interface: enx207bd51a6a7d
+2026-01-17 08:27:44 | INFO     | core.network_scanner | Auto-detected network range: 10.42.0.0/24
+2026-01-17 08:27:44 | INFO     | core.network_scanner | NetworkScanner initialized (simulation=False)
+2026-01-17 08:27:44 | INFO     | core.deception_engine | DeceptionEngine initialized (enabled=True)
+2026-01-17 08:27:44 | DEBUG    | core.event_store | Redis not installed - will use memory store
+2026-01-17 08:27:44 | INFO     | core.event_store | Auto-export started: every 3600s to data/events/
+2026-01-17 08:27:44 | INFO     | core.event_store | MemoryEventStore initialized (max_size=10000)
+2026-01-17 08:27:44 | INFO     | core.event_bus | LocalEventPublisher initialized
+2026-01-17 08:27:44 | INFO     | core.event_bus | AsyncEventPublisher initialized (queue_size=1000)
+2026-01-17 08:27:44 | INFO     | core.agentic_defender | Event publisher initialized for offline RL
+2026-01-17 08:27:44 | DEBUG    | core.agentic_defender | Networks initialized in INFERENCE mode (no training components)
+2026-01-17 08:27:44 | INFO     | core.agentic_defender | Loaded pre-trained model from models/kaal_policy.pth
+2026-01-17 08:27:44 | INFO     | core.agentic_defender | AgenticDefender initialized (mode=INFERENCE-ONLY, device=cuda)
+2026-01-17 08:27:44 | INFO     | core.agentic_defender | Gateway integration enabled for real device isolation
+2026-01-17 08:27:44 | INFO     | core.agentic_defender | Packet filter integration enabled
+2026-01-17 08:27:44 | INFO     | api.app | Flask app created successfully
+2026-01-17 08:27:44 | INFO     | __main__ | RAKSHAK components initialized successfully
+2026-01-17 08:27:44 | INFO     | __main__ | Starting RAKSHAK in GATEWAY mode...
+2026-01-17 08:27:44 | INFO     | __main__ | Starting gateway...
+2026-01-17 08:27:44 | INFO     | core.gateway | ============================================================
+2026-01-17 08:27:44 | INFO     | core.gateway | Starting RAKSHAK Inline Security Gateway
+2026-01-17 08:27:44 | INFO     | core.gateway | ============================================================
+2026-01-17 08:27:44 | INFO     | core.gateway | Detected interfaces: ['eno1', 'wlo1', 'br-4d548e8a4c39', 'enx207bd51a6a7d', 'enx3e3acd795fdc']
+2026-01-17 08:27:44 | DEBUG    | core.gateway | Current IP forwarding: 1
+2026-01-17 08:27:44 | INFO     | core.gateway | Non-Jetson platform (standard Linux)
+2026-01-17 08:27:44 | INFO     | core.gateway | Enabling IP forwarding...
+2026-01-17 08:27:44 | INFO     | core.gateway | IP forwarding enabled
+2026-01-17 08:27:44 | INFO     | core.gateway | Configuring LAN interface enx207bd51a6a7d...
+2026-01-17 08:27:44 | INFO     | core.gateway | IP 10.42.0.1/24 is already assigned to enx207bd51a6a7d
+2026-01-17 08:27:44 | INFO     | core.gateway | Setting up firewall chains...
+2026-01-17 08:27:44 | INFO     | core.gateway | RAKSHAK firewall chains configured
+2026-01-17 08:27:44 | INFO     | core.gateway | Setting up NAT rules...
+2026-01-17 08:27:44 | INFO     | core.gateway | NAT rules configured
+2026-01-17 08:27:44 | INFO     | core.gateway | Configuring DHCP server...
+2026-01-17 08:27:46 | INFO     | core.gateway | dnsmasq configured and running
+2026-01-17 08:27:46 | INFO     | core.gateway | DHCP lease monitor started
+2026-01-17 08:27:46 | INFO     | core.gateway | ============================================================
+2026-01-17 08:27:46 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:27:46 | INFO     | core.gateway | RAKSHAK Gateway ACTIVE
+2026-01-17 08:27:46 | INFO     | core.gateway |   WAN Interface: wlo1
+2026-01-17 08:27:46 | INFO     | core.gateway |   LAN Interface: enx207bd51a6a7d
+2026-01-17 08:27:46 | INFO     | core.gateway |   Gateway IP: 10.42.0.1
+2026-01-17 08:27:46 | INFO     | core.gateway |   DHCP Range: 10.42.0.10 - 10.42.0.254
+2026-01-17 08:27:46 | INFO     | core.gateway |   Jetson Platform: False
+2026-01-17 08:27:46 | INFO     | core.gateway | ============================================================
+2026-01-17 08:27:46 | DEBUG    | __main__ | Started thread: NetworkScanner
+2026-01-17 08:27:46 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:27:46 | DEBUG    | __main__ | Started thread: ThreatProcessor
+2026-01-17 08:27:48 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:27:51 | DEBUG    | api.app | WebSocket client connected
+2026-01-17 08:27:53 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:27:58 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:28:03 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:28:08 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:28:13 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:28:16 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:28:18 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:28:23 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:28:28 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:28:30 | DEBUG    | api.app | WebSocket client disconnected
+2026-01-17 08:28:30 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:28:30 | DEBUG    | api.app | WebSocket client connected
+2026-01-17 08:28:35 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:28:37 | INFO     | __main__ | Processing threat: port_scan from 10.91.136.214
+2026-01-17 08:28:37 | WARNING  | core.threat_logger | THREAT: port_scan | medium | 10.91.136.214 -> Smart Lock
+2026-01-17 08:28:37 | INFO     | __main__ | KAAL decided: MONITOR
+2026-01-17 08:28:37 | INFO     | core.agentic_defender | KAAL: Monitoring 10.91.136.214
+2026-01-17 08:28:37 | INFO     | core.threat_logger | ACTION: MONITOR | 10.91.136.214 | success
+2026-01-17 08:28:37 | DEBUG    | core.agentic_defender | Published decision event: 479c8413-721b-4fef-9a18-f951d07d01d1
+2026-01-17 08:28:37 | INFO     | __main__ | Action logged (no gateway): MONITOR
+2026-01-17 08:28:37 | DEBUG    | __main__ | Action: Continue monitoring
+2026-01-17 08:28:37 | INFO     | core.threat_logger | ACTION: MONITOR | 10.91.136.214 | decided
+2026-01-17 08:28:37 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:28:40 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:28:45 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:28:46 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:28:50 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:28:55 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:29:00 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:29:02 | INFO     | __main__ | Processing threat: dos_attack from 10.27.134.187
+2026-01-17 08:29:02 | WARNING  | core.threat_logger | THREAT: dos_attack | high | 10.27.134.187 -> Smart Thermostat
+2026-01-17 08:29:02 | INFO     | __main__ | KAAL decided: ISOLATE_DEVICE
+2026-01-17 08:29:02 | CRITICAL | core.gateway | Device 10.27.134.187 FULLY ISOLATED - Threat detected: dos_attack
+2026-01-17 08:29:02 | CRITICAL | core.agentic_defender | KAAL: Device 10.27.134.187 ISOLATED via gateway (REAL)
+2026-01-17 08:29:02 | INFO     | core.threat_logger | ACTION: ISOLATE_DEVICE | 10.27.134.187 | success
+2026-01-17 08:29:02 | DEBUG    | core.agentic_defender | Published decision event: 8f360efb-9210-4a95-8ea9-1690b64b556c
+2026-01-17 08:29:02 | WARNING  | __main__ | REAL ACTION TAKEN: ISOLATE_DEVICE
+2026-01-17 08:29:02 | WARNING  | __main__ | Action: Isolating device Smart Thermostat
+2026-01-17 08:29:02 | INFO     | core.threat_logger | ACTION: ISOLATE_DEVICE | 10.27.134.187 | decided
+2026-01-17 08:29:02 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:29:05 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:29:07 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:29:07 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:29:10 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:29:15 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:29:16 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:29:20 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:29:25 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:29:30 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:29:35 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:29:40 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:29:45 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:29:46 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:29:50 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:29:55 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:30:00 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:30:05 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:30:07 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:30:07 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:30:07 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:30:10 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:30:15 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:30:16 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:30:20 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:30:25 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:30:30 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:30:35 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:30:40 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:30:45 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:30:46 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:30:50 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:30:55 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:30:55 | DEBUG    | api.app | WebSocket client disconnected
+2026-01-17 08:30:56 | DEBUG    | api.app | WebSocket client connected
+2026-01-17 08:31:00 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:31:05 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:31:07 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:31:07 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:31:07 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:31:10 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:31:15 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:31:16 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:31:20 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:31:25 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:31:30 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:31:35 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:31:40 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:31:45 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:31:46 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:31:50 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:31:55 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:32:00 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:32:05 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:32:07 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:32:07 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:32:07 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:32:10 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:32:15 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:32:16 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:32:20 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:32:25 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:32:30 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:32:35 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:32:40 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:32:45 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:32:47 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:32:50 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:32:55 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:33:00 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:33:05 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:33:08 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:33:08 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:33:08 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:33:10 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:33:15 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:33:17 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:33:20 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:33:25 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:33:30 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:33:35 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:33:40 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:33:45 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:33:47 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:33:50 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:33:55 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:34:00 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:34:05 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:34:08 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:34:08 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:34:08 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:34:10 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:34:15 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:34:17 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:34:20 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:34:25 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:34:30 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:34:35 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:34:40 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:34:45 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:34:47 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:34:50 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:34:55 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:35:00 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:35:05 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:35:08 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:35:08 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:35:08 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:35:10 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:35:15 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:35:17 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:35:20 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:35:25 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:35:30 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:35:35 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:35:40 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:35:45 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:35:47 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:35:50 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:35:55 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:36:00 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:36:05 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:36:08 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:36:08 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:36:08 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:36:10 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:36:15 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:36:17 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:36:20 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:36:25 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:36:30 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:36:35 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:36:40 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:36:45 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:36:47 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:36:50 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:36:55 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:37:00 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:37:05 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:37:08 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:37:08 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:37:08 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:37:10 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:37:15 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:37:17 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:37:20 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:37:25 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:37:30 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:37:35 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:37:40 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:37:45 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:37:47 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:37:50 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:37:55 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:38:00 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:38:05 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:38:08 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:38:08 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:38:08 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:38:10 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:38:15 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:38:17 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:38:20 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 08:38:20 | INFO     | core.deception_engine | Stopped all honeypots and removed NAT redirections
+2026-01-17 08:38:20 | INFO     | __main__ | Stopping gateway...
+2026-01-17 08:38:20 | INFO     | core.gateway | Stopping RAKSHAK Gateway...
+2026-01-17 08:38:20 | INFO     | core.gateway | Device 10.27.134.187 isolation removed
+2026-01-17 08:38:20 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 08:38:20 | INFO     | core.deception_engine | Stopped all honeypots and removed NAT redirections
+2026-01-17 08:38:20 | INFO     | __main__ | Stopping gateway...
+2026-01-17 08:38:20 | INFO     | core.gateway | Stopping RAKSHAK Gateway...
+2026-01-17 08:38:20 | INFO     | core.gateway | RAKSHAK firewall chains removed
+2026-01-17 08:38:20 | INFO     | core.gateway | RAKSHAK Gateway stopped successfully
+2026-01-17 08:38:20 | INFO     | core.packet_filter | PacketFilter stopped
+2026-01-17 08:38:20 | INFO     | __main__ | RAKSHAK stopped
+2026-01-17 08:38:21 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:38:21 | DEBUG    | api.app | WebSocket client disconnected
+2026-01-17 08:38:51 | INFO     | __main__ | Initializing RAKSHAK components...
+2026-01-17 08:38:51 | INFO     | __main__ | Initializing GATEWAY MODE...
+2026-01-17 08:38:51 | INFO     | core.gateway | RakshakGateway initialized
+2026-01-17 08:38:51 | INFO     | core.packet_filter | PacketFilter initialized
+2026-01-17 08:38:51 | INFO     | __main__ | Gateway mode components initialized
+2026-01-17 08:38:51 | DEBUG    | core.threat_logger | Database initialized at data/rakshak.db
+2026-01-17 08:38:51 | INFO     | core.threat_logger | ThreatLogger initialized
+2026-01-17 08:38:51 | INFO     | core.llm_honeypot | Ollama initialized with model: mistral:7b
+2026-01-17 08:38:51 | INFO     | core.llm_honeypot | LLMHoneypot initialized (LLM available: True, backend: ollama)
+2026-01-17 08:38:52 | INFO     | core.ids_classifier | IDS model loaded successfully: 15 attack classes
+2026-01-17 08:38:52 | INFO     | __main__ | IDS classifier loaded successfully
+2026-01-17 08:38:52 | INFO     | core.network_scanner | Auto-detected network interface: enx207bd51a6a7d
+2026-01-17 08:38:52 | INFO     | core.network_scanner | Auto-detected network range: 10.42.0.0/24
+2026-01-17 08:38:52 | INFO     | core.network_scanner | NetworkScanner initialized (simulation=False)
+2026-01-17 08:38:52 | INFO     | core.deception_engine | DeceptionEngine initialized (enabled=True)
+2026-01-17 08:38:52 | DEBUG    | core.event_store | Redis not installed - will use memory store
+2026-01-17 08:38:52 | INFO     | core.event_store | Auto-export started: every 3600s to data/events/
+2026-01-17 08:38:52 | INFO     | core.event_store | MemoryEventStore initialized (max_size=10000)
+2026-01-17 08:38:52 | INFO     | core.event_bus | LocalEventPublisher initialized
+2026-01-17 08:38:52 | INFO     | core.event_bus | AsyncEventPublisher initialized (queue_size=1000)
+2026-01-17 08:38:52 | INFO     | core.agentic_defender | Event publisher initialized for offline RL
+2026-01-17 08:38:52 | DEBUG    | core.agentic_defender | Networks initialized in INFERENCE mode (no training components)
+2026-01-17 08:38:52 | INFO     | core.agentic_defender | Loaded pre-trained model from models/kaal_policy.pth
+2026-01-17 08:38:52 | INFO     | core.agentic_defender | AgenticDefender initialized (mode=INFERENCE-ONLY, device=cuda)
+2026-01-17 08:38:52 | INFO     | core.agentic_defender | Gateway integration enabled for real device isolation
+2026-01-17 08:38:52 | INFO     | core.agentic_defender | Packet filter integration enabled
+2026-01-17 08:38:52 | INFO     | api.app | Flask app created successfully
+2026-01-17 08:38:52 | INFO     | __main__ | RAKSHAK components initialized successfully
+2026-01-17 08:38:52 | INFO     | __main__ | Starting RAKSHAK in GATEWAY mode...
+2026-01-17 08:38:52 | INFO     | __main__ | Starting gateway...
+2026-01-17 08:38:52 | INFO     | core.gateway | ============================================================
+2026-01-17 08:38:52 | INFO     | core.gateway | Starting RAKSHAK Inline Security Gateway
+2026-01-17 08:38:52 | INFO     | core.gateway | ============================================================
+2026-01-17 08:38:52 | INFO     | core.gateway | Detected interfaces: ['eno1', 'wlo1', 'br-4d548e8a4c39', 'enx207bd51a6a7d', 'enx3e3acd795fdc']
+2026-01-17 08:38:52 | DEBUG    | core.gateway | Current IP forwarding: 1
+2026-01-17 08:38:52 | INFO     | core.gateway | Non-Jetson platform (standard Linux)
+2026-01-17 08:38:52 | INFO     | core.gateway | Enabling IP forwarding...
+2026-01-17 08:38:52 | INFO     | core.gateway | IP forwarding enabled
+2026-01-17 08:38:52 | INFO     | core.gateway | Configuring LAN interface enx207bd51a6a7d...
+2026-01-17 08:38:52 | INFO     | core.gateway | IP 10.42.0.1/24 is already assigned to enx207bd51a6a7d
+2026-01-17 08:38:52 | INFO     | core.gateway | Setting up firewall chains...
+2026-01-17 08:38:52 | INFO     | core.gateway | RAKSHAK firewall chains configured
+2026-01-17 08:38:52 | INFO     | core.gateway | Setting up NAT rules...
+2026-01-17 08:38:52 | INFO     | core.gateway | NAT rules configured
+2026-01-17 08:38:52 | INFO     | core.gateway | Configuring DHCP server...
+2026-01-17 08:38:54 | INFO     | core.gateway | dnsmasq configured and running
+2026-01-17 08:38:54 | INFO     | core.gateway | DHCP lease monitor started
+2026-01-17 08:38:54 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:38:54 | INFO     | core.gateway | ============================================================
+2026-01-17 08:38:54 | INFO     | core.gateway | RAKSHAK Gateway ACTIVE
+2026-01-17 08:38:54 | INFO     | core.gateway |   WAN Interface: wlo1
+2026-01-17 08:38:54 | INFO     | core.gateway |   LAN Interface: enx207bd51a6a7d
+2026-01-17 08:38:54 | INFO     | core.gateway |   Gateway IP: 10.42.0.1
+2026-01-17 08:38:54 | INFO     | core.gateway |   DHCP Range: 10.42.0.10 - 10.42.0.254
+2026-01-17 08:38:54 | INFO     | core.gateway |   Jetson Platform: False
+2026-01-17 08:38:54 | INFO     | core.gateway | ============================================================
+2026-01-17 08:38:54 | DEBUG    | __main__ | Started thread: NetworkScanner
+2026-01-17 08:38:54 | DEBUG    | __main__ | Started thread: ThreatProcessor
+2026-01-17 08:38:54 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:38:55 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:38:58 | DEBUG    | api.app | WebSocket client connected
+2026-01-17 08:39:00 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:39:05 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:39:10 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:39:15 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:39:20 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:39:24 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:39:25 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:39:30 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:39:35 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:39:37 | DEBUG    | api.app | WebSocket client disconnected
+2026-01-17 08:39:37 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:39:37 | DEBUG    | api.app | WebSocket client connected
+2026-01-17 08:39:42 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:39:47 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:39:52 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:39:54 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:39:57 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:40:02 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:40:07 | CRITICAL | core.gateway | Device 10.42.0.223 FULLY ISOLATED - Isolated via NetworkScanner
+2026-01-17 08:40:07 | WARNING  | core.network_scanner | Device 10.42.0.223 ISOLATED via gateway (REAL)
+2026-01-17 08:40:07 | INFO     | core.threat_logger | ACTION: isolate_device | 10.42.0.223 | success
+2026-01-17 08:40:07 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:40:12 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:40:15 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:40:15 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:40:17 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:40:22 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:40:24 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:40:27 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:40:32 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:40:37 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:40:42 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:40:47 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:40:52 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:40:54 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:40:57 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:41:02 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:41:07 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:41:12 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:41:15 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:41:15 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:41:15 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:41:17 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:41:22 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:41:24 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:41:27 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:41:32 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:41:37 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:41:42 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:41:47 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:41:52 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:41:54 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:41:57 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:42:02 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:42:07 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:42:12 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:42:15 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:42:15 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:42:15 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:42:17 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:42:22 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:42:24 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:42:27 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:42:32 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:42:37 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:42:42 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:42:47 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:42:52 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:42:54 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:42:57 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:43:02 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:43:07 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:43:12 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:43:15 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:43:15 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:43:15 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:43:17 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:43:22 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:43:24 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:43:27 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:43:32 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:43:37 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:43:42 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:43:43 | INFO     | core.deception_engine | Deployed honeypot HP-0001 (telnet:2323)
+2026-01-17 08:43:43 | INFO     | core.deception_engine | Telnet honeypot HP-0001 listening on port 2323
+2026-01-17 08:43:43 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2323 | success
+2026-01-17 08:43:47 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:43:52 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:43:54 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:43:57 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:44:02 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:44:07 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:44:12 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:44:15 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:44:15 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:44:15 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:44:17 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:44:22 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:44:24 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:44:27 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:44:32 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:44:37 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:44:42 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:44:47 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:44:52 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:44:54 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:44:57 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:45:02 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:45:07 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:45:12 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:45:15 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:45:15 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:45:15 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:45:17 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:45:22 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:45:24 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:45:27 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:45:32 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:45:37 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:45:42 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:45:47 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:45:52 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:45:54 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:45:57 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:46:02 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:46:07 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:46:12 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:46:15 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:46:15 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:46:15 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:46:17 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:46:22 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:46:24 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:46:27 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:46:32 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:46:37 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:46:42 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:46:47 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:46:52 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:46:54 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:46:57 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:47:02 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:47:07 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:47:12 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:47:15 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:47:15 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:47:15 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:47:17 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:47:22 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:47:24 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:47:27 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:47:32 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:47:37 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:47:42 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:47:47 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:47:52 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:47:54 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:47:57 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:48:02 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:48:07 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:48:12 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:48:15 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:48:15 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:48:15 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:48:17 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:48:22 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:48:24 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:48:27 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:48:32 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:48:37 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:48:42 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:48:47 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:48:52 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:48:54 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:48:57 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:49:02 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:49:07 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:49:12 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:49:15 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:49:15 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:49:15 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:49:17 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:49:22 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:49:24 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:49:27 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:49:32 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:49:37 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:49:42 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:49:47 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:49:52 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:49:54 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:49:57 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:50:02 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:50:07 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:50:12 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:50:15 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:50:15 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:50:15 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:50:17 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:50:22 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:50:24 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:50:27 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:50:32 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:50:37 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:50:42 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:50:47 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:50:52 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:50:54 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:50:57 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:51:02 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:51:07 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:51:12 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:51:15 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:51:15 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:51:15 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:51:17 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:51:22 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:51:24 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:51:27 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:51:32 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:51:37 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:51:42 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:51:47 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:51:52 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:51:54 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:51:57 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:52:02 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:52:07 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:52:12 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:52:15 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:52:15 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:52:15 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:52:17 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:52:22 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:52:24 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:52:27 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:52:32 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:52:37 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:52:42 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:52:47 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:52:52 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:52:54 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:52:57 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:53:02 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:53:07 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:53:12 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:53:15 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:53:15 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:53:15 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:53:17 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:53:22 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:53:24 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:53:27 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:53:32 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:53:33 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 08:53:33 | INFO     | core.deception_engine | Stopped all honeypots and removed NAT redirections
+2026-01-17 08:53:33 | INFO     | __main__ | Stopping gateway...
+2026-01-17 08:53:33 | INFO     | core.gateway | Stopping RAKSHAK Gateway...
+2026-01-17 08:53:33 | INFO     | core.gateway | Device 10.42.0.223 isolation removed
+2026-01-17 08:53:33 | INFO     | core.gateway | RAKSHAK firewall chains removed
+2026-01-17 08:53:33 | INFO     | core.gateway | RAKSHAK Gateway stopped successfully
+2026-01-17 08:53:33 | INFO     | core.packet_filter | PacketFilter stopped
+2026-01-17 08:53:33 | INFO     | __main__ | RAKSHAK stopped
+2026-01-17 08:53:33 | DEBUG    | api.app | WebSocket client disconnected
+2026-01-17 08:53:42 | INFO     | __main__ | Initializing RAKSHAK components...
+2026-01-17 08:53:42 | INFO     | __main__ | Initializing GATEWAY MODE...
+2026-01-17 08:53:42 | INFO     | core.gateway | RakshakGateway initialized
+2026-01-17 08:53:42 | INFO     | core.packet_filter | PacketFilter initialized
+2026-01-17 08:53:42 | INFO     | __main__ | Gateway mode components initialized
+2026-01-17 08:53:42 | DEBUG    | core.threat_logger | Database initialized at data/rakshak.db
+2026-01-17 08:53:42 | INFO     | core.threat_logger | ThreatLogger initialized
+2026-01-17 08:53:42 | INFO     | core.llm_honeypot | Ollama initialized with model: mistral:7b
+2026-01-17 08:53:42 | INFO     | core.llm_honeypot | LLMHoneypot initialized (LLM available: True, backend: ollama)
+2026-01-17 08:53:42 | INFO     | core.ids_classifier | IDS model loaded successfully: 15 attack classes
+2026-01-17 08:53:42 | INFO     | __main__ | IDS classifier loaded successfully
+2026-01-17 08:53:42 | INFO     | core.network_scanner | Auto-detected network interface: enx207bd51a6a7d
+2026-01-17 08:53:42 | INFO     | core.network_scanner | Auto-detected network range: 10.42.0.0/24
+2026-01-17 08:53:42 | INFO     | core.network_scanner | NetworkScanner initialized (simulation=False)
+2026-01-17 08:53:42 | INFO     | core.deception_engine | DeceptionEngine initialized (enabled=True)
+2026-01-17 08:53:42 | DEBUG    | core.event_store | Redis not installed - will use memory store
+2026-01-17 08:53:42 | INFO     | core.event_store | Auto-export started: every 3600s to data/events/
+2026-01-17 08:53:42 | INFO     | core.event_store | MemoryEventStore initialized (max_size=10000)
+2026-01-17 08:53:42 | INFO     | core.event_bus | LocalEventPublisher initialized
+2026-01-17 08:53:42 | INFO     | core.event_bus | AsyncEventPublisher initialized (queue_size=1000)
+2026-01-17 08:53:42 | INFO     | core.agentic_defender | Event publisher initialized for offline RL
+2026-01-17 08:53:42 | DEBUG    | core.agentic_defender | Networks initialized in INFERENCE mode (no training components)
+2026-01-17 08:53:42 | INFO     | core.agentic_defender | Loaded pre-trained model from models/kaal_policy.pth
+2026-01-17 08:53:42 | INFO     | core.agentic_defender | AgenticDefender initialized (mode=INFERENCE-ONLY, device=cuda)
+2026-01-17 08:53:42 | INFO     | core.agentic_defender | Gateway integration enabled for real device isolation
+2026-01-17 08:53:42 | INFO     | core.agentic_defender | Packet filter integration enabled
+2026-01-17 08:53:42 | INFO     | api.app | Flask app created successfully
+2026-01-17 08:53:42 | INFO     | __main__ | RAKSHAK components initialized successfully
+2026-01-17 08:53:42 | INFO     | __main__ | Starting RAKSHAK in GATEWAY mode...
+2026-01-17 08:53:42 | INFO     | __main__ | Starting gateway...
+2026-01-17 08:53:42 | INFO     | core.gateway | ============================================================
+2026-01-17 08:53:42 | INFO     | core.gateway | Starting RAKSHAK Inline Security Gateway
+2026-01-17 08:53:42 | INFO     | core.gateway | ============================================================
+2026-01-17 08:53:42 | INFO     | core.gateway | Detected interfaces: ['eno1', 'wlo1', 'br-4d548e8a4c39', 'enx207bd51a6a7d', 'enx3e3acd795fdc']
+2026-01-17 08:53:42 | DEBUG    | core.gateway | Current IP forwarding: 1
+2026-01-17 08:53:42 | INFO     | core.gateway | Non-Jetson platform (standard Linux)
+2026-01-17 08:53:42 | INFO     | core.gateway | Enabling IP forwarding...
+2026-01-17 08:53:42 | INFO     | core.gateway | IP forwarding enabled
+2026-01-17 08:53:42 | INFO     | core.gateway | Configuring LAN interface enx207bd51a6a7d...
+2026-01-17 08:53:42 | INFO     | core.gateway | IP 10.42.0.1/24 is already assigned to enx207bd51a6a7d
+2026-01-17 08:53:42 | INFO     | core.gateway | Setting up firewall chains...
+2026-01-17 08:53:42 | INFO     | core.gateway | RAKSHAK firewall chains configured
+2026-01-17 08:53:42 | INFO     | core.gateway | Setting up NAT rules...
+2026-01-17 08:53:42 | INFO     | core.gateway | NAT rules configured
+2026-01-17 08:53:42 | INFO     | core.gateway | Configuring DHCP server...
+2026-01-17 08:53:44 | INFO     | core.gateway | dnsmasq configured and running
+2026-01-17 08:53:44 | INFO     | core.gateway | DHCP lease monitor started
+2026-01-17 08:53:44 | INFO     | core.gateway | ============================================================
+2026-01-17 08:53:44 | INFO     | core.gateway | RAKSHAK Gateway ACTIVE
+2026-01-17 08:53:44 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:53:44 | INFO     | core.gateway |   WAN Interface: wlo1
+2026-01-17 08:53:44 | INFO     | core.gateway |   LAN Interface: enx207bd51a6a7d
+2026-01-17 08:53:44 | INFO     | core.gateway |   Gateway IP: 10.42.0.1
+2026-01-17 08:53:44 | INFO     | core.gateway |   DHCP Range: 10.42.0.10 - 10.42.0.254
+2026-01-17 08:53:44 | INFO     | core.gateway |   Jetson Platform: False
+2026-01-17 08:53:44 | INFO     | core.gateway | ============================================================
+2026-01-17 08:53:44 | DEBUG    | __main__ | Started thread: NetworkScanner
+2026-01-17 08:53:44 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:53:44 | DEBUG    | __main__ | Started thread: ThreatProcessor
+2026-01-17 08:53:46 | DEBUG    | api.app | WebSocket client connected
+2026-01-17 08:53:47 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:53:52 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:53:54 | DEBUG    | api.app | WebSocket client disconnected
+2026-01-17 08:53:54 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:53:54 | DEBUG    | api.app | WebSocket client connected
+2026-01-17 08:53:59 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:54:04 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:54:09 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:54:14 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:54:14 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:54:19 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:54:24 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:54:29 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:54:34 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:54:39 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:54:44 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:54:44 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:54:49 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:54:54 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:54:59 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:55:04 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:55:07 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:55:07 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:55:09 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:55:14 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:55:14 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:55:19 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:55:24 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:55:29 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:55:34 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:55:44 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:55:57 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:56:07 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:56:07 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:56:07 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:56:14 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:56:44 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:56:57 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:57:07 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:57:07 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:57:07 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:57:14 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:57:44 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:57:57 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:58:07 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:58:07 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:58:07 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:58:14 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:58:44 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:58:57 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:59:07 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:59:07 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 08:59:07 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 08:59:14 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:59:28 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:59:29 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:59:34 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:59:39 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:59:44 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:59:44 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:59:49 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:59:54 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 08:59:59 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 09:00:04 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 09:00:07 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 09:00:07 | DEBUG    | core.network_scanner | Discovered 2 devices from DHCP leases
+2026-01-17 09:00:07 | DEBUG    | __main__ | Discovered 2 devices
+2026-01-17 09:00:09 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 09:00:14 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 09:00:14 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 09:00:19 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 09:00:24 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 09:00:29 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 09:00:34 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 09:00:39 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 09:00:44 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 09:00:44 | DEBUG    | core.gateway | Refreshed 2 DHCP leases
+2026-01-17 09:00:49 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:00:54 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:00:59 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:01:04 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:01:07 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:01:08 | DEBUG    | core.network_scanner | Discovered 3 devices from DHCP leases
+2026-01-17 09:01:08 | DEBUG    | __main__ | Discovered 3 devices
+2026-01-17 09:01:09 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:01:14 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:01:14 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:01:19 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:01:24 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:01:29 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:01:34 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:01:39 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:01:44 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:01:44 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:01:49 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:01:54 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:01:59 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:02:04 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:02:08 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:02:08 | DEBUG    | core.network_scanner | Discovered 3 devices from DHCP leases
+2026-01-17 09:02:08 | DEBUG    | __main__ | Discovered 3 devices
+2026-01-17 09:02:09 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:02:14 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:02:14 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:02:19 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:02:24 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:02:29 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:02:34 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:02:39 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:02:44 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:02:44 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:02:49 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:02:54 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:02:59 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:03:04 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:03:08 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:03:08 | DEBUG    | core.network_scanner | Discovered 3 devices from DHCP leases
+2026-01-17 09:03:08 | DEBUG    | __main__ | Discovered 3 devices
+2026-01-17 09:03:09 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:03:14 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:03:14 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:03:19 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:03:24 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:03:29 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:03:34 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:03:39 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:03:44 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:03:44 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:03:49 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:03:54 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:03:59 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:04:04 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:04:08 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:04:08 | DEBUG    | core.network_scanner | Discovered 3 devices from DHCP leases
+2026-01-17 09:04:08 | DEBUG    | __main__ | Discovered 3 devices
+2026-01-17 09:04:09 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:04:14 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:04:14 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:04:19 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:04:24 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:04:29 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:04:34 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:04:39 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:04:44 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:04:44 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:04:49 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:04:54 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:04:59 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:05:04 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:05:08 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:05:08 | DEBUG    | core.network_scanner | Discovered 3 devices from DHCP leases
+2026-01-17 09:05:08 | DEBUG    | __main__ | Discovered 3 devices
+2026-01-17 09:05:09 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:05:14 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:05:14 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:05:19 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:05:24 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:05:29 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:05:34 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:05:39 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:05:44 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:05:44 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:05:47 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 09:05:47 | INFO     | core.deception_engine | Stopped all honeypots and removed NAT redirections
+2026-01-17 09:05:47 | INFO     | __main__ | Stopping gateway...
+2026-01-17 09:05:47 | INFO     | core.gateway | Stopping RAKSHAK Gateway...
+2026-01-17 09:05:48 | INFO     | core.gateway | RAKSHAK firewall chains removed
+2026-01-17 09:05:48 | INFO     | core.gateway | RAKSHAK Gateway stopped successfully
+2026-01-17 09:05:48 | INFO     | core.packet_filter | PacketFilter stopped
+2026-01-17 09:05:48 | INFO     | __main__ | RAKSHAK stopped
+2026-01-17 09:05:48 | DEBUG    | api.app | WebSocket client disconnected
+2026-01-17 09:05:55 | INFO     | __main__ | Initializing RAKSHAK components...
+2026-01-17 09:05:55 | INFO     | __main__ | Initializing GATEWAY MODE...
+2026-01-17 09:05:55 | INFO     | core.gateway | RakshakGateway initialized
+2026-01-17 09:05:55 | INFO     | core.packet_filter | PacketFilter initialized
+2026-01-17 09:05:55 | INFO     | __main__ | Gateway mode components initialized
+2026-01-17 09:05:55 | DEBUG    | core.threat_logger | Database initialized at data/rakshak.db
+2026-01-17 09:05:55 | INFO     | core.threat_logger | ThreatLogger initialized
+2026-01-17 09:05:55 | INFO     | core.llm_honeypot | Ollama initialized with model: mistral:7b
+2026-01-17 09:05:55 | INFO     | core.llm_honeypot | LLMHoneypot initialized (LLM available: True, backend: ollama)
+2026-01-17 09:05:56 | INFO     | core.ids_classifier | IDS model loaded successfully: 15 attack classes
+2026-01-17 09:05:56 | INFO     | __main__ | IDS classifier loaded successfully
+2026-01-17 09:05:56 | INFO     | core.network_scanner | Auto-detected network interface: enx207bd51a6a7d
+2026-01-17 09:05:56 | INFO     | core.network_scanner | Auto-detected network range: 10.42.0.0/24
+2026-01-17 09:05:56 | INFO     | core.network_scanner | NetworkScanner initialized (simulation=False)
+2026-01-17 09:05:56 | INFO     | core.deception_engine | DeceptionEngine initialized (enabled=True)
+2026-01-17 09:05:56 | DEBUG    | core.event_store | Redis not installed - will use memory store
+2026-01-17 09:05:56 | INFO     | core.event_store | Auto-export started: every 3600s to data/events/
+2026-01-17 09:05:56 | INFO     | core.event_store | MemoryEventStore initialized (max_size=10000)
+2026-01-17 09:05:56 | INFO     | core.event_bus | LocalEventPublisher initialized
+2026-01-17 09:05:56 | INFO     | core.event_bus | AsyncEventPublisher initialized (queue_size=1000)
+2026-01-17 09:05:56 | INFO     | core.agentic_defender | Event publisher initialized for offline RL
+2026-01-17 09:05:56 | DEBUG    | core.agentic_defender | Networks initialized in INFERENCE mode (no training components)
+2026-01-17 09:05:56 | INFO     | core.agentic_defender | Loaded pre-trained model from models/kaal_policy.pth
+2026-01-17 09:05:56 | INFO     | core.agentic_defender | AgenticDefender initialized (mode=INFERENCE-ONLY, device=cuda)
+2026-01-17 09:05:56 | INFO     | core.agentic_defender | Gateway integration enabled for real device isolation
+2026-01-17 09:05:56 | INFO     | core.agentic_defender | Packet filter integration enabled
+2026-01-17 09:05:56 | INFO     | api.app | Flask app created successfully
+2026-01-17 09:05:56 | INFO     | __main__ | RAKSHAK components initialized successfully
+2026-01-17 09:05:56 | INFO     | __main__ | Starting RAKSHAK in GATEWAY mode...
+2026-01-17 09:05:56 | INFO     | __main__ | Starting gateway...
+2026-01-17 09:05:56 | INFO     | core.gateway | ============================================================
+2026-01-17 09:05:56 | INFO     | core.gateway | Starting RAKSHAK Inline Security Gateway
+2026-01-17 09:05:56 | INFO     | core.gateway | ============================================================
+2026-01-17 09:05:56 | INFO     | core.gateway | Detected interfaces: ['eno1', 'wlo1', 'br-4d548e8a4c39', 'enx207bd51a6a7d', 'enx3e3acd795fdc']
+2026-01-17 09:05:56 | DEBUG    | core.gateway | Current IP forwarding: 1
+2026-01-17 09:05:56 | INFO     | core.gateway | Non-Jetson platform (standard Linux)
+2026-01-17 09:05:56 | INFO     | core.gateway | Enabling IP forwarding...
+2026-01-17 09:05:56 | INFO     | core.gateway | IP forwarding enabled
+2026-01-17 09:05:56 | INFO     | core.gateway | Configuring LAN interface enx207bd51a6a7d...
+2026-01-17 09:05:56 | INFO     | core.gateway | IP 10.42.0.1/24 is already assigned to enx207bd51a6a7d
+2026-01-17 09:05:56 | INFO     | core.gateway | Setting up firewall chains...
+2026-01-17 09:05:56 | INFO     | core.gateway | RAKSHAK firewall chains configured
+2026-01-17 09:05:56 | INFO     | core.gateway | Setting up NAT rules...
+2026-01-17 09:05:56 | INFO     | core.gateway | NAT rules configured
+2026-01-17 09:05:56 | INFO     | core.gateway | Configuring DHCP server...
+2026-01-17 09:05:58 | INFO     | core.gateway | dnsmasq configured and running
+2026-01-17 09:05:58 | INFO     | core.gateway | DHCP lease monitor started
+2026-01-17 09:05:58 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:05:58 | INFO     | core.gateway | ============================================================
+2026-01-17 09:05:58 | INFO     | core.gateway | RAKSHAK Gateway ACTIVE
+2026-01-17 09:05:58 | INFO     | core.gateway |   WAN Interface: wlo1
+2026-01-17 09:05:58 | INFO     | core.gateway |   LAN Interface: enx207bd51a6a7d
+2026-01-17 09:05:58 | INFO     | core.gateway |   Gateway IP: 10.42.0.1
+2026-01-17 09:05:58 | INFO     | core.gateway |   DHCP Range: 10.42.0.10 - 10.42.0.254
+2026-01-17 09:05:58 | INFO     | core.gateway |   Jetson Platform: False
+2026-01-17 09:05:58 | INFO     | core.gateway | ============================================================
+2026-01-17 09:05:58 | DEBUG    | __main__ | Started thread: NetworkScanner
+2026-01-17 09:05:58 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:05:58 | DEBUG    | __main__ | Started thread: ThreatProcessor
+2026-01-17 09:05:59 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:06:00 | DEBUG    | api.app | WebSocket client connected
+2026-01-17 09:06:02 | DEBUG    | api.app | WebSocket client disconnected
+2026-01-17 09:06:03 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:06:03 | DEBUG    | api.app | WebSocket client connected
+2026-01-17 09:06:08 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:06:13 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:06:18 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:06:23 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:06:28 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:06:28 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:06:33 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:06:38 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:06:43 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:06:48 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:06:53 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:06:58 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:06:58 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:07:03 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:07:08 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:07:13 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:07:18 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:07:23 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:07:24 | DEBUG    | core.network_scanner | Discovered 3 devices from DHCP leases
+2026-01-17 09:07:24 | DEBUG    | __main__ | Discovered 3 devices
+2026-01-17 09:07:28 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:07:28 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:07:33 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:07:38 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:07:43 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:07:48 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:07:53 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:07:58 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:07:58 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:08:03 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:08:08 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:08:13 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:08:18 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:08:23 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:08:24 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:08:24 | DEBUG    | core.network_scanner | Discovered 3 devices from DHCP leases
+2026-01-17 09:08:24 | DEBUG    | __main__ | Discovered 3 devices
+2026-01-17 09:08:28 | DEBUG    | core.gateway | Refreshed 3 DHCP leases
+2026-01-17 09:08:28 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 09:08:28 | INFO     | core.deception_engine | Stopped all honeypots and removed NAT redirections
+2026-01-17 09:08:28 | INFO     | __main__ | Stopping gateway...
+2026-01-17 09:08:28 | INFO     | core.gateway | Stopping RAKSHAK Gateway...
+2026-01-17 09:08:28 | INFO     | core.gateway | RAKSHAK firewall chains removed
+2026-01-17 09:08:28 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 09:08:28 | INFO     | core.deception_engine | Stopped all honeypots and removed NAT redirections
+2026-01-17 09:08:28 | INFO     | __main__ | Stopping gateway...
+2026-01-17 09:08:28 | INFO     | core.gateway | Stopping RAKSHAK Gateway...
+2026-01-17 09:08:28 | INFO     | core.gateway | RAKSHAK firewall chains removed
+2026-01-17 09:08:28 | INFO     | core.gateway | RAKSHAK Gateway stopped successfully
+2026-01-17 09:08:28 | INFO     | core.packet_filter | PacketFilter stopped
+2026-01-17 09:08:28 | INFO     | __main__ | RAKSHAK stopped
+2026-01-17 09:08:28 | DEBUG    | api.app | WebSocket client disconnected
+2026-01-17 09:09:26 | INFO     | __main__ | Initializing RAKSHAK components...
+2026-01-17 09:09:26 | INFO     | __main__ | Initializing GATEWAY MODE...
+2026-01-17 09:09:26 | INFO     | core.gateway | RakshakGateway initialized
+2026-01-17 09:09:26 | INFO     | core.packet_filter | PacketFilter initialized
+2026-01-17 09:09:26 | INFO     | __main__ | Gateway mode components initialized
+2026-01-17 09:09:26 | INFO     | core.threat_logger | ThreatLogger initialized
+2026-01-17 09:09:26 | INFO     | core.llm_honeypot | Ollama initialized with model: mistral:7b
+2026-01-17 09:09:26 | INFO     | core.llm_honeypot | LLMHoneypot initialized (LLM available: True, backend: ollama)
+2026-01-17 09:09:26 | INFO     | core.ids_classifier | IDS model loaded successfully: 15 attack classes
+2026-01-17 09:09:26 | INFO     | __main__ | IDS classifier loaded successfully
+2026-01-17 09:09:26 | INFO     | core.network_scanner | Auto-detected network interface: enx207bd51a6a7d
+2026-01-17 09:09:26 | INFO     | core.network_scanner | Auto-detected network range: 10.42.0.0/24
+2026-01-17 09:09:26 | INFO     | core.network_scanner | NetworkScanner initialized (simulation=False)
+2026-01-17 09:09:26 | INFO     | core.deception_engine | DeceptionEngine initialized (enabled=True)
+2026-01-17 09:09:26 | INFO     | core.event_store | Auto-export started: every 3600s to data/events/
+2026-01-17 09:09:26 | INFO     | core.event_store | MemoryEventStore initialized (max_size=10000)
+2026-01-17 09:09:26 | INFO     | core.event_bus | LocalEventPublisher initialized
+2026-01-17 09:09:26 | INFO     | core.event_bus | AsyncEventPublisher initialized (queue_size=1000)
+2026-01-17 09:09:26 | INFO     | core.agentic_defender | Event publisher initialized for offline RL
+2026-01-17 09:09:26 | INFO     | core.agentic_defender | Loaded pre-trained model from models/kaal_policy.pth
+2026-01-17 09:09:26 | INFO     | core.agentic_defender | AgenticDefender initialized (mode=INFERENCE-ONLY, device=cuda)
+2026-01-17 09:09:26 | INFO     | core.agentic_defender | Gateway integration enabled for real device isolation
+2026-01-17 09:09:26 | INFO     | core.agentic_defender | Packet filter integration enabled
+2026-01-17 09:09:26 | INFO     | api.app | Flask app created successfully
+2026-01-17 09:09:26 | INFO     | __main__ | RAKSHAK components initialized successfully
+2026-01-17 09:09:26 | INFO     | __main__ | Starting RAKSHAK in GATEWAY mode...
+2026-01-17 09:09:26 | INFO     | __main__ | Starting gateway...
+2026-01-17 09:09:26 | INFO     | core.gateway | ============================================================
+2026-01-17 09:09:26 | INFO     | core.gateway | Starting RAKSHAK Inline Security Gateway
+2026-01-17 09:09:26 | INFO     | core.gateway | ============================================================
+2026-01-17 09:09:26 | INFO     | core.gateway | Detected interfaces: ['eno1', 'wlo1', 'br-4d548e8a4c39', 'enx207bd51a6a7d', 'enx3e3acd795fdc']
+2026-01-17 09:09:26 | INFO     | core.gateway | Non-Jetson platform (standard Linux)
+2026-01-17 09:09:26 | INFO     | core.gateway | Enabling IP forwarding...
+2026-01-17 09:09:26 | INFO     | core.gateway | IP forwarding enabled
+2026-01-17 09:09:26 | INFO     | core.gateway | Configuring LAN interface enx207bd51a6a7d...
+2026-01-17 09:09:26 | INFO     | core.gateway | IP 10.42.0.1/24 is already assigned to enx207bd51a6a7d
+2026-01-17 09:09:26 | INFO     | core.gateway | Setting up firewall chains...
+2026-01-17 09:09:26 | INFO     | core.gateway | RAKSHAK firewall chains configured
+2026-01-17 09:09:26 | INFO     | core.gateway | Setting up NAT rules...
+2026-01-17 09:09:26 | INFO     | core.gateway | NAT rules configured
+2026-01-17 09:09:26 | INFO     | core.gateway | Configuring DHCP server...
+2026-01-17 09:09:28 | INFO     | core.gateway | dnsmasq configured and running
+2026-01-17 09:09:28 | INFO     | core.gateway | DHCP lease monitor started
+2026-01-17 09:09:28 | INFO     | core.gateway | ============================================================
+2026-01-17 09:09:28 | INFO     | core.gateway | RAKSHAK Gateway ACTIVE
+2026-01-17 09:09:28 | INFO     | core.gateway |   WAN Interface: wlo1
+2026-01-17 09:09:28 | INFO     | core.gateway |   LAN Interface: enx207bd51a6a7d
+2026-01-17 09:09:28 | INFO     | core.gateway |   Gateway IP: 10.42.0.1
+2026-01-17 09:09:28 | INFO     | core.gateway |   DHCP Range: 10.42.0.10 - 10.42.0.254
+2026-01-17 09:09:28 | INFO     | core.gateway |   Jetson Platform: False
+2026-01-17 09:09:28 | INFO     | core.gateway | ============================================================
+2026-01-17 09:10:51 | ERROR    | __main__ | Scanner error: dictionary changed size during iteration
+2026-01-17 09:18:08 | CRITICAL | core.gateway | Device 10.42.0.223 FULLY ISOLATED - Isolated via NetworkScanner
+2026-01-17 09:18:08 | WARNING  | core.network_scanner | Device 10.42.0.223 ISOLATED via gateway (REAL)
+2026-01-17 09:18:08 | INFO     | core.threat_logger | ACTION: isolate_device | 10.42.0.223 | success
+2026-01-17 09:18:08 | CRITICAL | core.gateway | Device 10.42.0.223 FULLY ISOLATED - Isolated via NetworkScanner
+2026-01-17 09:18:08 | WARNING  | core.network_scanner | Device 10.42.0.223 ISOLATED via gateway (REAL)
+2026-01-17 09:18:09 | INFO     | core.threat_logger | ACTION: isolate_device | 10.42.0.223 | success
+2026-01-17 09:18:09 | CRITICAL | core.gateway | Device 10.42.0.223 FULLY ISOLATED - Isolated via NetworkScanner
+2026-01-17 09:18:09 | WARNING  | core.network_scanner | Device 10.42.0.223 ISOLATED via gateway (REAL)
+2026-01-17 09:18:09 | INFO     | core.threat_logger | ACTION: isolate_device | 10.42.0.223 | success
+2026-01-17 09:18:09 | CRITICAL | core.gateway | Device 10.42.0.71 FULLY ISOLATED - Isolated via NetworkScanner
+2026-01-17 09:18:09 | WARNING  | core.network_scanner | Device 10.42.0.71 ISOLATED via gateway (REAL)
+2026-01-17 09:18:09 | INFO     | core.threat_logger | ACTION: isolate_device | 10.42.0.71 | success
+2026-01-17 09:18:09 | CRITICAL | core.gateway | Device 10.42.0.71 FULLY ISOLATED - Isolated via NetworkScanner
+2026-01-17 09:18:09 | WARNING  | core.network_scanner | Device 10.42.0.71 ISOLATED via gateway (REAL)
+2026-01-17 09:18:09 | INFO     | core.threat_logger | ACTION: isolate_device | 10.42.0.71 | success
+2026-01-17 09:18:10 | CRITICAL | core.gateway | Device 10.42.0.72 FULLY ISOLATED - Isolated via NetworkScanner
+2026-01-17 09:18:10 | WARNING  | core.network_scanner | Device 10.42.0.72 ISOLATED via gateway (REAL)
+2026-01-17 09:18:10 | INFO     | core.threat_logger | ACTION: isolate_device | 10.42.0.72 | success
+2026-01-17 09:18:12 | CRITICAL | core.gateway | Device 10.42.0.166 FULLY ISOLATED - Isolated via NetworkScanner
+2026-01-17 09:18:12 | WARNING  | core.network_scanner | Device 10.42.0.166 ISOLATED via gateway (REAL)
+2026-01-17 09:18:12 | INFO     | core.threat_logger | ACTION: isolate_device | 10.42.0.166 | success
+2026-01-17 09:18:13 | INFO     | core.deception_engine | Deployed honeypot HP-0001 (telnet:2323)
+2026-01-17 09:18:13 | INFO     | core.deception_engine | Telnet honeypot HP-0001 listening on port 2323
+2026-01-17 09:18:13 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2323 | success
+2026-01-17 09:18:13 | INFO     | core.deception_engine | Deployed honeypot HP-0002 (telnet:2324)
+2026-01-17 09:18:13 | INFO     | core.deception_engine | Telnet honeypot HP-0002 listening on port 2324
+2026-01-17 09:18:13 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2324 | success
+2026-01-17 09:18:13 | INFO     | core.deception_engine | Deployed honeypot HP-0003 (telnet:2325)
+2026-01-17 09:18:13 | INFO     | core.deception_engine | Telnet honeypot HP-0003 listening on port 2325
+2026-01-17 09:18:13 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2325 | success
+2026-01-17 09:18:13 | INFO     | core.deception_engine | Deployed honeypot HP-0004 (telnet:2326)
+2026-01-17 09:18:13 | INFO     | core.deception_engine | Telnet honeypot HP-0004 listening on port 2326
+2026-01-17 09:18:13 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2326 | success
+2026-01-17 09:18:15 | INFO     | core.deception_engine | Deployed honeypot HP-0005 (telnet:2327)
+2026-01-17 09:18:15 | INFO     | core.deception_engine | Telnet honeypot HP-0005 listening on port 2327
+2026-01-17 09:18:15 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2327 | success
+2026-01-17 09:18:15 | INFO     | core.deception_engine | Deployed honeypot HP-0006 (telnet:2328)
+2026-01-17 09:18:15 | INFO     | core.deception_engine | Telnet honeypot HP-0006 listening on port 2328
+2026-01-17 09:18:15 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2328 | success
+2026-01-17 09:18:15 | INFO     | core.deception_engine | Deployed honeypot HP-0007 (telnet:2329)
+2026-01-17 09:18:15 | INFO     | core.deception_engine | Telnet honeypot HP-0007 listening on port 2329
+2026-01-17 09:18:15 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2329 | success
+2026-01-17 09:18:16 | INFO     | core.deception_engine | Deployed honeypot HP-0008 (telnet:2330)
+2026-01-17 09:18:16 | INFO     | core.deception_engine | Telnet honeypot HP-0008 listening on port 2330
+2026-01-17 09:18:16 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2330 | success
+2026-01-17 09:35:03 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 09:35:03 | INFO     | core.deception_engine | Stopped all honeypots and removed NAT redirections
+2026-01-17 09:35:03 | INFO     | __main__ | Stopping gateway...
+2026-01-17 09:35:03 | INFO     | core.gateway | Stopping RAKSHAK Gateway...
+2026-01-17 09:35:03 | INFO     | core.gateway | Device 10.42.0.223 isolation removed
+2026-01-17 09:35:03 | INFO     | core.gateway | Device 10.42.0.71 isolation removed
+2026-01-17 09:35:03 | INFO     | core.gateway | Device 10.42.0.72 isolation removed
+2026-01-17 09:35:03 | INFO     | core.gateway | Device 10.42.0.166 isolation removed
+2026-01-17 09:35:03 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 09:35:03 | INFO     | core.deception_engine | Stopped all honeypots and removed NAT redirections
+2026-01-17 09:35:03 | INFO     | __main__ | Stopping gateway...
+2026-01-17 09:35:03 | INFO     | core.gateway | Stopping RAKSHAK Gateway...
+2026-01-17 09:35:03 | INFO     | core.gateway | RAKSHAK firewall chains removed
+2026-01-17 09:35:03 | INFO     | core.gateway | RAKSHAK Gateway stopped successfully
+2026-01-17 09:35:03 | INFO     | core.packet_filter | PacketFilter stopped
+2026-01-17 09:35:03 | INFO     | __main__ | RAKSHAK stopped
+2026-01-17 09:35:14 | INFO     | __main__ | Initializing RAKSHAK components...
+2026-01-17 09:35:14 | INFO     | __main__ | Initializing GATEWAY MODE...
+2026-01-17 09:35:14 | INFO     | core.gateway | RakshakGateway initialized
+2026-01-17 09:35:14 | INFO     | core.packet_filter | PacketFilter initialized
+2026-01-17 09:35:14 | INFO     | __main__ | Gateway mode components initialized
+2026-01-17 09:35:14 | INFO     | core.threat_logger | ThreatLogger initialized
+2026-01-17 09:35:14 | INFO     | core.llm_honeypot | Ollama initialized with model: mistral:7b
+2026-01-17 09:35:14 | INFO     | core.llm_honeypot | LLMHoneypot initialized (LLM available: True, backend: ollama)
+2026-01-17 09:35:15 | INFO     | core.ids_classifier | IDS model loaded successfully: 15 attack classes
+2026-01-17 09:35:15 | INFO     | __main__ | IDS classifier loaded successfully
+2026-01-17 09:35:15 | INFO     | core.network_scanner | Auto-detected network interface: enx207bd51a6a7d
+2026-01-17 09:35:15 | INFO     | core.network_scanner | Auto-detected network range: 10.42.0.0/24
+2026-01-17 09:35:15 | INFO     | core.network_scanner | NetworkScanner initialized (simulation=False)
+2026-01-17 09:35:15 | INFO     | core.deception_engine | DeceptionEngine initialized (enabled=True)
+2026-01-17 09:35:15 | INFO     | core.event_store | Auto-export started: every 3600s to data/events/
+2026-01-17 09:35:15 | INFO     | core.event_store | MemoryEventStore initialized (max_size=10000)
+2026-01-17 09:35:15 | INFO     | core.event_bus | LocalEventPublisher initialized
+2026-01-17 09:35:15 | INFO     | core.event_bus | AsyncEventPublisher initialized (queue_size=1000)
+2026-01-17 09:35:15 | INFO     | core.agentic_defender | Event publisher initialized for offline RL
+2026-01-17 09:35:15 | INFO     | core.agentic_defender | Loaded pre-trained model from models/kaal_policy.pth
+2026-01-17 09:35:15 | INFO     | core.agentic_defender | AgenticDefender initialized (mode=INFERENCE-ONLY, device=cuda)
+2026-01-17 09:35:15 | INFO     | core.agentic_defender | Gateway integration enabled for real device isolation
+2026-01-17 09:35:15 | INFO     | core.agentic_defender | Packet filter integration enabled
+2026-01-17 09:35:15 | INFO     | api.app | Flask app created successfully
+2026-01-17 09:35:15 | INFO     | __main__ | RAKSHAK components initialized successfully
+2026-01-17 09:35:15 | INFO     | __main__ | Starting RAKSHAK in GATEWAY mode...
+2026-01-17 09:35:15 | INFO     | __main__ | Starting gateway...
+2026-01-17 09:35:15 | INFO     | core.gateway | ============================================================
+2026-01-17 09:35:15 | INFO     | core.gateway | Starting RAKSHAK Inline Security Gateway
+2026-01-17 09:35:15 | INFO     | core.gateway | ============================================================
+2026-01-17 09:35:15 | INFO     | core.gateway | Detected interfaces: ['eno1', 'wlo1', 'br-4d548e8a4c39', 'enx207bd51a6a7d', 'enx9af1910e7084']
+2026-01-17 09:35:15 | INFO     | core.gateway | Non-Jetson platform (standard Linux)
+2026-01-17 09:35:15 | INFO     | core.gateway | Enabling IP forwarding...
+2026-01-17 09:35:15 | INFO     | core.gateway | IP forwarding enabled
+2026-01-17 09:35:15 | INFO     | core.gateway | Configuring LAN interface enx207bd51a6a7d...
+2026-01-17 09:35:15 | INFO     | core.gateway | IP 10.42.0.1/24 is already assigned to enx207bd51a6a7d
+2026-01-17 09:35:15 | INFO     | core.gateway | Setting up firewall chains...
+2026-01-17 09:35:15 | INFO     | core.gateway | RAKSHAK firewall chains configured
+2026-01-17 09:35:15 | INFO     | core.gateway | Setting up NAT rules...
+2026-01-17 09:35:15 | INFO     | core.gateway | DHCP disabled - preserving NetworkManager NAT rules
+2026-01-17 09:35:15 | WARNING  | core.gateway | No MASQUERADE rule found - internet may not work
+2026-01-17 09:35:15 | INFO     | core.gateway | NAT rules configured
+2026-01-17 09:35:15 | INFO     | core.gateway | Configuring DHCP server...
+2026-01-17 09:35:15 | INFO     | core.gateway | DHCP disabled - skipping dnsmasq configuration (NetworkManager mode)
+2026-01-17 09:35:15 | INFO     | core.gateway | DHCP lease monitor started
+2026-01-17 09:35:15 | INFO     | core.gateway | ============================================================
+2026-01-17 09:35:15 | INFO     | core.gateway | RAKSHAK Gateway ACTIVE
+2026-01-17 09:35:15 | INFO     | core.gateway |   WAN Interface: wlo1
+2026-01-17 09:35:15 | INFO     | core.gateway |   LAN Interface: enx207bd51a6a7d
+2026-01-17 09:35:15 | INFO     | core.gateway |   Gateway IP: 10.42.0.1
+2026-01-17 09:35:15 | INFO     | core.gateway |   DHCP Range: 10.42.0.10 - 10.42.0.254
+2026-01-17 09:35:15 | INFO     | core.gateway |   Jetson Platform: False
+2026-01-17 09:35:15 | INFO     | core.gateway | ============================================================
+2026-01-17 09:35:30 | CRITICAL | core.gateway | Device 10.42.0.66 FULLY ISOLATED - Isolated via NetworkScanner
+2026-01-17 09:35:30 | WARNING  | core.network_scanner | Device 10.42.0.66 ISOLATED via gateway (REAL)
+2026-01-17 09:35:30 | INFO     | core.threat_logger | ACTION: isolate_device | 10.42.0.66 | success
+2026-01-17 09:37:28 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 09:37:28 | INFO     | core.deception_engine | Stopped all honeypots and removed NAT redirections
+2026-01-17 09:37:28 | INFO     | __main__ | Stopping gateway...
+2026-01-17 09:37:28 | INFO     | core.gateway | Stopping RAKSHAK Gateway...
+2026-01-17 09:37:28 | INFO     | core.gateway | Device 10.42.0.66 isolation removed
+2026-01-17 09:37:28 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 09:37:28 | INFO     | core.deception_engine | Stopped all honeypots and removed NAT redirections
+2026-01-17 09:37:28 | INFO     | __main__ | Stopping gateway...
+2026-01-17 09:37:28 | INFO     | core.gateway | Stopping RAKSHAK Gateway...
+2026-01-17 09:37:28 | INFO     | core.gateway | RAKSHAK firewall chains removed
+2026-01-17 09:37:28 | INFO     | core.gateway | RAKSHAK Gateway stopped successfully
+2026-01-17 09:37:28 | INFO     | core.packet_filter | PacketFilter stopped
+2026-01-17 09:37:28 | INFO     | __main__ | RAKSHAK stopped
+2026-01-17 09:37:35 | INFO     | __main__ | Initializing RAKSHAK components...
+2026-01-17 09:37:35 | INFO     | __main__ | Initializing GATEWAY MODE...
+2026-01-17 09:37:35 | INFO     | core.gateway | RakshakGateway initialized
+2026-01-17 09:37:35 | INFO     | core.packet_filter | PacketFilter initialized
+2026-01-17 09:37:35 | INFO     | __main__ | Gateway mode components initialized
+2026-01-17 09:37:35 | INFO     | core.threat_logger | ThreatLogger initialized
+2026-01-17 09:37:35 | INFO     | core.llm_honeypot | Ollama initialized with model: mistral:7b
+2026-01-17 09:37:35 | INFO     | core.llm_honeypot | LLMHoneypot initialized (LLM available: True, backend: ollama)
+2026-01-17 09:37:36 | INFO     | core.ids_classifier | IDS model loaded successfully: 15 attack classes
+2026-01-17 09:37:36 | INFO     | __main__ | IDS classifier loaded successfully
+2026-01-17 09:37:36 | INFO     | core.network_scanner | Auto-detected network interface: enx207bd51a6a7d
+2026-01-17 09:37:36 | INFO     | core.network_scanner | Auto-detected network range: 10.42.0.0/24
+2026-01-17 09:37:36 | INFO     | core.network_scanner | NetworkScanner initialized (simulation=False)
+2026-01-17 09:37:36 | INFO     | core.deception_engine | DeceptionEngine initialized (enabled=True)
+2026-01-17 09:37:36 | INFO     | core.event_store | Auto-export started: every 3600s to data/events/
+2026-01-17 09:37:36 | INFO     | core.event_store | MemoryEventStore initialized (max_size=10000)
+2026-01-17 09:37:36 | INFO     | core.event_bus | LocalEventPublisher initialized
+2026-01-17 09:37:36 | INFO     | core.event_bus | AsyncEventPublisher initialized (queue_size=1000)
+2026-01-17 09:37:36 | INFO     | core.agentic_defender | Event publisher initialized for offline RL
+2026-01-17 09:37:36 | INFO     | core.agentic_defender | Loaded pre-trained model from models/kaal_policy.pth
+2026-01-17 09:37:36 | INFO     | core.agentic_defender | AgenticDefender initialized (mode=INFERENCE-ONLY, device=cuda)
+2026-01-17 09:37:36 | INFO     | core.agentic_defender | Gateway integration enabled for real device isolation
+2026-01-17 09:37:36 | INFO     | core.agentic_defender | Packet filter integration enabled
+2026-01-17 09:37:36 | INFO     | api.app | Flask app created successfully
+2026-01-17 09:37:36 | INFO     | __main__ | RAKSHAK components initialized successfully
+2026-01-17 09:37:36 | INFO     | __main__ | Starting RAKSHAK in GATEWAY mode...
+2026-01-17 09:37:36 | INFO     | __main__ | Starting gateway...
+2026-01-17 09:37:36 | INFO     | core.gateway | ============================================================
+2026-01-17 09:37:36 | INFO     | core.gateway | Starting RAKSHAK Inline Security Gateway
+2026-01-17 09:37:36 | INFO     | core.gateway | ============================================================
+2026-01-17 09:37:36 | INFO     | core.gateway | Detected interfaces: ['eno1', 'wlo1', 'br-4d548e8a4c39', 'enx207bd51a6a7d', 'enx9af1910e7084']
+2026-01-17 09:37:36 | INFO     | core.gateway | Non-Jetson platform (standard Linux)
+2026-01-17 09:37:36 | INFO     | core.gateway | Enabling IP forwarding...
+2026-01-17 09:37:36 | INFO     | core.gateway | IP forwarding enabled
+2026-01-17 09:37:36 | INFO     | core.gateway | Configuring LAN interface enx207bd51a6a7d...
+2026-01-17 09:37:36 | INFO     | core.gateway | IP 10.42.0.1/24 is already assigned to enx207bd51a6a7d
+2026-01-17 09:37:36 | INFO     | core.gateway | Setting up firewall chains...
+2026-01-17 09:37:36 | INFO     | core.gateway | RAKSHAK firewall chains configured
+2026-01-17 09:37:36 | INFO     | core.gateway | Setting up NAT rules...
+2026-01-17 09:37:36 | INFO     | core.gateway | DHCP disabled - preserving NetworkManager NAT rules
+2026-01-17 09:37:36 | WARNING  | core.gateway | No MASQUERADE rule found - internet may not work
+2026-01-17 09:37:36 | INFO     | core.gateway | NAT rules configured
+2026-01-17 09:37:36 | INFO     | core.gateway | Configuring DHCP server...
+2026-01-17 09:37:36 | INFO     | core.gateway | DHCP disabled - skipping dnsmasq configuration (NetworkManager mode)
+2026-01-17 09:37:36 | INFO     | core.gateway | DHCP lease monitor started
+2026-01-17 09:37:36 | INFO     | core.gateway | ============================================================
+2026-01-17 09:37:36 | INFO     | core.gateway | RAKSHAK Gateway ACTIVE
+2026-01-17 09:37:36 | INFO     | core.gateway |   WAN Interface: wlo1
+2026-01-17 09:37:36 | INFO     | core.gateway |   LAN Interface: enx207bd51a6a7d
+2026-01-17 09:37:36 | INFO     | core.gateway |   Gateway IP: 10.42.0.1
+2026-01-17 09:37:36 | INFO     | core.gateway |   DHCP Range: 10.42.0.10 - 10.42.0.254
+2026-01-17 09:37:36 | INFO     | core.gateway |   Jetson Platform: False
+2026-01-17 09:37:36 | INFO     | core.gateway | ============================================================
+2026-01-17 09:37:48 | CRITICAL | core.gateway | Device 10.42.0.66 FULLY ISOLATED - Isolated via NetworkScanner
+2026-01-17 09:37:48 | WARNING  | core.network_scanner | Device 10.42.0.66 ISOLATED via gateway (REAL)
+2026-01-17 09:37:48 | INFO     | core.threat_logger | ACTION: isolate_device | 10.42.0.66 | success
+2026-01-17 09:38:10 | INFO     | core.deception_engine | Deployed honeypot HP-0001 (telnet:2323)
+2026-01-17 09:38:10 | INFO     | core.deception_engine | Telnet honeypot HP-0001 listening on port 2323
+2026-01-17 09:38:10 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:2323 | success
+2026-01-17 09:40:18 | INFO     | core.deception_engine | New telnet connection from 127.0.0.1:56222
+2026-01-17 09:40:18 | INFO     | __main__ | Processing threat: honeypot_connection from 127.0.0.1
+2026-01-17 09:40:18 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 127.0.0.1 -> Honeypot HP-0001
+2026-01-17 09:40:18 | INFO     | __main__ | KAAL decided: ALERT_USER
+2026-01-17 09:40:18 | WARNING  | core.agentic_defender | KAAL: Alert - Threat detected from 127.0.0.1
+2026-01-17 09:40:18 | INFO     | core.threat_logger | ACTION: ALERT_USER | 127.0.0.1 | success
+2026-01-17 09:40:18 | INFO     | __main__ | Action logged (no gateway): ALERT_USER
+2026-01-17 09:40:18 | INFO     | __main__ | Action: Alerting user
+2026-01-17 09:40:18 | INFO     | core.threat_logger | ACTION: ALERT_USER | 127.0.0.1 | decided
+2026-01-17 09:40:27 | INFO     | core.deception_engine | Login attempt: admin:admin
+2026-01-17 09:40:27 | INFO     | core.llm_honeypot | Login attempt: admin:admin
+2026-01-17 09:40:31 | INFO     | core.deception_engine | Honeypot command: ls
+2026-01-17 09:40:35 | INFO     | core.deception_engine | Honeypot command: cd bin
+2026-01-17 09:40:47 | INFO     | core.deception_engine | Honeypot command: cd ..

@@ -530,28 +530,52 @@ class SimulatedThreatGenerator:
         ("suspicious_traffic", "low", "Unusual traffic pattern")
     ]
 
-    def __init__(self, config: dict):
+    def __init__(self, config: dict, real_devices: list = None):
         self.config = config
         self.fake_devices = config.get("simulation", {}).get("fake_devices", [])
+        self.real_devices = real_devices or []
 
-    def generate_threat(self) -> dict:
-        """Generate a random simulated threat."""
+    def generate_threat(self, attack_type: str = None) -> dict:
+        """
+        Generate a random simulated threat.
+
+        Args:
+            attack_type: Optional specific attack type to generate.
+                         One of: port_scan, brute_force, exploit_attempt, dos_attack, suspicious_traffic
+        """
         import random
 
-        attack = random.choice(self.ATTACK_TYPES)
-        target = random.choice(self.fake_devices) if self.fake_devices else {
-            "name": "Unknown Device",
-            "ip": "192.168.1.100"
-        }
+        # Use specific attack type if provided, otherwise random
+        if attack_type:
+            attack = next((a for a in self.ATTACK_TYPES if a[0] == attack_type), random.choice(self.ATTACK_TYPES))
+        else:
+            attack = random.choice(self.ATTACK_TYPES)
 
+        # Prefer real devices over fake devices
+        if self.real_devices:
+            target = random.choice(self.real_devices)
+            target_ip = target.get("ip", target.get("ip_address", "192.168.1.100"))
+            target_name = target.get("hostname", target.get("name", "Unknown Device"))
+        elif self.fake_devices:
+            target = random.choice(self.fake_devices)
+            target_ip = target.get("ip", "192.168.1.100")
+            target_name = target.get("name", "Unknown Device")
+        else:
+            target_ip = "192.168.1.100"
+            target_name = "Unknown Device"
+
+        # For simulated threats, source_ip is the "attacker"
+        # In real scenarios, this would be an external IP
+        # For testing isolation, we use the target device IP as source
+        # so isolation actually blocks the device
         return {
             "type": attack[0],
             "severity": attack[1],
             "description": attack[2],
-            "source_ip": f"10.{random.randint(0,255)}.{random.randint(0,255)}.{random.randint(1,254)}",
+            "source_ip": target_ip,  # Use device IP so isolation works on real devices
             "source_port": random.randint(1024, 65535),
-            "target_ip": target.get("ip", "192.168.1.100"),
-            "target_device": target.get("name", "Unknown Device"),
+            "target_ip": target_ip,
+            "target_device": target_name,
             "target_port": random.choice([22, 23, 80, 443, 8080, 1883, 5540]),
             "protocol": random.choice(["tcp", "udp"]),
             "packets_count": random.randint(10, 1000),

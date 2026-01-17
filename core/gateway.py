@@ -94,6 +94,7 @@ class GatewayConfig:
     lan_ip: str = "192.168.100.1"
     lan_netmask: str = "255.255.255.0"
     lan_network: str = "192.168.100.0/24"
+    dhcp_enabled: bool = True  # Set False if NetworkManager handles DHCP
     dhcp_range_start: str = "192.168.100.10"
     dhcp_range_end: str = "192.168.100.250"
     dhcp_lease_time: str = "24h"
@@ -473,14 +474,33 @@ class RakshakGateway:
             wan = self.config.wan_interface
             lan = self.config.lan_interface
 
-            # Flush existing NAT rules (except our chains)
-            subprocess.run(["iptables", "-t", "nat", "-F", "POSTROUTING"], capture_output=True)
+            # If DHCP is disabled, NetworkManager handles NAT - don't flush its rules
+            if self.config.dhcp_enabled:
+                # Flush existing NAT rules (only if we manage DHCP)
+                subprocess.run(["iptables", "-t", "nat", "-F", "POSTROUTING"], capture_output=True)
 
-            # Masquerade outgoing traffic on WAN
-            subprocess.run([
-                "iptables", "-t", "nat", "-A", "POSTROUTING",
-                "-o", wan, "-j", "MASQUERADE"
-            ], check=True, capture_output=True)
+                # Masquerade outgoing traffic on WAN
+                subprocess.run([
+                    "iptables", "-t", "nat", "-A", "POSTROUTING",
+                    "-o", wan, "-j", "MASQUERADE"
+                ], check=True, capture_output=True)
+
+                # Set default FORWARD policy to DROP (only when we manage everything)
+                subprocess.run([
+                    "iptables", "-P", "FORWARD", "DROP"
+                ], capture_output=True)
+            else:
+                logger.info("DHCP disabled - preserving NetworkManager NAT rules")
+                # Don't set FORWARD to DROP - let NetworkManager handle it
+                # Just verify NAT is working
+                result = subprocess.run(
+                    ["iptables", "-t", "nat", "-L", "POSTROUTING", "-n"],
+                    capture_output=True, text=True
+                )
+                if "MASQUERADE" in result.stdout:
+                    logger.info("NetworkManager NAT (MASQUERADE) detected")
+                else:
+                    logger.warning("No MASQUERADE rule found - internet may not work")
 
             # Allow forwarding from LAN to WAN (in our chain)
             subprocess.run([
@@ -526,11 +546,6 @@ class RakshakGateway:
                     "-j", "ACCEPT"
                 ], capture_output=True)
 
-            # Set default FORWARD policy to DROP
-            subprocess.run([
-                "iptables", "-P", "FORWARD", "DROP"
-            ], capture_output=True)
-
             logger.info("NAT rules configured")
             return True
 
@@ -540,6 +555,11 @@ class RakshakGateway:
 
     def configure_dnsmasq(self) -> bool:
         """Configure dnsmasq for DHCP and DNS"""
+        # Skip if DHCP is disabled (NetworkManager handles it)
+        if not self.config.dhcp_enabled:
+            logger.info("DHCP disabled - skipping dnsmasq configuration (NetworkManager mode)")
+            return True
+
         try:
             config_content = f"""# RAKSHAK Gateway - DHCP/DNS Configuration
 # Generated: {datetime.now().isoformat()}
@@ -841,18 +861,19 @@ expand-hosts
         try:
             if level == IsolationLevel.FULL:
                 # Block ALL traffic from/to device
+                # Note: -m comment must come before -j DROP (iptables syntax requirement)
                 subprocess.run([
                     "iptables", "-I", "RAKSHAK_ISOLATED", "1",
                     "-s", ip_address,
-                    "-j", "DROP",
-                    "-m", "comment", "--comment", f"rakshak-isolate-{ip_address}"
+                    "-m", "comment", "--comment", f"rakshak-isolate-{ip_address}",
+                    "-j", "DROP"
                 ], check=True, capture_output=True)
 
                 subprocess.run([
                     "iptables", "-I", "RAKSHAK_ISOLATED", "1",
                     "-d", ip_address,
-                    "-j", "DROP",
-                    "-m", "comment", "--comment", f"rakshak-isolate-{ip_address}"
+                    "-m", "comment", "--comment", f"rakshak-isolate-{ip_address}",
+                    "-j", "DROP"
                 ], check=True, capture_output=True)
 
                 logger.critical(f"Device {ip_address} FULLY ISOLATED - {reason}")
@@ -864,8 +885,8 @@ expand-hosts
                 subprocess.run([
                     "iptables", "-I", "RAKSHAK_ISOLATED", "1",
                     "-s", ip_address, "-o", wan,
-                    "-j", "DROP",
-                    "-m", "comment", "--comment", f"rakshak-isolate-wan-{ip_address}"
+                    "-m", "comment", "--comment", f"rakshak-isolate-wan-{ip_address}",
+                    "-j", "DROP"
                 ], check=True, capture_output=True)
 
                 logger.warning(f"Device {ip_address} INTERNET BLOCKED - {reason}")
@@ -876,15 +897,15 @@ expand-hosts
                     "iptables", "-I", "RAKSHAK_RATELIMIT", "1",
                     "-s", ip_address,
                     "-m", "limit", "--limit", "10/second", "--limit-burst", "20",
-                    "-j", "ACCEPT",
-                    "-m", "comment", "--comment", f"rakshak-ratelimit-{ip_address}"
+                    "-m", "comment", "--comment", f"rakshak-ratelimit-{ip_address}",
+                    "-j", "ACCEPT"
                 ], check=True, capture_output=True)
 
                 subprocess.run([
                     "iptables", "-I", "RAKSHAK_RATELIMIT", "2",
                     "-s", ip_address,
-                    "-j", "DROP",
-                    "-m", "comment", "--comment", f"rakshak-ratelimit-drop-{ip_address}"
+                    "-m", "comment", "--comment", f"rakshak-ratelimit-drop-{ip_address}",
+                    "-j", "DROP"
                 ], check=True, capture_output=True)
 
                 logger.warning(f"Device {ip_address} RATE LIMITED - {reason}")
@@ -1186,6 +1207,7 @@ def create_gateway_from_config(config_dict: Dict) -> RakshakGateway:
         lan_ip=gateway_config.get("lan_ip", "192.168.100.1"),
         lan_netmask=gateway_config.get("lan_netmask", "255.255.255.0"),
         lan_network=gateway_config.get("lan_network", "192.168.100.0/24"),
+        dhcp_enabled=dhcp_config.get("enabled", gateway_config.get("dhcp_enabled", True)),
         dhcp_range_start=dhcp_config.get("range_start", gateway_config.get("dhcp_range_start", "192.168.100.10")),
         dhcp_range_end=dhcp_config.get("range_end", gateway_config.get("dhcp_range_end", "192.168.100.250")),
         dhcp_lease_time=dhcp_config.get("lease_time", gateway_config.get("dhcp_lease_time", "24h")),
