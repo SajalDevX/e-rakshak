@@ -749,7 +749,7 @@ def main():
 
     if args.eval_only:
         # Load and evaluate existing model
-        checkpoint = torch.load("models/dqn_model.pth", map_location=args.device)
+        checkpoint = torch.load("models/dqn_model.pth", map_location=args.device , weights_only=False)
         model.load_state_dict(checkpoint["policy_state_dict"])
         evaluate_model(model, dataset, args.device)
         return

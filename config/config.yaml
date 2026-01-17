@@ -466,6 +466,26 @@ gateway:
       http: 8080
 
   # ---------------------------------------------------------------------------
+  # LAN-to-LAN Interception (KAVACH)
+  # ---------------------------------------------------------------------------
+  # Enables detection of lateral movement attacks between devices.
+  # RAKSHAK positions itself as man-in-the-middle for all LAN traffic
+  # using ARP announcements, allowing inspection of internal traffic.
+  lan_interception:
+    enabled: true
+    arp_announcement_interval: 5    # Seconds between ARP broadcasts
+    inspect_internal_traffic: true  # Apply IDS to internal traffic
+    log_all_internal_flows: false   # Log all device-to-device communication
+
+    # Whitelist device pairs that need direct communication
+    # (e.g., Chromecast discovering Smart TV, etc.)
+    allowed_pairs: []
+    # Example:
+    # allowed_pairs:
+    #   - source: "10.42.0.10"   # Smart TV
+    #     dest: "10.42.0.11"     # Chromecast
+
+  # ---------------------------------------------------------------------------
   # Jetson Xavier NX Specific Settings
   # ---------------------------------------------------------------------------
   jetson:

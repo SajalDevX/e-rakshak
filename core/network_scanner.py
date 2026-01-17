@@ -130,6 +130,7 @@ class NetworkScanner:
         # Device storage
         self.devices: Dict[str, Device] = {}
         self._devices_lock = threading.Lock()
+        self._mac_to_ip: Dict[str, str] = {}  # MAC→IP index for detecting IP changes
 
         # Simulation mode
         self.simulation_mode = self.simulation_config.get("enabled", True)
@@ -470,7 +471,23 @@ class NetworkScanner:
                         logger.info(f"Device {ip} marked as inactive (disconnected)")
 
             for mac, lease in leases.items():
-                # Check if device already exists
+                # Check if this MAC already has a device with different IP (IP changed)
+                if mac in self._mac_to_ip:
+                    old_ip = self._mac_to_ip[mac]
+                    if old_ip != lease.ip_address and old_ip in self.devices:
+                        # Device changed IP - update existing device instead of creating new
+                        device = self.devices.pop(old_ip)  # Remove old IP entry
+                        logger.info(f"MAYA: Device {mac} changed IP: {old_ip} → {lease.ip_address}")
+                        device.ip = lease.ip_address
+                        device.last_seen = datetime.now().isoformat()
+                        device.hostname = lease.hostname if lease.hostname != "unknown" else device.hostname
+                        device.status = "active" if lease.is_active else "inactive"
+                        self.devices[lease.ip_address] = device
+                        self._mac_to_ip[mac] = lease.ip_address
+                        devices.append(device)
+                        continue
+
+                # Check if device already exists at this IP
                 if lease.ip_address in self.devices:
                     device = self.devices[lease.ip_address]
                     device.last_seen = datetime.now().isoformat()
@@ -510,9 +527,52 @@ class NetworkScanner:
 
                 # Update internal tracking
                 self.devices[device.ip] = device
+                # Track MAC→IP mapping
+                if mac:
+                    self._mac_to_ip[mac] = lease.ip_address
 
         logger.debug(f"Discovered {len(devices)} devices from DHCP leases")
         return devices
+
+    def cleanup_stale_devices(self, inactive_threshold_seconds: int = 300) -> int:
+        """
+        Remove devices that have been inactive for longer than threshold.
+
+        This prevents stale entries from accumulating when devices leave
+        the network or change IP addresses.
+
+        Args:
+            inactive_threshold_seconds: Remove devices inactive for longer than this (default: 5 min)
+
+        Returns:
+            Number of devices removed
+        """
+        with self._devices_lock:
+            now = datetime.now()
+            to_remove = []
+
+            for ip, device in self.devices.items():
+                if device.status == "inactive":
+                    try:
+                        last_seen = datetime.fromisoformat(device.last_seen)
+                        inactive_duration = (now - last_seen).total_seconds()
+                        if inactive_duration > inactive_threshold_seconds:
+                            to_remove.append(ip)
+                    except (ValueError, TypeError):
+                        # Invalid timestamp, mark for removal
+                        to_remove.append(ip)
+
+            for ip in to_remove:
+                device = self.devices.pop(ip)
+                # Also remove from MAC→IP index
+                if device.mac and device.mac in self._mac_to_ip:
+                    del self._mac_to_ip[device.mac]
+                logger.info(f"MAYA: Removed stale device {ip} ({device.hostname or 'unknown'})")
+
+            if to_remove:
+                logger.info(f"MAYA: Cleaned up {len(to_remove)} stale device(s)")
+
+            return len(to_remove)
 
     def _guess_device_type(self, mac: str, hostname: str) -> str:
         """Guess device type from MAC address and hostname."""

@@ -102,6 +102,8 @@ class GatewayConfig:
     enable_ipv6: bool = False
     auto_detect_interfaces: bool = True
     usb_ethernet_patterns: List[str] = field(default_factory=lambda: ["eth1", "enx*", "enp*s*u*"])
+    # LAN-to-LAN interception (KAVACH)
+    lan_interception_enabled: bool = False
 
 
 class RakshakGateway:
@@ -516,6 +518,26 @@ class RakshakGateway:
                 "-m", "state", "--state", "RELATED,ESTABLISHED",
                 "-j", "ACCEPT"
             ], check=True, capture_output=True)
+
+            # LAN-to-LAN forwarding (for KAVACH ARP interception)
+            # When KAVACH is active, internal traffic arrives at gateway and needs
+            # to be forwarded back out to the real destination on the same interface
+            if self.config.lan_interception_enabled:
+                # Log internal traffic for monitoring
+                subprocess.run([
+                    "iptables", "-A", "RAKSHAK_FORWARD",
+                    "-i", lan, "-o", lan,
+                    "-j", "LOG", "--log-prefix", "[RAKSHAK-INTERNAL] ", "--log-level", "4"
+                ], capture_output=True)
+
+                # Allow LAN-to-LAN forwarding
+                subprocess.run([
+                    "iptables", "-A", "RAKSHAK_FORWARD",
+                    "-i", lan, "-o", lan,
+                    "-j", "ACCEPT"
+                ], check=True, capture_output=True)
+
+                logger.info("KAVACH: LAN-to-LAN forwarding enabled")
 
             # Allow DHCP on LAN
             subprocess.run([
@@ -1248,6 +1270,9 @@ def create_gateway_from_config(config_dict: Dict) -> RakshakGateway:
     # Handle nested DHCP config
     dhcp_config = gateway_config.get("dhcp", {})
 
+    # Handle lan_interception config
+    lan_interception_config = gateway_config.get("lan_interception", {})
+
     config = GatewayConfig(
         wan_interface=gateway_config.get("wan_interface", "eth0"),
         lan_interface=gateway_config.get("lan_interface", "eth1"),
@@ -1260,7 +1285,8 @@ def create_gateway_from_config(config_dict: Dict) -> RakshakGateway:
         dhcp_lease_time=dhcp_config.get("lease_time", gateway_config.get("dhcp_lease_time", "24h")),
         dns_servers=gateway_config.get("dns", {}).get("servers", gateway_config.get("dns_servers", ["8.8.8.8", "1.1.1.1"])),
         auto_detect_interfaces=gateway_config.get("auto_detect_interfaces", True),
-        usb_ethernet_patterns=gateway_config.get("usb_ethernet_patterns", ["eth1", "enx*", "enp*s*u*"])
+        usb_ethernet_patterns=gateway_config.get("usb_ethernet_patterns", ["eth1", "enx*", "enp*s*u*"]),
+        lan_interception_enabled=lan_interception_config.get("enabled", False)
     )
 
     return RakshakGateway(config)

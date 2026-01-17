@@ -332,7 +332,7 @@ class AgenticDefender:
 
         if model_path.exists():
             try:
-                checkpoint = torch.load(model_path, map_location=self.device)
+                checkpoint = torch.load(model_path, map_location=self.device, weights_only=False)
                 self.policy_net.load_state_dict(checkpoint["policy_state_dict"])
                 if self.target_net is not None:
                     self.target_net.load_state_dict(checkpoint["target_state_dict"])

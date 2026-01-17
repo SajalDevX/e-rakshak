@@ -4348,3 +4348,871 @@ Check the documentation of torch.load to learn more about types accepted by defa
 2026-01-17 11:15:14 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | decided
 2026-01-17 11:15:14 | INFO     | core.deception_engine | Session SES-1042087-58778 ended: 1 commands, 6.4s duration
 2026-01-17 11:15:16 | INFO     | core.deception_engine | Session SES-1042087-58796 ended: 1 commands, 2.7s duration
+2026-01-17 11:15:23 | INFO     | core.deception_engine | Session SES-1042087-58782 ended: 1 commands, 9.1s duration
+2026-01-17 11:15:45 | INFO     | core.deception_engine | New telnet connection from 10.42.0.87:45552
+2026-01-17 11:15:45 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.87
+2026-01-17 11:15:45 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.87 -> Honeypot HP-0006
+2026-01-17 11:15:45 | INFO     | core.deception_engine | Login attempt: GET / HTTP/1.1:
+2026-01-17 11:15:45 | INFO     | core.llm_honeypot | Login attempt: GET / HTTP/1.1:
+2026-01-17 11:15:45 | INFO     | core.deception_engine | Honeypot command: Host: connectivity-check.ubuntu.com.
+2026-01-17 11:15:45 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:15:45 | INFO     | core.gateway | Traffic from 10.42.0.87:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:15:45 | INFO     | core.gateway | Traffic from 10.42.0.87:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:15:45 | INFO     | core.gateway | Traffic from 10.42.0.87:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:15:45 | INFO     | core.gateway | Traffic from 10.42.0.87:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:15:45 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.87 REDIRECTED to honeypot (REAL)
+2026-01-17 11:15:45 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:15:45 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:15:45 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | success
+2026-01-17 11:15:45 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:15:45 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:15:45 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | decided
+2026-01-17 11:15:51 | INFO     | core.deception_engine | Session SES-1042087-45552 ended: 1 commands, 6.4s duration
+2026-01-17 11:16:44 | INFO     | core.deception_engine | New telnet connection from 10.42.0.71:46692
+2026-01-17 11:16:44 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.71 -> Honeypot HP-0006
+2026-01-17 11:16:44 | INFO     | core.deception_engine | Login attempt: GET /generate204 HTTP/1.1:
+2026-01-17 11:16:44 | INFO     | core.llm_honeypot | Login attempt: GET /generate204 HTTP/1.1:
+2026-01-17 11:16:44 | INFO     | core.deception_engine | Honeypot command: Connection: close
+2026-01-17 11:16:44 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.71
+2026-01-17 11:16:44 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:16:44 | INFO     | core.gateway | Traffic from 10.42.0.71:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:16:44 | INFO     | core.gateway | Traffic from 10.42.0.71:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:16:44 | INFO     | core.gateway | Traffic from 10.42.0.71:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:16:44 | INFO     | core.gateway | Traffic from 10.42.0.71:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:16:44 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.71 REDIRECTED to honeypot (REAL)
+2026-01-17 11:16:44 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:16:44 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:16:44 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | success
+2026-01-17 11:16:44 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:16:44 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:16:44 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | decided
+2026-01-17 11:16:44 | INFO     | core.deception_engine | Session SES-1042071-46692 ended: 1 commands, 0.4s duration
+2026-01-17 11:18:13 | INFO     | core.network_scanner | Device Charan-s-CE-2 (10.42.0.71) is now inactive (disconnected)
+2026-01-17 11:20:01 | INFO     | core.deception_engine | New telnet connection from 10.42.0.87:42782
+2026-01-17 11:20:01 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.87 -> Honeypot HP-0006
+2026-01-17 11:20:01 | INFO     | core.deception_engine | Login attempt: GET / HTTP/1.1:
+2026-01-17 11:20:01 | INFO     | core.llm_honeypot | Login attempt: GET / HTTP/1.1:
+2026-01-17 11:20:01 | INFO     | core.deception_engine | Honeypot command: Host: connectivity-check.ubuntu.com.
+2026-01-17 11:20:01 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.87
+2026-01-17 11:20:01 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:20:01 | INFO     | core.gateway | Traffic from 10.42.0.87:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:20:01 | INFO     | core.gateway | Traffic from 10.42.0.87:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:20:01 | INFO     | core.gateway | Traffic from 10.42.0.87:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:20:01 | INFO     | core.gateway | Traffic from 10.42.0.87:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:20:01 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.87 REDIRECTED to honeypot (REAL)
+2026-01-17 11:20:01 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:20:01 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:20:01 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | success
+2026-01-17 11:20:01 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:20:01 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:20:01 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | decided
+2026-01-17 11:20:07 | INFO     | core.deception_engine | Session SES-1042087-42782 ended: 1 commands, 6.4s duration
+2026-01-17 11:20:53 | INFO     | core.deception_engine | New telnet connection from 10.42.0.71:55284
+2026-01-17 11:20:53 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.71 -> Honeypot HP-0006
+2026-01-17 11:20:53 | INFO     | core.deception_engine | Login attempt: GET /generate204 HTTP/1.1:
+2026-01-17 11:20:53 | INFO     | core.llm_honeypot | Login attempt: GET /generate204 HTTP/1.1:
+2026-01-17 11:20:53 | INFO     | core.deception_engine | Honeypot command: Connection: close
+2026-01-17 11:20:53 | INFO     | core.deception_engine | New telnet connection from 10.42.0.71:49810
+2026-01-17 11:20:53 | INFO     | core.deception_engine | New telnet connection from 10.42.0.71:35386
+2026-01-17 11:20:53 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.71 -> Honeypot HP-0006
+2026-01-17 11:20:53 | INFO     | core.deception_engine | Login attempt: GET /generate_204 HTTP/1.1:
+2026-01-17 11:20:53 | INFO     | core.llm_honeypot | Login attempt: GET /generate_204 HTTP/1.1:
+2026-01-17 11:20:53 | INFO     | core.deception_engine | Honeypot command: Connection: close
+2026-01-17 11:20:53 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.71
+2026-01-17 11:20:53 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.71 -> Honeypot HP-0006
+2026-01-17 11:20:53 | INFO     | core.deception_engine | Login attempt: GET /generate204 HTTP/1.1:
+2026-01-17 11:20:53 | INFO     | core.llm_honeypot | Login attempt: GET /generate204 HTTP/1.1:
+2026-01-17 11:20:53 | INFO     | core.deception_engine | Honeypot command: Connection: close
+2026-01-17 11:20:53 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:20:53 | INFO     | core.gateway | Traffic from 10.42.0.71:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:20:53 | INFO     | core.gateway | Traffic from 10.42.0.71:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:20:53 | INFO     | core.gateway | Traffic from 10.42.0.71:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:20:53 | INFO     | core.gateway | Traffic from 10.42.0.71:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:20:53 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.71 REDIRECTED to honeypot (REAL)
+2026-01-17 11:20:53 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:20:53 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:20:53 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | success
+2026-01-17 11:20:53 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:20:53 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:20:53 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | decided
+2026-01-17 11:20:53 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.71
+2026-01-17 11:20:53 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:20:53 | INFO     | core.gateway | Traffic from 10.42.0.71:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:20:53 | INFO     | core.gateway | Traffic from 10.42.0.71:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:20:53 | INFO     | core.gateway | Traffic from 10.42.0.71:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:20:53 | INFO     | core.gateway | Traffic from 10.42.0.71:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:20:53 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.71 REDIRECTED to honeypot (REAL)
+2026-01-17 11:20:53 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:20:53 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:20:53 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | success
+2026-01-17 11:20:53 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:20:53 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:20:53 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | decided
+2026-01-17 11:20:53 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.71
+2026-01-17 11:20:53 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:20:53 | INFO     | core.gateway | Traffic from 10.42.0.71:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:20:53 | INFO     | core.gateway | Traffic from 10.42.0.71:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:20:53 | INFO     | core.gateway | Traffic from 10.42.0.71:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:20:53 | INFO     | core.gateway | Traffic from 10.42.0.71:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:20:53 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.71 REDIRECTED to honeypot (REAL)
+2026-01-17 11:20:53 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:20:53 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:20:53 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | success
+2026-01-17 11:20:53 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:20:53 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:20:53 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | decided
+2026-01-17 11:20:54 | INFO     | core.deception_engine | Session SES-1042071-55284 ended: 1 commands, 0.3s duration
+2026-01-17 11:20:54 | INFO     | core.deception_engine | New telnet connection from 10.42.0.71:35390
+2026-01-17 11:20:54 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.71
+2026-01-17 11:20:54 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:20:54 | INFO     | core.gateway | Traffic from 10.42.0.71:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:20:54 | INFO     | core.gateway | Traffic from 10.42.0.71:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:20:54 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.71 -> Honeypot HP-0006
+2026-01-17 11:20:54 | INFO     | core.deception_engine | Login attempt: POST /mtuprobe HTTP/1.1:
+2026-01-17 11:20:54 | INFO     | core.llm_honeypot | Login attempt: POST /mtuprobe HTTP/1.1:
+2026-01-17 11:20:54 | INFO     | core.deception_engine | Honeypot command: Connection: Keep-Alive
+2026-01-17 11:20:54 | INFO     | core.gateway | Traffic from 10.42.0.71:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:20:54 | INFO     | core.gateway | Traffic from 10.42.0.71:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:20:54 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.71 REDIRECTED to honeypot (REAL)
+2026-01-17 11:20:54 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:20:54 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:20:54 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | success
+2026-01-17 11:20:54 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:20:54 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:20:54 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | decided
+2026-01-17 11:20:54 | INFO     | core.deception_engine | New telnet connection from 10.42.0.71:55304
+2026-01-17 11:20:54 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.71 -> Honeypot HP-0006
+2026-01-17 11:20:54 | INFO     | core.deception_engine | Login attempt: GET /generate204 HTTP/1.1:
+2026-01-17 11:20:54 | INFO     | core.llm_honeypot | Login attempt: GET /generate204 HTTP/1.1:
+2026-01-17 11:20:54 | INFO     | core.deception_engine | Honeypot command: Connection: close
+2026-01-17 11:20:55 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.71
+2026-01-17 11:20:55 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:20:55 | INFO     | core.gateway | Traffic from 10.42.0.71:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:20:55 | INFO     | core.gateway | Traffic from 10.42.0.71:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:20:55 | INFO     | core.gateway | Traffic from 10.42.0.71:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:20:55 | INFO     | core.gateway | Traffic from 10.42.0.71:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:20:55 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.71 REDIRECTED to honeypot (REAL)
+2026-01-17 11:20:55 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:20:55 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:20:55 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | success
+2026-01-17 11:20:55 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:20:55 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:20:55 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | decided
+2026-01-17 11:20:55 | INFO     | core.deception_engine | Session SES-1042071-49810 ended: 1 commands, 1.4s duration
+2026-01-17 11:20:56 | INFO     | core.deception_engine | Session SES-1042071-35386 ended: 1 commands, 2.6s duration
+2026-01-17 11:21:00 | INFO     | core.deception_engine | New telnet connection from 10.42.0.71:60504
+2026-01-17 11:21:00 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.71
+2026-01-17 11:21:00 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.71 -> Honeypot HP-0006
+2026-01-17 11:21:00 | INFO     | core.deception_engine | Login attempt: GET / HTTP/1.1:
+2026-01-17 11:21:00 | INFO     | core.llm_honeypot | Login attempt: GET / HTTP/1.1:
+2026-01-17 11:21:00 | INFO     | core.deception_engine | Honeypot command: User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; IV2201 Build/TP1A.220905.001)
+2026-01-17 11:21:00 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:21:00 | INFO     | core.gateway | Traffic from 10.42.0.71:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:21:00 | INFO     | core.gateway | Traffic from 10.42.0.71:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:21:00 | INFO     | core.gateway | Traffic from 10.42.0.71:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:21:00 | INFO     | core.gateway | Traffic from 10.42.0.71:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:21:00 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.71 REDIRECTED to honeypot (REAL)
+2026-01-17 11:21:00 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:21:00 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:21:00 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | success
+2026-01-17 11:21:00 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:21:00 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:21:00 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | decided
+2026-01-17 11:21:02 | INFO     | core.deception_engine | Session SES-1042071-35390 ended: 1 commands, 8.6s duration
+2026-01-17 11:21:03 | INFO     | core.deception_engine | Session SES-1042071-55304 ended: 1 commands, 8.6s duration
+2026-01-17 11:21:06 | INFO     | core.deception_engine | Session SES-1042071-60504 ended: 1 commands, 5.6s duration
+2026-01-17 11:21:13 | INFO     | core.network_scanner | Device Charan-s-CE-2 (10.42.0.71) is now active
+2026-01-17 11:22:13 | INFO     | core.network_scanner | Device Charan-s-CE-2 (10.42.0.71) is now inactive (disconnected)
+2026-01-17 11:24:20 | INFO     | core.deception_engine | New telnet connection from 10.42.0.71:54078
+2026-01-17 11:24:20 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.71 -> Honeypot HP-0006
+2026-01-17 11:24:20 | INFO     | core.deception_engine | Login attempt: GET /generate204 HTTP/1.1:
+2026-01-17 11:24:20 | INFO     | core.llm_honeypot | Login attempt: GET /generate204 HTTP/1.1:
+2026-01-17 11:24:20 | INFO     | core.deception_engine | Login attempt: Connection: close:
+2026-01-17 11:24:20 | INFO     | core.llm_honeypot | Login attempt: Connection: close:
+2026-01-17 11:24:20 | INFO     | core.deception_engine | Honeypot command: User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; IV2201 Build/TP1A.220905.001)
+2026-01-17 11:24:20 | INFO     | core.deception_engine | New telnet connection from 10.42.0.71:33330
+2026-01-17 11:24:20 | INFO     | core.deception_engine | New telnet connection from 10.42.0.71:50044
+2026-01-17 11:24:20 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.71 -> Honeypot HP-0006
+2026-01-17 11:24:20 | INFO     | core.deception_engine | Login attempt: GET /generate204 HTTP/1.1:
+2026-01-17 11:24:20 | INFO     | core.llm_honeypot | Login attempt: GET /generate204 HTTP/1.1:
+2026-01-17 11:24:20 | INFO     | core.deception_engine | Login attempt: Connection: close:
+2026-01-17 11:24:20 | INFO     | core.llm_honeypot | Login attempt: Connection: close:
+2026-01-17 11:24:20 | INFO     | core.deception_engine | Honeypot command: User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.32 Safari/537.36
+2026-01-17 11:24:20 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.71 -> Honeypot HP-0006
+2026-01-17 11:24:20 | INFO     | core.deception_engine | Login attempt: GET /generate_204 HTTP/1.1:
+2026-01-17 11:24:20 | INFO     | core.llm_honeypot | Login attempt: GET /generate_204 HTTP/1.1:
+2026-01-17 11:24:20 | INFO     | core.deception_engine | Honeypot command: Connection: close
+2026-01-17 11:24:20 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.71
+2026-01-17 11:24:20 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:24:20 | INFO     | core.gateway | Traffic from 10.42.0.71:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:24:20 | INFO     | core.gateway | Traffic from 10.42.0.71:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:24:20 | INFO     | core.gateway | Traffic from 10.42.0.71:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:24:20 | INFO     | core.gateway | Traffic from 10.42.0.71:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:24:20 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.71 REDIRECTED to honeypot (REAL)
+2026-01-17 11:24:20 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:24:20 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:24:20 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | success
+2026-01-17 11:24:20 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:24:20 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:24:20 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | decided
+2026-01-17 11:24:20 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.71
+2026-01-17 11:24:20 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:24:20 | INFO     | core.gateway | Traffic from 10.42.0.71:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:24:20 | INFO     | core.gateway | Traffic from 10.42.0.71:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:24:20 | INFO     | core.gateway | Traffic from 10.42.0.71:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:24:20 | INFO     | core.gateway | Traffic from 10.42.0.71:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:24:20 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.71 REDIRECTED to honeypot (REAL)
+2026-01-17 11:24:20 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:24:20 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:24:20 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | success
+2026-01-17 11:24:20 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:24:20 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:24:20 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | decided
+2026-01-17 11:24:20 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.71
+2026-01-17 11:24:20 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:24:20 | INFO     | core.gateway | Traffic from 10.42.0.71:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:24:20 | INFO     | core.gateway | Traffic from 10.42.0.71:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:24:20 | INFO     | core.gateway | Traffic from 10.42.0.71:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:24:20 | INFO     | core.gateway | Traffic from 10.42.0.71:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:24:20 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.71 REDIRECTED to honeypot (REAL)
+2026-01-17 11:24:20 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:24:20 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:24:20 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | success
+2026-01-17 11:24:20 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:24:20 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:24:20 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | decided
+2026-01-17 11:24:21 | INFO     | core.deception_engine | New telnet connection from 10.42.0.71:54092
+2026-01-17 11:24:21 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.71
+2026-01-17 11:24:21 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:24:21 | INFO     | core.gateway | Traffic from 10.42.0.71:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:24:21 | INFO     | core.gateway | Traffic from 10.42.0.71:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:24:21 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.71 -> Honeypot HP-0006
+2026-01-17 11:24:21 | INFO     | core.deception_engine | Login attempt: POST /mtuprobe HTTP/1.1:
+2026-01-17 11:24:21 | INFO     | core.llm_honeypot | Login attempt: POST /mtuprobe HTTP/1.1:
+2026-01-17 11:24:21 | INFO     | core.deception_engine | Honeypot command: Connection: Keep-Alive
+2026-01-17 11:24:21 | INFO     | core.gateway | Traffic from 10.42.0.71:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:24:21 | INFO     | core.gateway | Traffic from 10.42.0.71:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:24:21 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.71 REDIRECTED to honeypot (REAL)
+2026-01-17 11:24:21 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:24:21 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:24:21 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | success
+2026-01-17 11:24:21 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:24:21 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:24:21 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | decided
+2026-01-17 11:24:21 | INFO     | core.deception_engine | New telnet connection from 10.42.0.71:54100
+2026-01-17 11:24:21 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.71
+2026-01-17 11:24:21 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:24:21 | INFO     | core.gateway | Traffic from 10.42.0.71:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:24:21 | INFO     | core.gateway | Traffic from 10.42.0.71:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:24:21 | INFO     | core.gateway | Traffic from 10.42.0.71:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:24:21 | INFO     | core.gateway | Traffic from 10.42.0.71:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:24:21 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.71 REDIRECTED to honeypot (REAL)
+2026-01-17 11:24:21 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:24:21 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:24:21 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.71 -> Honeypot HP-0006
+2026-01-17 11:24:21 | INFO     | core.deception_engine | Login attempt: GET /generate204 HTTP/1.1:
+2026-01-17 11:24:21 | INFO     | core.llm_honeypot | Login attempt: GET /generate204 HTTP/1.1:
+2026-01-17 11:24:21 | INFO     | core.deception_engine | Login attempt: Connection: close:
+2026-01-17 11:24:21 | INFO     | core.llm_honeypot | Login attempt: Connection: close:
+2026-01-17 11:24:21 | INFO     | core.deception_engine | Honeypot command: User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; IV2201 Build/TP1A.220905.001)
+2026-01-17 11:24:21 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | success
+2026-01-17 11:24:21 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:24:21 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:24:21 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | decided
+2026-01-17 11:24:25 | INFO     | core.deception_engine | Session SES-1042071-54078 ended: 1 commands, 4.8s duration
+2026-01-17 11:24:25 | INFO     | core.deception_engine | Session SES-1042071-50044 ended: 1 commands, 5.3s duration
+2026-01-17 11:24:27 | INFO     | core.deception_engine | New telnet connection from 10.42.0.71:60732
+2026-01-17 11:24:27 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.71 -> Honeypot HP-0006
+2026-01-17 11:24:27 | INFO     | core.deception_engine | Login attempt: GET / HTTP/1.1:
+2026-01-17 11:24:27 | INFO     | core.llm_honeypot | Login attempt: GET / HTTP/1.1:
+2026-01-17 11:24:27 | INFO     | core.deception_engine | Honeypot command: User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; IV2201 Build/TP1A.220905.001)
+2026-01-17 11:24:27 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.71
+2026-01-17 11:24:27 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:24:27 | INFO     | core.gateway | Traffic from 10.42.0.71:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:24:27 | INFO     | core.gateway | Traffic from 10.42.0.71:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:24:27 | INFO     | core.gateway | Traffic from 10.42.0.71:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:24:27 | INFO     | core.gateway | Traffic from 10.42.0.71:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:24:27 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.71 REDIRECTED to honeypot (REAL)
+2026-01-17 11:24:27 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:24:27 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:24:27 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | success
+2026-01-17 11:24:27 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:24:27 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:24:27 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | decided
+2026-01-17 11:24:32 | INFO     | core.deception_engine | Session SES-1042071-33330 ended: 1 commands, 11.6s duration
+2026-01-17 11:24:37 | INFO     | core.deception_engine | Session SES-1042071-54092 ended: 1 commands, 16.6s duration
+2026-01-17 11:24:40 | INFO     | core.deception_engine | Session SES-1042071-54100 ended: 1 commands, 18.7s duration
+2026-01-17 11:24:45 | INFO     | core.deception_engine | Session SES-1042071-60732 ended: 1 commands, 18.0s duration
+2026-01-17 11:25:01 | INFO     | core.deception_engine | New telnet connection from 10.42.0.87:54246
+2026-01-17 11:25:01 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.87 -> Honeypot HP-0006
+2026-01-17 11:25:01 | INFO     | core.deception_engine | Login attempt: GET / HTTP/1.1:
+2026-01-17 11:25:01 | INFO     | core.llm_honeypot | Login attempt: GET / HTTP/1.1:
+2026-01-17 11:25:01 | INFO     | core.deception_engine | Honeypot command: Host: connectivity-check.ubuntu.com.
+2026-01-17 11:25:01 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.87
+2026-01-17 11:25:01 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:25:01 | INFO     | core.gateway | Traffic from 10.42.0.87:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:25:01 | INFO     | core.gateway | Traffic from 10.42.0.87:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:25:01 | INFO     | core.gateway | Traffic from 10.42.0.87:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:25:01 | INFO     | core.gateway | Traffic from 10.42.0.87:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:25:01 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.87 REDIRECTED to honeypot (REAL)
+2026-01-17 11:25:01 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:25:01 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:25:01 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | success
+2026-01-17 11:25:01 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:25:01 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:25:01 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | decided
+2026-01-17 11:25:07 | INFO     | core.deception_engine | Session SES-1042087-54246 ended: 1 commands, 6.4s duration
+2026-01-17 11:25:13 | INFO     | core.network_scanner | Device Charan-s-CE-2 (10.42.0.71) is now active
+2026-01-17 11:27:48 | INFO     | core.deception_engine | New telnet connection from 10.42.0.71:56014
+2026-01-17 11:27:48 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.71
+2026-01-17 11:27:48 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.71 -> Honeypot HP-0006
+2026-01-17 11:27:48 | INFO     | core.deception_engine | Login attempt: GET /generate204 HTTP/1.1:
+2026-01-17 11:27:48 | INFO     | core.llm_honeypot | Login attempt: GET /generate204 HTTP/1.1:
+2026-01-17 11:27:48 | INFO     | core.deception_engine | Honeypot command: Connection: close
+2026-01-17 11:27:48 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:27:48 | INFO     | core.gateway | Traffic from 10.42.0.71:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:27:48 | INFO     | core.gateway | Traffic from 10.42.0.71:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:27:48 | INFO     | core.gateway | Traffic from 10.42.0.71:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:27:48 | INFO     | core.gateway | Traffic from 10.42.0.71:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:27:48 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.71 REDIRECTED to honeypot (REAL)
+2026-01-17 11:27:48 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:27:48 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:27:48 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | success
+2026-01-17 11:27:48 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:27:48 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:27:48 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | decided
+2026-01-17 11:27:50 | INFO     | core.deception_engine | Session SES-1042071-56014 ended: 1 commands, 1.9s duration
+2026-01-17 11:28:21 | INFO     | core.deception_engine | New telnet connection from 10.42.0.71:33850
+2026-01-17 11:28:21 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.71
+2026-01-17 11:28:21 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.71 -> Honeypot HP-0006
+2026-01-17 11:28:21 | INFO     | core.deception_engine | Login attempt: GET /generate204 HTTP/1.1:
+2026-01-17 11:28:21 | INFO     | core.llm_honeypot | Login attempt: GET /generate204 HTTP/1.1:
+2026-01-17 11:28:21 | INFO     | core.deception_engine | Honeypot command: Connection: close
+2026-01-17 11:28:21 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:28:21 | INFO     | core.gateway | Traffic from 10.42.0.71:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:28:21 | INFO     | core.gateway | Traffic from 10.42.0.71:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:28:21 | INFO     | core.gateway | Traffic from 10.42.0.71:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:28:21 | INFO     | core.gateway | Traffic from 10.42.0.71:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:28:21 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.71 REDIRECTED to honeypot (REAL)
+2026-01-17 11:28:21 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:28:21 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:28:21 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | success
+2026-01-17 11:28:21 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:28:21 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:28:21 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | decided
+2026-01-17 11:28:22 | INFO     | core.deception_engine | Session SES-1042071-33850 ended: 1 commands, 1.0s duration
+2026-01-17 11:30:01 | INFO     | core.deception_engine | New telnet connection from 10.42.0.87:37416
+2026-01-17 11:30:01 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.87 -> Honeypot HP-0006
+2026-01-17 11:30:01 | INFO     | core.deception_engine | Login attempt: GET / HTTP/1.1:
+2026-01-17 11:30:01 | INFO     | core.llm_honeypot | Login attempt: GET / HTTP/1.1:
+2026-01-17 11:30:01 | INFO     | core.deception_engine | Honeypot command: Host: connectivity-check.ubuntu.com.
+2026-01-17 11:30:01 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.87
+2026-01-17 11:30:01 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:30:01 | INFO     | core.gateway | Traffic from 10.42.0.87:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:30:01 | INFO     | core.gateway | Traffic from 10.42.0.87:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:30:01 | INFO     | core.gateway | Traffic from 10.42.0.87:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:30:01 | INFO     | core.gateway | Traffic from 10.42.0.87:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:30:01 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.87 REDIRECTED to honeypot (REAL)
+2026-01-17 11:30:01 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:30:01 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:30:01 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | success
+2026-01-17 11:30:01 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:30:01 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:30:01 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | decided
+2026-01-17 11:30:06 | INFO     | core.deception_engine | Session SES-1042087-37416 ended: 1 commands, 4.5s duration
+2026-01-17 11:30:08 | INFO     | core.deception_engine | New telnet connection from 10.42.0.87:39698
+2026-01-17 11:30:08 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.87 -> Honeypot HP-0006
+2026-01-17 11:30:08 | INFO     | core.deception_engine | Login attempt: GET /metadata/instance/compute HTTP/1.1:
+2026-01-17 11:30:08 | INFO     | core.llm_honeypot | Login attempt: GET /metadata/instance/compute HTTP/1.1:
+2026-01-17 11:30:08 | INFO     | core.deception_engine | Honeypot command: Metadata: True
+2026-01-17 11:30:08 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.87
+2026-01-17 11:30:08 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:30:08 | INFO     | core.gateway | Traffic from 10.42.0.87:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:30:08 | INFO     | core.gateway | Traffic from 10.42.0.87:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:30:08 | INFO     | core.gateway | Traffic from 10.42.0.87:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:30:08 | INFO     | core.gateway | Traffic from 10.42.0.87:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:30:08 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.87 REDIRECTED to honeypot (REAL)
+2026-01-17 11:30:08 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:30:08 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:30:08 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | success
+2026-01-17 11:30:08 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:30:08 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:30:08 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | decided
+2026-01-17 11:30:10 | INFO     | core.deception_engine | Honeypot command: Host: 169.254.169.254
+2026-01-17 11:30:14 | INFO     | core.deception_engine | New telnet connection from 10.42.0.87:39704
+2026-01-17 11:30:14 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.87
+2026-01-17 11:30:14 | INFO     | core.deception_engine | New telnet connection from 10.42.0.87:39710
+2026-01-17 11:30:14 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.87 -> Honeypot HP-0006
+2026-01-17 11:30:14 | INFO     | core.deception_engine | Login attempt: GET /metadata/instance/compute HTTP/1.1:
+2026-01-17 11:30:14 | INFO     | core.llm_honeypot | Login attempt: GET /metadata/instance/compute HTTP/1.1:
+2026-01-17 11:30:14 | INFO     | core.deception_engine | Login attempt: Metadata: True:
+2026-01-17 11:30:14 | INFO     | core.llm_honeypot | Login attempt: Metadata: True:
+2026-01-17 11:30:14 | INFO     | core.deception_engine | Honeypot command: Host: 169.254.169.254
+2026-01-17 11:30:14 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:30:14 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.87 -> Honeypot HP-0006
+2026-01-17 11:30:14 | INFO     | core.deception_engine | Login attempt: GET /metadata/instance/compute HTTP/1.1:
+2026-01-17 11:30:14 | INFO     | core.llm_honeypot | Login attempt: GET /metadata/instance/compute HTTP/1.1:
+2026-01-17 11:30:14 | INFO     | core.deception_engine | Login attempt: Metadata: True:
+2026-01-17 11:30:14 | INFO     | core.llm_honeypot | Login attempt: Metadata: True:
+2026-01-17 11:30:14 | INFO     | core.deception_engine | Honeypot command: Host: 169.254.169.254
+2026-01-17 11:30:14 | INFO     | core.gateway | Traffic from 10.42.0.87:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:30:14 | INFO     | core.gateway | Traffic from 10.42.0.87:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:30:14 | INFO     | core.gateway | Traffic from 10.42.0.87:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:30:14 | INFO     | core.gateway | Traffic from 10.42.0.87:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:30:14 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.87 REDIRECTED to honeypot (REAL)
+2026-01-17 11:30:14 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:30:14 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:30:14 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | success
+2026-01-17 11:30:14 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:30:14 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:30:14 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | decided
+2026-01-17 11:30:14 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.87
+2026-01-17 11:30:14 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:30:14 | INFO     | core.gateway | Traffic from 10.42.0.87:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:30:14 | INFO     | core.gateway | Traffic from 10.42.0.87:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:30:14 | INFO     | core.gateway | Traffic from 10.42.0.87:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:30:14 | INFO     | core.gateway | Traffic from 10.42.0.87:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:30:14 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.87 REDIRECTED to honeypot (REAL)
+2026-01-17 11:30:14 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:30:14 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:30:14 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | success
+2026-01-17 11:30:14 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:30:14 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:30:14 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | decided
+2026-01-17 11:30:15 | INFO     | core.deception_engine | Session SES-1042087-39698 ended: 2 commands, 7.4s duration
+2026-01-17 11:30:18 | INFO     | core.deception_engine | Honeypot command: Connection: close
+2026-01-17 11:30:24 | INFO     | core.deception_engine | Honeypot command: Connection: close
+2026-01-17 11:30:25 | INFO     | core.deception_engine | Session SES-1042087-39704 ended: 2 commands, 11.7s duration
+2026-01-17 11:30:27 | INFO     | core.deception_engine | Session SES-1042087-39710 ended: 2 commands, 13.0s duration
+2026-01-17 11:35:01 | INFO     | core.deception_engine | New telnet connection from 10.42.0.87:44752
+2026-01-17 11:35:01 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.87
+2026-01-17 11:35:01 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.87 -> Honeypot HP-0006
+2026-01-17 11:35:01 | INFO     | core.deception_engine | Login attempt: GET / HTTP/1.1:
+2026-01-17 11:35:01 | INFO     | core.llm_honeypot | Login attempt: GET / HTTP/1.1:
+2026-01-17 11:35:01 | INFO     | core.deception_engine | Honeypot command: Host: connectivity-check.ubuntu.com.
+2026-01-17 11:35:01 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:35:01 | INFO     | core.gateway | Traffic from 10.42.0.87:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:35:01 | INFO     | core.gateway | Traffic from 10.42.0.87:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:35:01 | INFO     | core.gateway | Traffic from 10.42.0.87:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:35:01 | INFO     | core.gateway | Traffic from 10.42.0.87:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:35:01 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.87 REDIRECTED to honeypot (REAL)
+2026-01-17 11:35:01 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:35:01 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:35:01 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | success
+2026-01-17 11:35:01 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:35:01 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:35:01 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | decided
+2026-01-17 11:35:07 | INFO     | core.deception_engine | Session SES-1042087-44752 ended: 1 commands, 6.3s duration
+2026-01-17 11:40:01 | INFO     | core.deception_engine | New telnet connection from 10.42.0.87:51464
+2026-01-17 11:40:01 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.87 -> Honeypot HP-0006
+2026-01-17 11:40:01 | INFO     | core.deception_engine | Login attempt: GET / HTTP/1.1:
+2026-01-17 11:40:01 | INFO     | core.llm_honeypot | Login attempt: GET / HTTP/1.1:
+2026-01-17 11:40:01 | INFO     | core.deception_engine | Honeypot command: Host: connectivity-check.ubuntu.com.
+2026-01-17 11:40:01 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.87
+2026-01-17 11:40:01 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:40:01 | INFO     | core.gateway | Traffic from 10.42.0.87:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:40:01 | INFO     | core.gateway | Traffic from 10.42.0.87:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:40:01 | INFO     | core.gateway | Traffic from 10.42.0.87:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:40:01 | INFO     | core.gateway | Traffic from 10.42.0.87:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:40:01 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.87 REDIRECTED to honeypot (REAL)
+2026-01-17 11:40:01 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:40:01 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:40:01 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | success
+2026-01-17 11:40:01 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:40:01 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:40:01 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | decided
+2026-01-17 11:40:07 | INFO     | core.deception_engine | Session SES-1042087-51464 ended: 1 commands, 6.3s duration
+2026-01-17 11:45:01 | INFO     | core.deception_engine | New telnet connection from 10.42.0.87:59464
+2026-01-17 11:45:01 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.87
+2026-01-17 11:45:01 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.87 -> Honeypot HP-0006
+2026-01-17 11:45:01 | INFO     | core.deception_engine | Login attempt: GET / HTTP/1.1:
+2026-01-17 11:45:01 | INFO     | core.llm_honeypot | Login attempt: GET / HTTP/1.1:
+2026-01-17 11:45:01 | INFO     | core.deception_engine | Honeypot command: Host: connectivity-check.ubuntu.com.
+2026-01-17 11:45:01 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:45:01 | INFO     | core.gateway | Traffic from 10.42.0.87:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:45:01 | INFO     | core.gateway | Traffic from 10.42.0.87:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:45:01 | INFO     | core.gateway | Traffic from 10.42.0.87:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:45:01 | INFO     | core.gateway | Traffic from 10.42.0.87:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:45:01 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.87 REDIRECTED to honeypot (REAL)
+2026-01-17 11:45:01 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:45:01 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:45:01 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | success
+2026-01-17 11:45:01 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:45:01 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:45:01 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | decided
+2026-01-17 11:45:04 | INFO     | core.deception_engine | Session SES-1042087-59464 ended: 1 commands, 3.4s duration
+2026-01-17 11:45:08 | INFO     | core.deception_engine | New telnet connection from 10.42.0.87:58182
+2026-01-17 11:45:08 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.87 -> Honeypot HP-0006
+2026-01-17 11:45:08 | INFO     | core.deception_engine | Login attempt: GET /metadata/instance/compute HTTP/1.1:
+2026-01-17 11:45:08 | INFO     | core.llm_honeypot | Login attempt: GET /metadata/instance/compute HTTP/1.1:
+2026-01-17 11:45:08 | INFO     | core.deception_engine | Honeypot command: Metadata: True
+2026-01-17 11:45:08 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.87
+2026-01-17 11:45:08 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:45:08 | INFO     | core.gateway | Traffic from 10.42.0.87:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:45:08 | INFO     | core.gateway | Traffic from 10.42.0.87:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:45:08 | INFO     | core.gateway | Traffic from 10.42.0.87:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:45:08 | INFO     | core.gateway | Traffic from 10.42.0.87:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:45:08 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.87 REDIRECTED to honeypot (REAL)
+2026-01-17 11:45:08 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:45:08 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:45:08 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | success
+2026-01-17 11:45:08 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:45:08 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:45:08 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | decided
+2026-01-17 11:45:11 | INFO     | core.deception_engine | Session SES-1042087-58182 ended: 1 commands, 3.2s duration
+2026-01-17 11:45:14 | INFO     | core.deception_engine | New telnet connection from 10.42.0.87:58186
+2026-01-17 11:45:14 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.87
+2026-01-17 11:45:14 | INFO     | core.deception_engine | New telnet connection from 10.42.0.87:58202
+2026-01-17 11:45:14 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:45:14 | INFO     | core.gateway | Traffic from 10.42.0.87:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:45:14 | INFO     | core.gateway | Traffic from 10.42.0.87:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:45:14 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.87 -> Honeypot HP-0006
+2026-01-17 11:45:14 | INFO     | core.gateway | Traffic from 10.42.0.87:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:45:14 | INFO     | core.deception_engine | Login attempt: GET /metadata/instance/compute HTTP/1.1:
+2026-01-17 11:45:14 | INFO     | core.llm_honeypot | Login attempt: GET /metadata/instance/compute HTTP/1.1:
+2026-01-17 11:45:14 | INFO     | core.deception_engine | Honeypot command: Metadata: True
+2026-01-17 11:45:14 | INFO     | core.gateway | Traffic from 10.42.0.87:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:45:14 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.87 REDIRECTED to honeypot (REAL)
+2026-01-17 11:45:14 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:45:14 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:45:14 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | success
+2026-01-17 11:45:14 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:45:14 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:45:14 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | decided
+2026-01-17 11:45:14 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.87 -> Honeypot HP-0006
+2026-01-17 11:45:14 | INFO     | core.deception_engine | Login attempt: GET /metadata/instance/compute HTTP/1.1:
+2026-01-17 11:45:14 | INFO     | core.llm_honeypot | Login attempt: GET /metadata/instance/compute HTTP/1.1:
+2026-01-17 11:45:14 | INFO     | core.deception_engine | Login attempt: Metadata: True:
+2026-01-17 11:45:14 | INFO     | core.llm_honeypot | Login attempt: Metadata: True:
+2026-01-17 11:45:14 | INFO     | core.deception_engine | Honeypot command: Host: 169.254.169.254
+2026-01-17 11:45:14 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.87
+2026-01-17 11:45:14 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:45:14 | INFO     | core.gateway | Traffic from 10.42.0.87:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:45:14 | INFO     | core.gateway | Traffic from 10.42.0.87:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:45:14 | INFO     | core.gateway | Traffic from 10.42.0.87:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:45:14 | INFO     | core.gateway | Traffic from 10.42.0.87:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:45:14 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.87 REDIRECTED to honeypot (REAL)
+2026-01-17 11:45:14 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:45:14 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:45:14 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | success
+2026-01-17 11:45:14 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:45:14 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:45:14 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | decided
+2026-01-17 11:45:18 | INFO     | core.deception_engine | Session SES-1042087-58186 ended: 1 commands, 4.4s duration
+2026-01-17 11:45:20 | INFO     | core.deception_engine | Session SES-1042087-58202 ended: 1 commands, 6.3s duration
+2026-01-17 11:50:01 | INFO     | core.deception_engine | New telnet connection from 10.42.0.87:54992
+2026-01-17 11:50:01 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.87
+2026-01-17 11:50:01 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.87 -> Honeypot HP-0006
+2026-01-17 11:50:01 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:50:01 | INFO     | core.deception_engine | Login attempt: GET / HTTP/1.1:
+2026-01-17 11:50:01 | INFO     | core.llm_honeypot | Login attempt: GET / HTTP/1.1:
+2026-01-17 11:50:01 | INFO     | core.deception_engine | Honeypot command: Host: connectivity-check.ubuntu.com.
+2026-01-17 11:50:01 | INFO     | core.gateway | Traffic from 10.42.0.87:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:50:01 | INFO     | core.gateway | Traffic from 10.42.0.87:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:50:01 | INFO     | core.gateway | Traffic from 10.42.0.87:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:50:01 | INFO     | core.gateway | Traffic from 10.42.0.87:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:50:01 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.87 REDIRECTED to honeypot (REAL)
+2026-01-17 11:50:01 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:50:01 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:50:01 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | success
+2026-01-17 11:50:01 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:50:01 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:50:01 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | decided
+2026-01-17 11:50:04 | INFO     | core.deception_engine | Session SES-1042087-54992 ended: 1 commands, 2.6s duration
+2026-01-17 11:54:27 | INFO     | core.deception_engine | New telnet connection from 10.42.0.71:34206
+2026-01-17 11:54:27 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.71 -> Honeypot HP-0006
+2026-01-17 11:54:27 | INFO     | core.deception_engine | Login attempt: GET / HTTP/1.1:
+2026-01-17 11:54:27 | INFO     | core.llm_honeypot | Login attempt: GET / HTTP/1.1:
+2026-01-17 11:54:27 | INFO     | core.deception_engine | Honeypot command: User-Agent: Dalvik/2.1.0 (Linux; U; Android 13; IV2201 Build/TP1A.220905.001)
+2026-01-17 11:54:27 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.71
+2026-01-17 11:54:27 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:54:27 | INFO     | core.gateway | Traffic from 10.42.0.71:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:54:27 | INFO     | core.gateway | Traffic from 10.42.0.71:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:54:27 | INFO     | core.gateway | Traffic from 10.42.0.71:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:54:27 | INFO     | core.gateway | Traffic from 10.42.0.71:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:54:27 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.71 REDIRECTED to honeypot (REAL)
+2026-01-17 11:54:27 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:54:27 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:54:27 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | success
+2026-01-17 11:54:27 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:54:27 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:54:27 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.71 | decided
+2026-01-17 11:54:34 | INFO     | core.deception_engine | Session SES-1042071-34206 ended: 1 commands, 6.5s duration
+2026-01-17 11:55:01 | INFO     | core.deception_engine | New telnet connection from 10.42.0.87:46720
+2026-01-17 11:55:01 | WARNING  | core.threat_logger | THREAT: honeypot_connection | high | 10.42.0.87 -> Honeypot HP-0006
+2026-01-17 11:55:01 | INFO     | core.deception_engine | Login attempt: GET / HTTP/1.1:
+2026-01-17 11:55:01 | INFO     | core.llm_honeypot | Login attempt: GET / HTTP/1.1:
+2026-01-17 11:55:01 | INFO     | core.deception_engine | Login attempt: Host: connectivity-check.ubuntu.com.:
+2026-01-17 11:55:01 | INFO     | core.llm_honeypot | Login attempt: Host: connectivity-check.ubuntu.com.:
+2026-01-17 11:55:01 | INFO     | core.deception_engine | Honeypot command: Accept: */*
+2026-01-17 11:55:01 | INFO     | __main__ | Processing threat: honeypot_connection from 10.42.0.87
+2026-01-17 11:55:01 | INFO     | __main__ | KAAL decided: ENGAGE_ATTACKER
+2026-01-17 11:55:01 | INFO     | core.gateway | Traffic from 10.42.0.87:23 REDIRECTED to local honeypot:2323
+2026-01-17 11:55:01 | INFO     | core.gateway | Traffic from 10.42.0.87:22 REDIRECTED to local honeypot:2323
+2026-01-17 11:55:01 | INFO     | core.gateway | Traffic from 10.42.0.87:80 REDIRECTED to local honeypot:2323
+2026-01-17 11:55:01 | INFO     | core.gateway | Traffic from 10.42.0.87:8080 REDIRECTED to local honeypot:2323
+2026-01-17 11:55:01 | WARNING  | core.agentic_defender | KAAL: Traffic from 10.42.0.87 REDIRECTED to honeypot (REAL)
+2026-01-17 11:55:01 | WARNING  | core.deception_engine | Maximum honeypots (10) reached
+2026-01-17 11:55:01 | ERROR    | core.deception_engine | Failed to deploy honeypot for redirection
+2026-01-17 11:55:01 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | success
+2026-01-17 11:55:01 | WARNING  | __main__ | REAL ACTION TAKEN: ENGAGE_ATTACKER
+2026-01-17 11:55:01 | INFO     | __main__ | Action: Engaging attacker with honeypot
+2026-01-17 11:55:01 | INFO     | core.threat_logger | ACTION: ENGAGE_ATTACKER | 10.42.0.87 | decided
+2026-01-17 11:55:06 | INFO     | core.deception_engine | Session SES-1042087-46720 ended: 1 commands, 5.3s duration
+2026-01-17 11:56:19 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 11:56:19 | INFO     | core.gateway | Honeypot redirection removed for 10.42.0.87:23
+2026-01-17 11:56:19 | INFO     | core.deception_engine | Removed NAT redirection for honeypot HP-0006
+2026-01-17 11:56:19 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 11:56:21 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 11:56:43 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 11:56:43 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 11:56:43 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 11:56:44 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 11:56:44 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 11:56:44 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 11:56:44 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 11:56:47 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 11:56:47 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 11:56:47 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 12:02:19 | INFO     | __main__ | Initializing RAKSHAK components...
+2026-01-17 12:02:19 | INFO     | __main__ | Initializing GATEWAY MODE...
+2026-01-17 12:02:19 | INFO     | core.gateway | RakshakGateway initialized
+2026-01-17 12:02:19 | INFO     | core.packet_filter | PacketFilter initialized
+2026-01-17 12:02:19 | INFO     | __main__ | Gateway mode components initialized
+2026-01-17 12:02:19 | INFO     | core.threat_logger | ThreatLogger initialized
+2026-01-17 12:02:19 | INFO     | core.llm_honeypot | Ollama initialized with model: mistral:7b
+2026-01-17 12:02:19 | INFO     | core.llm_honeypot | LLMHoneypot initialized (LLM available: True, backend: ollama)
+2026-01-17 12:02:19 | INFO     | core.ids_classifier | IDS model loaded successfully: 15 attack classes
+2026-01-17 12:02:19 | INFO     | __main__ | IDS classifier loaded successfully
+2026-01-17 12:02:19 | INFO     | core.network_scanner | Auto-detected network interface: enx207bd51a6a7d
+2026-01-17 12:02:19 | INFO     | core.network_scanner | Auto-detected network range: 10.42.0.0/24
+2026-01-17 12:02:19 | INFO     | core.network_scanner | NetworkScanner initialized (simulation=False)
+2026-01-17 12:02:19 | INFO     | core.deception_engine | DeceptionEngine initialized (enabled=True)
+2026-01-17 12:02:19 | INFO     | core.event_store | Auto-export started: every 3600s to data/events/
+2026-01-17 12:02:19 | INFO     | core.event_store | MemoryEventStore initialized (max_size=10000)
+2026-01-17 12:02:19 | INFO     | core.event_bus | LocalEventPublisher initialized
+2026-01-17 12:02:19 | INFO     | core.event_bus | AsyncEventPublisher initialized (queue_size=1000)
+2026-01-17 12:02:19 | INFO     | core.agentic_defender | Event publisher initialized for offline RL
+2026-01-17 12:02:19 | INFO     | core.agentic_defender | Loaded pre-trained model from models/kaal_policy.pth
+2026-01-17 12:02:19 | INFO     | core.agentic_defender | AgenticDefender initialized (mode=INFERENCE-ONLY, device=cuda)
+2026-01-17 12:02:19 | INFO     | core.agentic_defender | Gateway integration enabled for real device isolation
+2026-01-17 12:02:19 | INFO     | core.agentic_defender | Packet filter integration enabled
+2026-01-17 12:02:20 | INFO     | api.app | Flask app created successfully
+2026-01-17 12:02:20 | INFO     | __main__ | RAKSHAK components initialized successfully
+2026-01-17 12:02:20 | INFO     | __main__ | Starting RAKSHAK in GATEWAY mode...
+2026-01-17 12:02:20 | INFO     | __main__ | Starting gateway...
+2026-01-17 12:02:20 | INFO     | core.gateway | ============================================================
+2026-01-17 12:02:20 | INFO     | core.gateway | Starting RAKSHAK Inline Security Gateway
+2026-01-17 12:02:20 | INFO     | core.gateway | ============================================================
+2026-01-17 12:02:20 | INFO     | core.gateway | Detected interfaces: ['eno1', 'wlo1', 'br-4d548e8a4c39', 'enx207bd51a6a7d', 'enx9af1910e7084']
+2026-01-17 12:02:20 | INFO     | core.gateway | Non-Jetson platform (standard Linux)
+2026-01-17 12:02:20 | INFO     | core.gateway | Enabling IP forwarding...
+2026-01-17 12:02:20 | INFO     | core.gateway | IP forwarding enabled
+2026-01-17 12:02:20 | INFO     | core.gateway | Configuring LAN interface enx207bd51a6a7d...
+2026-01-17 12:02:20 | INFO     | core.gateway | IP 10.42.0.1/24 is already assigned to enx207bd51a6a7d
+2026-01-17 12:02:20 | INFO     | core.gateway | Setting up firewall chains...
+2026-01-17 12:02:20 | INFO     | core.gateway | RAKSHAK firewall chains configured
+2026-01-17 12:02:20 | INFO     | core.gateway | Setting up NAT rules...
+2026-01-17 12:02:20 | INFO     | core.gateway | DHCP disabled - preserving NetworkManager NAT rules
+2026-01-17 12:02:20 | WARNING  | core.gateway | No MASQUERADE rule found - internet may not work
+2026-01-17 12:02:20 | INFO     | core.gateway | KAVACH: LAN-to-LAN forwarding enabled
+2026-01-17 12:02:20 | INFO     | core.gateway | NAT rules configured
+2026-01-17 12:02:20 | INFO     | core.gateway | Configuring DHCP server...
+2026-01-17 12:02:20 | INFO     | core.gateway | DHCP disabled - skipping dnsmasq configuration (NetworkManager mode)
+2026-01-17 12:02:20 | INFO     | core.gateway | DHCP lease monitor started
+2026-01-17 12:02:20 | INFO     | core.gateway | ============================================================
+2026-01-17 12:02:20 | INFO     | core.gateway | RAKSHAK Gateway ACTIVE
+2026-01-17 12:02:20 | INFO     | core.gateway |   WAN Interface: wlo1
+2026-01-17 12:02:20 | INFO     | core.gateway |   LAN Interface: enx207bd51a6a7d
+2026-01-17 12:02:20 | INFO     | core.gateway |   Gateway IP: 10.42.0.1
+2026-01-17 12:02:20 | INFO     | core.gateway |   DHCP Range: 10.42.0.10 - 10.42.0.254
+2026-01-17 12:02:20 | INFO     | core.gateway |   Jetson Platform: False
+2026-01-17 12:02:20 | INFO     | core.gateway | ============================================================
+2026-01-17 12:02:20 | INFO     | core.packet_filter | Dashboard access monitor started
+2026-01-17 12:02:20 | INFO     | core.packet_filter | Monitoring /var/log/kern.log for dashboard access
+2026-01-17 12:02:20 | INFO     | core.deception_engine | Deployed honeypot HP-0001 (telnet:21)
+2026-01-17 12:02:20 | INFO     | core.deception_engine | Telnet honeypot HP-0001 listening on port 21
+2026-01-17 12:02:20 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:21 | success
+2026-01-17 12:02:20 | INFO     | __main__ | TRAP: Deployed telnet honeypot on port 21 (tp_link)
+2026-01-17 12:02:20 | INFO     | core.deception_engine | Deployed honeypot HP-0002 (telnet:23)
+2026-01-17 12:02:20 | INFO     | core.deception_engine | Telnet honeypot HP-0002 listening on port 23
+2026-01-17 12:02:20 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:23 | success
+2026-01-17 12:02:20 | INFO     | __main__ | TRAP: Deployed telnet honeypot on port 23 (wyze_cam)
+2026-01-17 12:02:20 | INFO     | core.deception_engine | Deployed honeypot HP-0003 (http:80)
+2026-01-17 12:02:20 | INFO     | core.deception_engine | HTTP honeypot HP-0003 listening on port 80
+2026-01-17 12:02:20 | INFO     | core.threat_logger | ACTION: deploy_honeypot | http:80 | success
+2026-01-17 12:02:20 | INFO     | __main__ | TRAP: Deployed http honeypot on port 80 (samsung_tv)
+2026-01-17 12:02:20 | INFO     | core.deception_engine | Deployed honeypot HP-0004 (http:8080)
+2026-01-17 12:02:20 | INFO     | core.deception_engine | HTTP honeypot HP-0004 listening on port 8080
+2026-01-17 12:02:20 | INFO     | core.threat_logger | ACTION: deploy_honeypot | http:8080 | success
+2026-01-17 12:02:20 | INFO     | __main__ | TRAP: Deployed http honeypot on port 8080 (tp_link)
+2026-01-17 12:02:20 | INFO     | core.deception_engine | Deployed honeypot HP-0005 (telnet:22)
+2026-01-17 12:02:20 | INFO     | core.deception_engine | Telnet honeypot HP-0005 listening on port 22
+2026-01-17 12:02:20 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:22 | success
+2026-01-17 12:02:20 | INFO     | __main__ | TRAP: Deployed telnet honeypot on port 22 (nest)
+2026-01-17 12:02:20 | INFO     | core.arp_interceptor | KAVACH: Initialized on enx207bd51a6a7d (MAC: 20:7b:d5:1a:6a:7d)
+2026-01-17 12:02:20 | INFO     | core.arp_interceptor | KAVACH: ARP interceptor started on enx207bd51a6a7d
+2026-01-17 12:02:20 | INFO     | core.arp_interceptor | KAVACH: Gateway 10.42.0.1 (20:7b:d5:1a:6a:7d)
+2026-01-17 12:04:14 | INFO     | core.arp_interceptor | KAVACH: Tracking device 10.42.0.166 (72:e5:dc:9f:dc:92)
+2026-01-17 12:04:14 | INFO     | core.arp_interceptor | KAVACH: Tracking device 10.42.0.72 (e4:c3:2a:5d:69:5a)
+2026-01-17 12:04:14 | INFO     | core.arp_interceptor | KAVACH: Tracking device 10.42.0.71 (3e:2a:b7:ec:12:6b)
+2026-01-17 12:07:26 | CRITICAL | core.gateway | Device 10.42.0.166 FULLY ISOLATED - Isolated via NetworkScanner
+2026-01-17 12:07:26 | WARNING  | core.network_scanner | Device 10.42.0.166 ISOLATED via gateway (REAL)
+2026-01-17 12:07:26 | INFO     | core.threat_logger | ACTION: isolate_device | 10.42.0.166 | success
+2026-01-17 12:10:39 | CRITICAL | core.gateway | Device 10.42.0.66 FULLY ISOLATED - Isolated via NetworkScanner
+2026-01-17 12:10:39 | WARNING  | core.network_scanner | Device 10.42.0.66 ISOLATED via gateway (REAL)
+2026-01-17 12:10:39 | INFO     | core.threat_logger | ACTION: isolate_device | 10.42.0.66 | success
+2026-01-17 12:24:27 | INFO     | core.deception_engine | HTTP connection from 10.42.0.71:35476
+2026-01-17 12:24:27 | INFO     | __main__ | Processing threat: http_probe from 10.42.0.71
+2026-01-17 12:24:27 | WARNING  | core.threat_logger | THREAT: http_probe | medium | 10.42.0.71 -> HTTP Honeypot HP-0003
+2026-01-17 12:24:27 | INFO     | __main__ | KAAL decided: ALERT_USER
+2026-01-17 12:24:27 | WARNING  | core.agentic_defender | KAAL: Alert - Threat detected from 10.42.0.71
+2026-01-17 12:24:27 | INFO     | core.threat_logger | ACTION: ALERT_USER | 10.42.0.71 | success
+2026-01-17 12:24:27 | INFO     | __main__ | Action logged (no gateway): ALERT_USER
+2026-01-17 12:24:27 | INFO     | __main__ | Action: Alerting user
+2026-01-17 12:24:27 | INFO     | core.threat_logger | ACTION: ALERT_USER | 10.42.0.71 | decided
+2026-01-17 12:25:25 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 12:25:25 | INFO     | core.deception_engine | Stopped all honeypots and removed NAT redirections
+2026-01-17 12:25:25 | INFO     | __main__ | Stopping KAVACH ARP interceptor...
+2026-01-17 12:25:27 | INFO     | core.arp_interceptor | KAVACH: Restoring original ARP entries...
+2026-01-17 12:25:28 | INFO     | core.arp_interceptor | KAVACH: ARP tables restored
+2026-01-17 12:25:28 | INFO     | core.arp_interceptor | KAVACH: ARP interceptor stopped, ARP tables restored
+2026-01-17 12:25:28 | INFO     | __main__ | Stopping gateway...
+2026-01-17 12:25:28 | INFO     | core.gateway | Stopping RAKSHAK Gateway...
+2026-01-17 12:25:28 | INFO     | core.gateway | Device 10.42.0.166 isolation removed
+2026-01-17 12:25:28 | INFO     | core.gateway | Device 10.42.0.66 isolation removed
+2026-01-17 12:25:28 | INFO     | core.gateway | RAKSHAK firewall chains removed
+2026-01-17 12:25:28 | INFO     | core.gateway | RAKSHAK Gateway stopped successfully
+2026-01-17 12:25:28 | INFO     | core.packet_filter | PacketFilter stopped
+2026-01-17 12:25:28 | INFO     | __main__ | RAKSHAK stopped
+2026-01-17 12:25:35 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 12:25:35 | INFO     | core.deception_engine | Stopped all honeypots and removed NAT redirections
+2026-01-17 12:25:35 | INFO     | __main__ | Stopping KAVACH ARP interceptor...
+2026-01-17 12:25:35 | INFO     | __main__ | Stopping gateway...
+2026-01-17 12:25:35 | INFO     | core.gateway | Stopping RAKSHAK Gateway...
+2026-01-17 12:25:35 | INFO     | core.gateway | RAKSHAK firewall chains removed
+2026-01-17 12:25:35 | INFO     | core.gateway | RAKSHAK Gateway stopped successfully
+2026-01-17 12:25:35 | INFO     | core.packet_filter | PacketFilter stopped
+2026-01-17 12:25:35 | INFO     | __main__ | RAKSHAK stopped
+2026-01-17 12:25:35 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 12:25:35 | INFO     | core.deception_engine | Stopped all honeypots and removed NAT redirections
+2026-01-17 12:25:35 | INFO     | __main__ | Stopping KAVACH ARP interceptor...
+2026-01-17 12:25:35 | INFO     | __main__ | Stopping gateway...
+2026-01-17 12:25:35 | INFO     | core.gateway | Stopping RAKSHAK Gateway...
+2026-01-17 12:25:35 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 12:25:35 | INFO     | core.deception_engine | Stopped all honeypots and removed NAT redirections
+2026-01-17 12:25:35 | INFO     | __main__ | Stopping KAVACH ARP interceptor...
+2026-01-17 12:25:35 | INFO     | __main__ | Stopping gateway...
+2026-01-17 12:25:35 | INFO     | core.gateway | Stopping RAKSHAK Gateway...
+2026-01-17 12:25:35 | INFO     | core.gateway | RAKSHAK firewall chains removed
+2026-01-17 12:25:35 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 12:25:35 | INFO     | core.deception_engine | Stopped all honeypots and removed NAT redirections
+2026-01-17 12:25:35 | INFO     | __main__ | Stopping KAVACH ARP interceptor...
+2026-01-17 12:25:35 | INFO     | __main__ | Stopping gateway...
+2026-01-17 12:25:35 | INFO     | core.gateway | Stopping RAKSHAK Gateway...
+2026-01-17 12:25:35 | INFO     | core.gateway | RAKSHAK firewall chains removed
+2026-01-17 12:25:35 | INFO     | core.gateway | RAKSHAK Gateway stopped successfully
+2026-01-17 12:25:35 | INFO     | core.packet_filter | PacketFilter stopped
+2026-01-17 12:25:35 | INFO     | __main__ | RAKSHAK stopped
+2026-01-17 12:25:47 | INFO     | __main__ | Initializing RAKSHAK components...
+2026-01-17 12:25:47 | INFO     | __main__ | Initializing GATEWAY MODE...
+2026-01-17 12:25:47 | INFO     | core.gateway | RakshakGateway initialized
+2026-01-17 12:25:47 | INFO     | core.packet_filter | PacketFilter initialized
+2026-01-17 12:25:47 | INFO     | __main__ | Gateway mode components initialized
+2026-01-17 12:25:47 | INFO     | core.threat_logger | ThreatLogger initialized
+2026-01-17 12:25:47 | INFO     | core.llm_honeypot | Ollama initialized with model: mistral:7b
+2026-01-17 12:25:47 | INFO     | core.llm_honeypot | LLMHoneypot initialized (LLM available: True, backend: ollama)
+2026-01-17 12:25:48 | INFO     | core.ids_classifier | IDS model loaded successfully: 15 attack classes
+2026-01-17 12:25:48 | INFO     | __main__ | IDS classifier loaded successfully
+2026-01-17 12:25:48 | INFO     | core.network_scanner | Auto-detected network interface: enx207bd51a6a7d
+2026-01-17 12:25:48 | INFO     | core.network_scanner | Auto-detected network range: 10.42.0.0/24
+2026-01-17 12:25:48 | INFO     | core.network_scanner | NetworkScanner initialized (simulation=False)
+2026-01-17 12:25:48 | INFO     | core.deception_engine | DeceptionEngine initialized (enabled=True)
+2026-01-17 12:25:48 | INFO     | core.event_store | Auto-export started: every 3600s to data/events/
+2026-01-17 12:25:48 | INFO     | core.event_store | MemoryEventStore initialized (max_size=10000)
+2026-01-17 12:25:48 | INFO     | core.event_bus | LocalEventPublisher initialized
+2026-01-17 12:25:48 | INFO     | core.event_bus | AsyncEventPublisher initialized (queue_size=1000)
+2026-01-17 12:25:48 | INFO     | core.agentic_defender | Event publisher initialized for offline RL
+2026-01-17 12:25:48 | INFO     | core.agentic_defender | Loaded pre-trained model from models/kaal_policy.pth
+2026-01-17 12:25:48 | INFO     | core.agentic_defender | AgenticDefender initialized (mode=INFERENCE-ONLY, device=cuda)
+2026-01-17 12:25:48 | INFO     | core.agentic_defender | Gateway integration enabled for real device isolation
+2026-01-17 12:25:48 | INFO     | core.agentic_defender | Packet filter integration enabled
+2026-01-17 12:25:48 | INFO     | api.app | Flask app created successfully
+2026-01-17 12:25:48 | INFO     | __main__ | RAKSHAK components initialized successfully
+2026-01-17 12:25:48 | INFO     | __main__ | Starting RAKSHAK in GATEWAY mode...
+2026-01-17 12:25:48 | INFO     | __main__ | Starting gateway...
+2026-01-17 12:25:48 | INFO     | core.gateway | ============================================================
+2026-01-17 12:25:48 | INFO     | core.gateway | Starting RAKSHAK Inline Security Gateway
+2026-01-17 12:25:48 | INFO     | core.gateway | ============================================================
+2026-01-17 12:25:48 | INFO     | core.gateway | Detected interfaces: ['eno1', 'wlo1', 'br-4d548e8a4c39', 'enx207bd51a6a7d', 'enx9af1910e7084']
+2026-01-17 12:25:48 | INFO     | core.gateway | Non-Jetson platform (standard Linux)
+2026-01-17 12:25:48 | INFO     | core.gateway | Enabling IP forwarding...
+2026-01-17 12:25:48 | INFO     | core.gateway | IP forwarding enabled
+2026-01-17 12:25:48 | INFO     | core.gateway | Configuring LAN interface enx207bd51a6a7d...
+2026-01-17 12:25:48 | INFO     | core.gateway | IP 10.42.0.1/24 is already assigned to enx207bd51a6a7d
+2026-01-17 12:25:48 | INFO     | core.gateway | Setting up firewall chains...
+2026-01-17 12:25:48 | INFO     | core.gateway | RAKSHAK firewall chains configured
+2026-01-17 12:25:48 | INFO     | core.gateway | Setting up NAT rules...
+2026-01-17 12:25:48 | INFO     | core.gateway | DHCP disabled - preserving NetworkManager NAT rules
+2026-01-17 12:25:48 | WARNING  | core.gateway | No MASQUERADE rule found - internet may not work
+2026-01-17 12:25:48 | INFO     | core.gateway | KAVACH: LAN-to-LAN forwarding enabled
+2026-01-17 12:25:48 | INFO     | core.gateway | NAT rules configured
+2026-01-17 12:25:48 | INFO     | core.gateway | Configuring DHCP server...
+2026-01-17 12:25:48 | INFO     | core.gateway | DHCP disabled - skipping dnsmasq configuration (NetworkManager mode)
+2026-01-17 12:25:48 | INFO     | core.gateway | DHCP lease monitor started
+2026-01-17 12:25:48 | INFO     | core.gateway | ============================================================
+2026-01-17 12:25:48 | INFO     | core.gateway | RAKSHAK Gateway ACTIVE
+2026-01-17 12:25:48 | INFO     | core.gateway |   WAN Interface: wlo1
+2026-01-17 12:25:48 | INFO     | core.gateway |   LAN Interface: enx207bd51a6a7d
+2026-01-17 12:25:48 | INFO     | core.gateway |   Gateway IP: 10.42.0.1
+2026-01-17 12:25:48 | INFO     | core.gateway |   DHCP Range: 10.42.0.10 - 10.42.0.254
+2026-01-17 12:25:48 | INFO     | core.gateway |   Jetson Platform: False
+2026-01-17 12:25:48 | INFO     | core.gateway | ============================================================
+2026-01-17 12:25:48 | INFO     | core.packet_filter | Dashboard access monitor started
+2026-01-17 12:25:48 | INFO     | core.packet_filter | Monitoring /var/log/kern.log for dashboard access
+2026-01-17 12:25:48 | INFO     | core.deception_engine | Deployed honeypot HP-0001 (telnet:21)
+2026-01-17 12:25:48 | INFO     | core.deception_engine | Telnet honeypot HP-0001 listening on port 21
+2026-01-17 12:25:48 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:21 | success
+2026-01-17 12:25:48 | INFO     | __main__ | TRAP: Deployed telnet honeypot on port 21 (tp_link)
+2026-01-17 12:25:48 | INFO     | core.deception_engine | Deployed honeypot HP-0002 (telnet:23)
+2026-01-17 12:25:48 | INFO     | core.deception_engine | Telnet honeypot HP-0002 listening on port 23
+2026-01-17 12:25:48 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:23 | success
+2026-01-17 12:25:48 | INFO     | __main__ | TRAP: Deployed telnet honeypot on port 23 (wyze_cam)
+2026-01-17 12:25:48 | INFO     | core.deception_engine | Deployed honeypot HP-0003 (http:80)
+2026-01-17 12:25:48 | INFO     | core.deception_engine | HTTP honeypot HP-0003 listening on port 80
+2026-01-17 12:25:48 | INFO     | core.threat_logger | ACTION: deploy_honeypot | http:80 | success
+2026-01-17 12:25:48 | INFO     | __main__ | TRAP: Deployed http honeypot on port 80 (samsung_tv)
+2026-01-17 12:25:48 | INFO     | core.deception_engine | Deployed honeypot HP-0004 (http:8080)
+2026-01-17 12:25:48 | INFO     | core.deception_engine | HTTP honeypot HP-0004 listening on port 8080
+2026-01-17 12:25:48 | INFO     | core.threat_logger | ACTION: deploy_honeypot | http:8080 | success
+2026-01-17 12:25:48 | INFO     | __main__ | TRAP: Deployed http honeypot on port 8080 (tp_link)
+2026-01-17 12:25:48 | INFO     | core.deception_engine | Deployed honeypot HP-0005 (telnet:22)
+2026-01-17 12:25:48 | INFO     | core.deception_engine | Telnet honeypot HP-0005 listening on port 22
+2026-01-17 12:25:48 | INFO     | core.threat_logger | ACTION: deploy_honeypot | telnet:22 | success
+2026-01-17 12:25:48 | INFO     | __main__ | TRAP: Deployed telnet honeypot on port 22 (nest)
+2026-01-17 12:25:48 | INFO     | core.arp_interceptor | KAVACH: Initialized on enx207bd51a6a7d (MAC: 20:7b:d5:1a:6a:7d)
+2026-01-17 12:25:48 | INFO     | core.arp_interceptor | KAVACH: ARP interceptor started on enx207bd51a6a7d
+2026-01-17 12:25:48 | INFO     | core.arp_interceptor | KAVACH: Gateway 10.42.0.1 (20:7b:d5:1a:6a:7d)
+2026-01-17 12:27:15 | INFO     | core.arp_interceptor | KAVACH: Tracking device 10.42.0.166 (72:e5:dc:9f:dc:92)
+2026-01-17 12:27:15 | INFO     | core.arp_interceptor | KAVACH: Tracking device 10.42.0.72 (e4:c3:2a:5d:69:5a)
+2026-01-17 12:27:15 | INFO     | core.arp_interceptor | KAVACH: Tracking device 10.42.0.71 (3e:2a:b7:ec:12:6b)
+2026-01-17 12:28:05 | CRITICAL | core.gateway | Device 10.42.0.166 FULLY ISOLATED - Isolated via NetworkScanner
+2026-01-17 12:28:05 | WARNING  | core.network_scanner | Device 10.42.0.166 ISOLATED via gateway (REAL)
+2026-01-17 12:28:05 | INFO     | core.threat_logger | ACTION: isolate_device | 10.42.0.166 | success
+2026-01-17 12:28:45 | CRITICAL | core.gateway | Device 10.42.0.71 FULLY ISOLATED - Isolated via NetworkScanner
+2026-01-17 12:28:45 | WARNING  | core.network_scanner | Device 10.42.0.71 ISOLATED via gateway (REAL)
+2026-01-17 12:28:45 | INFO     | core.threat_logger | ACTION: isolate_device | 10.42.0.71 | success
+2026-01-17 12:51:44 | INFO     | __main__ | Stopping RAKSHAK...
+2026-01-17 12:51:44 | INFO     | core.deception_engine | Stopped all honeypots and removed NAT redirections
+2026-01-17 12:51:44 | INFO     | __main__ | Stopping KAVACH ARP interceptor...
+2026-01-17 12:51:46 | INFO     | core.arp_interceptor | KAVACH: Restoring original ARP entries...
+2026-01-17 12:51:47 | INFO     | core.arp_interceptor | KAVACH: ARP tables restored
+2026-01-17 12:51:47 | INFO     | core.arp_interceptor | KAVACH: ARP interceptor stopped, ARP tables restored
+2026-01-17 12:51:47 | INFO     | __main__ | Stopping gateway...
+2026-01-17 12:51:47 | INFO     | core.gateway | Stopping RAKSHAK Gateway...
+2026-01-17 12:51:47 | INFO     | core.gateway | Device 10.42.0.166 isolation removed
+2026-01-17 12:51:47 | INFO     | core.gateway | Device 10.42.0.71 isolation removed
+2026-01-17 12:51:48 | INFO     | core.gateway | RAKSHAK firewall chains removed
+2026-01-17 12:51:48 | INFO     | core.gateway | RAKSHAK Gateway stopped successfully
+2026-01-17 12:51:48 | INFO     | core.packet_filter | PacketFilter stopped
+2026-01-17 12:51:48 | INFO     | __main__ | RAKSHAK stopped
