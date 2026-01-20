@@ -103,15 +103,44 @@ class NetworkScanner:
 
     # MAC OUI prefixes for device identification
     MAC_PREFIXES = {
+        # Smart Home Devices
         "00:17:88": ("Philips", "smart_bulb"),
-        "B4:E6:2D": ("TP-Link", "router"),
+        "18:B4:30": ("Nest", "thermostat"),
         "44:07:0B": ("Google", "smart_speaker"),
         "F0:27:2D": ("Amazon", "alexa"),
-        "50:C7:BF": ("TP-Link", "smart_plug"),
-        "D8:6C:63": ("Samsung", "smart_tv"),
-        "2C:AA:8E": ("Wyze", "camera"),
-        "18:B4:30": ("Nest", "thermostat"),
         "AC:CC:8E": ("Roku", "streaming"),
+        "D8:6C:63": ("Samsung", "smart_tv"),
+
+        # TP-Link Devices
+        "50:C7:BF": ("TP-Link", "smart_plug"),
+        "5C:A6:E6": ("TP-Link", "camera"),
+        "B4:E6:2D": ("TP-Link", "router"),
+        "E4:C3:2A": ("TP-Link", "router"),
+
+        # Cameras
+        "2C:AA:8E": ("Wyze", "camera"),
+
+        # Mobile Devices
+        "72:E5:DC": ("Vivo", "mobile"),
+
+        # Network Adapters
+        "00:E0:4C": ("Realtek", "network_adapter"),
+        "50:5A:65": ("AzureWave", "network_adapter"),
+        "9C:29:76": ("Intel", "network_adapter"),
+
+        # ESP32 / Espressif MAC OUI prefixes
+        "24:0A:C4": ("Espressif", "esp32_cam"),
+        "30:AE:A4": ("Espressif", "esp32_cam"),
+        "3C:71:BF": ("Espressif", "esp32_cam"),
+        "7C:9E:BD": ("Espressif", "esp32_cam"),
+        "94:B9:7E": ("Espressif", "esp32_cam"),
+        "A4:CF:12": ("Espressif", "esp32_cam"),
+        "B4:E6:2E": ("Espressif", "esp32_cam"),
+        "C4:D8:D5": ("Espressif", "esp32_cam"),
+        "CC:50:E3": ("Espressif", "esp32_cam"),
+        "DC:4F:22": ("Espressif", "esp32_cam"),
+        "EC:FA:BC": ("Espressif", "esp32_cam"),
+        "F4:CF:A2": ("Espressif", "esp32_cam"),
     }
 
     def __init__(self, config: dict, threat_logger=None, gateway=None, trust_manager=None, orchestrator=None):
@@ -353,6 +382,13 @@ class NetworkScanner:
 
                 if device_info.get("mac") and device.mac == "unknown":
                     device.mac = device_info["mac"]
+                    # Re-identify device now that we have MAC
+                    mac_prefix = device.mac[:8].upper()
+                    if mac_prefix in self.MAC_PREFIXES:
+                        manufacturer, device_type = self.MAC_PREFIXES[mac_prefix]
+                        device.manufacturer = manufacturer
+                        device.device_type = device_type
+                        logger.info(f"MAYA: Identified device from MAC: {ip} ({device.mac}) -> {manufacturer} / {device_type}")
                 if device_info.get("device_type") and device.device_type == "unknown":
                     device.device_type = device_info["device_type"]
                 if device_info.get("manufacturer") and device.manufacturer == "unknown":
@@ -385,6 +421,15 @@ class NetworkScanner:
                 last_seen=datetime.now().isoformat(),
                 status="active"
             )
+
+            # Identify device from MAC address if available
+            if device.mac and device.mac != "unknown":
+                mac_prefix = device.mac[:8].upper()
+                if mac_prefix in self.MAC_PREFIXES:
+                    manufacturer, device_type = self.MAC_PREFIXES[mac_prefix]
+                    device.manufacturer = manufacturer
+                    device.device_type = device_type
+                    logger.info(f"MAYA: Identified passively discovered device: {ip} ({device.mac}) -> {manufacturer} / {device_type}")
 
             # Calculate risk score
             device.risk_score = self._calculate_risk_score(device)
@@ -430,7 +475,7 @@ class NetworkScanner:
 
         # Determine zone assignment
         zone = "guest"  # Default zone for unknown devices
-        enrollment_status = "unknown"
+        enrollment_status = "pending"  # New devices default to pending approval
 
         # CRITICAL FIX: Preserve manually enrolled devices
         if existing_status == "enrolled" and existing_zone:
@@ -445,9 +490,9 @@ class NetworkScanner:
                 determined_zone = self.trust_manager.get_zone_for_ip(device.ip)
                 if determined_zone:
                     zone = determined_zone
-                    # ZERO TRUST FIX: All new devices start as 'unknown' regardless of zone
+                    # ZERO TRUST: New devices start as 'pending' requiring manual approval
                     # Only manual approval via dashboard should set 'enrolled'
-                    enrollment_status = "unknown"
+                    enrollment_status = "pending"
 
         # Update Device object with zone info
         device.zone = zone
@@ -537,6 +582,16 @@ class NetworkScanner:
                     zone=row['zone'] or "unknown",
                     enrollment_status=row['enrollment_status'] or "unknown"
                 )
+
+                # Re-identify device from MAC to pick up any updated MAC prefixes
+                # (skip nmap fingerprinting during database load to avoid blocking startup)
+                if device.mac and device.mac != "unknown":
+                    mac_prefix = device.mac[:8].upper()
+                    if mac_prefix in self.MAC_PREFIXES:
+                        manufacturer, device_type = self.MAC_PREFIXES[mac_prefix]
+                        device.manufacturer = manufacturer
+                        device.device_type = device_type
+                        logger.debug(f"Re-identified from DB: {device.ip} ({device.mac}) -> {manufacturer} / {device_type}")
 
                 self.devices[device.ip] = device
                 if device.mac and device.mac != "unknown":
@@ -749,21 +804,34 @@ class NetworkScanner:
                 if ip not in current_lease_ips:
                     device = self.devices[ip]
 
-                    # Check if device was recently seen (within 30 seconds)
+                    # ENHANCED FIX: Check if device was recently seen by ANY method
+                    # This includes passive discovery (SSDP, ARP, ONVIF) and static IPs
                     recently_seen = False
+                    inactive_timeout = 300  # 5 minutes (was 30 seconds - too aggressive)
+
                     try:
                         last_seen = datetime.fromisoformat(device.last_seen)
                         time_since_seen = (datetime.now() - last_seen).total_seconds()
-                        recently_seen = time_since_seen < 30  # Give 30 seconds for DHCP lease
+                        recently_seen = time_since_seen < inactive_timeout
                     except (ValueError, TypeError):
                         pass
 
                     # GRACE PERIOD FIX: Don't mark inactive if:
                     # 1. During startup grace period, OR
-                    # 2. Device was recently seen by passive discovery
-                    if not startup_grace_active and not recently_seen and device.status == "active":
+                    # 2. Device was recently seen by passive discovery or any method, OR
+                    # 3. Device is isolated (managed by admin)
+                    should_mark_inactive = (
+                        not startup_grace_active and
+                        not recently_seen and
+                        device.status == "active"
+                    )
+
+                    if should_mark_inactive:
                         device.status = "inactive"
-                        logger.info(f"Device {ip} marked as inactive (disconnected)")
+                        logger.info(
+                            f"Device {ip} marked as inactive "
+                            f"(no activity for {inactive_timeout}s via DHCP or passive discovery)"
+                        )
 
                         # REAL-TIME FIX: Emit status change event
                         if self.orchestrator:
@@ -853,7 +921,7 @@ class NetworkScanner:
         logger.debug(f"Discovered {len(devices)} devices from DHCP leases")
         return devices
 
-    def cleanup_stale_devices(self, inactive_threshold_seconds: int = 300) -> int:
+    def cleanup_stale_devices(self, inactive_threshold_seconds: int = 1800) -> int:
         """
         Remove devices that have been inactive for longer than threshold.
 
@@ -861,7 +929,7 @@ class NetworkScanner:
         the network or change IP addresses.
 
         Args:
-            inactive_threshold_seconds: Remove devices inactive for longer than this (default: 5 min)
+            inactive_threshold_seconds: Remove devices inactive for longer than this (default: 30 min)
 
         Returns:
             Number of devices removed
@@ -906,6 +974,8 @@ class NetworkScanner:
         type_hints = {
             "camera": "camera",
             "cam": "camera",
+            "esp32": "esp32_cam",
+            "espressif": "esp32_cam",
             "wyze": "wyze_cam",
             "alexa": "alexa",
             "echo": "alexa",
@@ -938,10 +1008,14 @@ class NetworkScanner:
         """Identify device type from MAC address and fingerprint."""
         # Check MAC OUI prefix
         mac_prefix = device.mac[:8].upper()
+        logger.debug(f"Identifying device: MAC={device.mac}, prefix={mac_prefix}")
         if mac_prefix in self.MAC_PREFIXES:
             manufacturer, device_type = self.MAC_PREFIXES[mac_prefix]
             device.manufacturer = manufacturer
             device.device_type = device_type
+            logger.info(f"Device identified: {device.ip} ({device.mac}) -> {manufacturer} / {device_type}")
+        else:
+            logger.debug(f"No match found for MAC prefix: {mac_prefix}")
 
         # Run nmap fingerprint if available
         if NMAP_AVAILABLE and self.nm:
@@ -1003,10 +1077,15 @@ class NetworkScanner:
                 risk_factors.append(f"{service_name.upper()} service exposed")
 
         # High-risk device types
-        high_risk_types = ["camera", "wyze_cam", "router", "tp_link"]
+        high_risk_types = ["camera", "wyze_cam", "esp32_cam", "router", "tp_link"]
         if device.device_type in high_risk_types:
             score += 15
             risk_factors.append("High-risk device type")
+
+        # ESP32-CAM specific (often DIY, vulnerable)
+        if device.device_type == "esp32_cam":
+            score += 10
+            risk_factors.append("DIY camera (ESP32) - often insecure")
 
         # Check for default ports
         default_dangerous_ports = [23, 21, 5900, 3389]  # telnet, ftp, vnc, rdp

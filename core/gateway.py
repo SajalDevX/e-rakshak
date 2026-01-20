@@ -134,6 +134,10 @@ class RakshakGateway:
         self._original_lan_interface = None  # For bridge mode rollback
         self.firewall_persistence = None  # Will be set after database initialization
 
+        # Store original network state for proper cleanup
+        self._original_ip_forward = None
+        self._original_nat_rules = []
+
         # Paths
         self.dnsmasq_config_path = Path("/etc/dnsmasq.d/rakshak.conf")
         self.dhcp_leases_path = Path("/var/lib/misc/dnsmasq.leases")
@@ -303,6 +307,16 @@ class RakshakGateway:
     def enable_ip_forwarding(self) -> bool:
         """Enable IP forwarding in kernel"""
         try:
+            # Save original IP forwarding state before changing
+            if self._original_ip_forward is None:
+                try:
+                    with open("/proc/sys/net/ipv4/ip_forward", "r") as f:
+                        self._original_ip_forward = f.read().strip()
+                    logger.debug(f"Saved original IP forwarding state: {self._original_ip_forward}")
+                except Exception as e:
+                    logger.warning(f"Could not read original IP forward state: {e}")
+                    self._original_ip_forward = "0"  # Assume it was disabled
+
             # Enable immediately
             subprocess.run(
                 ["sysctl", "-w", "net.ipv4.ip_forward=1"],
@@ -1105,23 +1119,54 @@ expand-hosts
                 logger.info("Tearing down bridge...")
                 self.teardown_bridge()
 
-            # Flush NAT rules
-            subprocess.run(["iptables", "-t", "nat", "-F"], capture_output=True)
-            subprocess.run(["iptables", "-F", "FORWARD"], capture_output=True)
+            # Restore IP forwarding to original state
+            if self._original_ip_forward is not None:
+                logger.info(f"Restoring IP forwarding to original state: {self._original_ip_forward}")
+                try:
+                    subprocess.run(
+                        ["sysctl", "-w", f"net.ipv4.ip_forward={self._original_ip_forward}"],
+                        capture_output=True, check=True
+                    )
+                except Exception as e:
+                    logger.warning(f"Failed to restore IP forwarding: {e}")
 
-            # Reset FORWARD policy
-            subprocess.run(["iptables", "-P", "FORWARD", "ACCEPT"], capture_output=True)
+            # Remove persistent sysctl configuration
+            sysctl_conf = Path("/etc/sysctl.d/99-rakshak.conf")
+            if sysctl_conf.exists():
+                try:
+                    sysctl_conf.unlink()
+                    logger.info("Removed RAKSHAK sysctl configuration")
+                except Exception as e:
+                    logger.warning(f"Failed to remove sysctl config: {e}")
 
-            # Stop dnsmasq
-            subprocess.run(["systemctl", "stop", "dnsmasq"], capture_output=True)
+            # Only flush NAT rules if we were managing DHCP/NAT
+            # Otherwise, preserve NetworkManager's NAT configuration
+            if self.config.dhcp_enabled:
+                logger.info("Flushing RAKSHAK NAT rules...")
+                subprocess.run(["iptables", "-t", "nat", "-F", "POSTROUTING"], capture_output=True)
+                subprocess.run(["iptables", "-F", "FORWARD"], capture_output=True)
+                subprocess.run(["iptables", "-P", "FORWARD", "ACCEPT"], capture_output=True)
+            else:
+                logger.info("Preserving NetworkManager NAT configuration")
+                # Only clean up RAKSHAK-specific chains, not NAT
+                subprocess.run(["iptables", "-F", "FORWARD"], capture_output=True)
+
+            # Stop dnsmasq only if we started it
+            if self.config.dhcp_enabled:
+                logger.info("Stopping dnsmasq...")
+                subprocess.run(["systemctl", "stop", "dnsmasq"], capture_output=True)
 
             # Remove config
             if self.dnsmasq_config_path.exists():
-                self.dnsmasq_config_path.unlink()
+                try:
+                    self.dnsmasq_config_path.unlink()
+                    logger.info("Removed dnsmasq configuration")
+                except Exception as e:
+                    logger.warning(f"Failed to remove dnsmasq config: {e}")
 
             self.is_gateway_mode = False
 
-            logger.info("RAKSHAK Gateway stopped successfully")
+            logger.info("RAKSHAK Gateway stopped successfully - network restored")
             return True
 
         except Exception as e:
@@ -1339,43 +1384,138 @@ expand-hosts
             return False
 
     def unisolate_device(self, ip_address: str) -> bool:
-        """Remove isolation from a device"""
+        """Remove isolation from a device (supports both IP and MAC-based isolation)"""
         try:
-            # Remove all rules for this IP from RAKSHAK_ISOLATED
-            for _ in range(10):
-                result = subprocess.run([
-                    "iptables", "-D", "RAKSHAK_ISOLATED",
-                    "-s", ip_address, "-j", "DROP"
-                ], capture_output=True)
-                if result.returncode != 0:
-                    break
+            # Check if this is a MAC-based isolation
+            is_mac_isolation = ip_address.startswith("MAC:")
 
-            for _ in range(10):
-                result = subprocess.run([
-                    "iptables", "-D", "RAKSHAK_ISOLATED",
-                    "-d", ip_address, "-j", "DROP"
-                ], capture_output=True)
-                if result.returncode != 0:
-                    break
+            if is_mac_isolation:
+                # Extract MAC from key
+                mac_address = ip_address.split(":", 1)[1]
 
-            # Remove from RATELIMIT chain
-            for _ in range(10):
-                result = subprocess.run([
-                    "iptables", "-D", "RAKSHAK_RATELIMIT",
-                    "-s", ip_address
-                ], capture_output=True)
-                if result.returncode != 0:
-                    break
+                # Remove MAC-based iptables rule
+                for _ in range(10):
+                    result = subprocess.run([
+                        "iptables", "-D", "RAKSHAK_ISOLATED",
+                        "-m", "mac", "--mac-source", mac_address,
+                        "-j", "DROP"
+                    ], capture_output=True)
+                    if result.returncode != 0:
+                        break
+
+                logger.info(f"MAC-based isolation removed for {mac_address}")
+
+            else:
+                # IP-based isolation removal
+                # Remove all rules for this IP from RAKSHAK_ISOLATED
+                for _ in range(10):
+                    result = subprocess.run([
+                        "iptables", "-D", "RAKSHAK_ISOLATED",
+                        "-s", ip_address, "-j", "DROP"
+                    ], capture_output=True)
+                    if result.returncode != 0:
+                        break
+
+                for _ in range(10):
+                    result = subprocess.run([
+                        "iptables", "-D", "RAKSHAK_ISOLATED",
+                        "-d", ip_address, "-j", "DROP"
+                    ], capture_output=True)
+                    if result.returncode != 0:
+                        break
+
+                # Remove from RATELIMIT chain
+                for _ in range(10):
+                    result = subprocess.run([
+                        "iptables", "-D", "RAKSHAK_RATELIMIT",
+                        "-s", ip_address
+                    ], capture_output=True)
+                    if result.returncode != 0:
+                        break
+
+                logger.info(f"Device {ip_address} isolation removed")
 
             # Remove from tracking
             if ip_address in self.isolated_devices:
                 del self.isolated_devices[ip_address]
 
-            logger.info(f"Device {ip_address} isolation removed")
+            # Persist removal if firewall persistence is available
+            if self.firewall_persistence:
+                try:
+                    self.firewall_persistence.remove_isolation(ip_address)
+                except Exception as e:
+                    logger.warning(f"Failed to persist isolation removal to database: {e}")
+
             return True
 
         except Exception as e:
-            logger.error(f"Failed to unisolate device {ip_address}: {e}")
+            logger.error(f"Failed to unisolate {ip_address}: {e}")
+            return False
+
+    def isolate_device_by_mac(self, mac_address: str,
+                              reason: str = "Threat detected") -> bool:
+        """
+        Isolate a device by MAC address using iptables.
+
+        This provides redundant isolation even if the device changes IP.
+        Uses iptables MAC matching module to block traffic from specific MAC address.
+
+        Args:
+            mac_address: MAC address of device to isolate (format: AA:BB:CC:DD:EE:FF or AA-BB-CC-DD-EE-FF)
+            reason: Reason for isolation (for logging)
+
+        Returns:
+            True if isolation successful, False otherwise.
+        """
+        try:
+            # Normalize MAC address to uppercase with colons
+            mac_normalized = mac_address.upper().replace('-', ':')
+
+            # Check if already isolated by MAC
+            for device in self.isolated_devices.values():
+                if device.mac_address and device.mac_address.upper() == mac_normalized:
+                    logger.warning(f"Device with MAC {mac_normalized} already isolated")
+                    return True
+
+            # Block ALL traffic from this MAC address
+            # This rule catches the device regardless of IP address
+            subprocess.run([
+                "iptables", "-I", "RAKSHAK_ISOLATED", "1",
+                "-m", "mac", "--mac-source", mac_normalized,
+                "-m", "comment", "--comment", f"rakshak-isolate-mac-{mac_normalized}",
+                "-j", "DROP"
+            ], check=True, capture_output=True)
+
+            logger.critical(f"Device MAC {mac_normalized} ISOLATED - {reason}")
+
+            # Track MAC-based isolation
+            # Use MAC as key for tracking
+            self.isolated_devices[f"MAC:{mac_normalized}"] = IsolatedDevice(
+                ip_address="0.0.0.0",  # Unknown/dynamic IP
+                mac_address=mac_normalized,
+                isolation_level=IsolationLevel.FULL,
+                isolated_at=datetime.now(),
+                reason=reason,
+                auto_expire=None  # Permanent
+            )
+
+            # Persist to database if firewall persistence is available
+            if self.firewall_persistence:
+                try:
+                    self.firewall_persistence.save_isolation(
+                        identifier=f"MAC:{mac_normalized}",
+                        mac_address=mac_normalized,
+                        ip_address="0.0.0.0",
+                        level=IsolationLevel.FULL.value,
+                        reason=reason
+                    )
+                except Exception as e:
+                    logger.warning(f"Failed to persist MAC isolation to database: {e}")
+
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to isolate MAC {mac_address}: {e}")
             return False
 
     def isolate_device_enhanced(self, ip_address: str,
@@ -1697,6 +1837,335 @@ expand-hosts
             logger.error(f"Failed to get traffic stats: {e}")
 
         return stats
+
+    def create_device_chain(
+        self,
+        device_mac: str,
+        device_ip: str,
+        device_type: str = "unknown",
+        policy_engine=None
+    ) -> bool:
+        """
+        Create per-device iptables chain with policy-based rules.
+
+        Args:
+            device_mac: Device MAC address
+            device_ip: Device IP address
+            device_type: Device type (camera, smart_plug, etc.)
+            policy_engine: DevicePolicyEngine instance
+
+        Returns:
+            True if successful
+        """
+        try:
+            # Generate chain name from MAC
+            device_id = device_mac.replace(":", "").lower()[:12]
+            chain_name = f"RAKSHAK_DEVICE_{device_id}"
+
+            # Create chain
+            subprocess.run(
+                ["iptables", "-t", "filter", "-N", chain_name],
+                capture_output=True
+            )
+
+            # Flush existing rules (in case chain already exists)
+            subprocess.run(
+                ["iptables", "-t", "filter", "-F", chain_name],
+                capture_output=True
+            )
+
+            # Get device policy
+            if policy_engine:
+                policy = policy_engine.get_policy(device_type)
+            else:
+                # Default restrictive policy if no engine provided
+                policy = None
+
+            # Add jump rule from FORWARD chain
+            subprocess.run([
+                "iptables", "-A", "FORWARD",
+                "-s", device_ip,
+                "-j", chain_name,
+                "-m", "comment", "--comment", f"per-device-{device_id}"
+            ], check=True, capture_output=True)
+
+            # Apply policy-based rules
+            if policy:
+                self._apply_policy_rules(chain_name, device_ip, device_mac, policy)
+            else:
+                # Default: allow HTTPS and DNS only
+                subprocess.run([
+                    "iptables", "-A", chain_name,
+                    "-p", "tcp", "--dport", "443",
+                    "-j", "ACCEPT"
+                ], capture_output=True)
+
+                subprocess.run([
+                    "iptables", "-A", chain_name,
+                    "-p", "udp", "--dport", "53",
+                    "-j", "ACCEPT"
+                ], capture_output=True)
+
+            # Default DROP at end of chain
+            subprocess.run([
+                "iptables", "-A", chain_name,
+                "-j", "LOG", "--log-prefix", f"[RAKSHAK-DROP-{device_id}] ",
+                "--log-level", "4"
+            ], capture_output=True)
+
+            subprocess.run([
+                "iptables", "-A", chain_name,
+                "-j", "DROP"
+            ], capture_output=True)
+
+            logger.info(f"Created device chain {chain_name} for {device_ip} (type={device_type})")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to create device chain for {device_mac}: {e}")
+            return False
+
+    def _apply_policy_rules(
+        self,
+        chain_name: str,
+        device_ip: str,
+        device_mac: str,
+        policy
+    ):
+        """Apply policy-based firewall rules to device chain."""
+        device_id = device_mac.replace(":", "").lower()[:12]
+        ipset_name = f"rakshak_allowed_{device_id}"
+
+        # CRITICAL: Block IoT-to-IoT lateral movement
+        if not policy.allow_iot_lateral:
+            # Get IoT zone network (assuming 10.42.0.0/25)
+            iot_network = self.full_config.get("zero_trust", {}).get("networks", {}).get("iot", "10.42.0.0/25")
+
+            subprocess.run([
+                "iptables", "-A", chain_name,
+                "-d", iot_network,
+                "-j", "LOG", "--log-prefix", f"[IOT-LATERAL-BLOCK-{device_id}] ",
+                "--log-level", "4"
+            ], capture_output=True)
+
+            subprocess.run([
+                "iptables", "-A", chain_name,
+                "-d", iot_network,
+                "-j", "DROP",
+                "-m", "comment", "--comment", "block-iot-lateral"
+            ], capture_output=True)
+
+            logger.debug(f"Blocked IoT lateral movement for {device_ip}")
+
+        # Allow DNS (almost all devices need this)
+        subprocess.run([
+            "iptables", "-A", chain_name,
+            "-p", "udp", "--dport", "53",
+            "-j", "ACCEPT",
+            "-m", "comment", "--comment", "allow-dns"
+        ], capture_output=True)
+
+        # Allow NTP (time sync)
+        subprocess.run([
+            "iptables", "-A", chain_name,
+            "-p", "udp", "--dport", "123",
+            "-j", "ACCEPT",
+            "-m", "comment", "--comment", "allow-ntp"
+        ], capture_output=True)
+
+        # Apply permitted ports
+        for port_rule in policy.permitted_ports:
+            if port_rule.port == 0:
+                # Allow all ports for this protocol
+                subprocess.run([
+                    "iptables", "-A", chain_name,
+                    "-p", port_rule.protocol,
+                    "-j", "ACCEPT",
+                    "-m", "comment", "--comment", f"allow-{port_rule.protocol}"
+                ], capture_output=True)
+            else:
+                # Specific port
+                subprocess.run([
+                    "iptables", "-A", chain_name,
+                    "-p", port_rule.protocol,
+                    "--dport", str(port_rule.port),
+                    "-j", "ACCEPT",
+                    "-m", "comment", "--comment", f"allow-{port_rule.protocol}-{port_rule.port}"
+                ], capture_output=True)
+
+        # DNS whitelist enforcement (if ipset exists)
+        result = subprocess.run(
+            ["ipset", "list", ipset_name],
+            capture_output=True
+        )
+
+        if result.returncode == 0:
+            # Allow traffic to whitelisted IPs only (for HTTPS)
+            subprocess.run([
+                "iptables", "-A", chain_name,
+                "-p", "tcp", "--dport", "443",
+                "-m", "set", "--match-set", ipset_name, "dst",
+                "-j", "ACCEPT",
+                "-m", "comment", "--comment", "dns-whitelist"
+            ], capture_output=True)
+
+            logger.debug(f"Applied DNS whitelist ipset {ipset_name} for {device_ip}")
+
+        # Rate limiting
+        if policy.rate_limits:
+            # Connection rate limit
+            subprocess.run([
+                "iptables", "-I", chain_name, "1",
+                "-m", "connlimit",
+                "--connlimit-above", str(policy.rate_limits.max_connections_per_second),
+                "--connlimit-mask", "32",
+                "-j", "DROP",
+                "-m", "comment", "--comment", "rate-limit-connections"
+            ], capture_output=True)
+
+            # Bandwidth rate limit (using hashlimit)
+            subprocess.run([
+                "iptables", "-I", chain_name, "1",
+                "-m", "hashlimit",
+                "--hashlimit-above", f"{policy.rate_limits.max_bandwidth_mbps}mb/sec",
+                "--hashlimit-name", f"bw_{device_id}",
+                "-j", "DROP",
+                "-m", "comment", "--comment", "rate-limit-bandwidth"
+            ], capture_output=True)
+
+        # LAN access control
+        if not policy.allow_lan:
+            # Block LAN except gateway
+            lan_network = self.config.lan_network
+            subprocess.run([
+                "iptables", "-I", chain_name, "1",
+                "-d", lan_network,
+                "!", "-d", self.config.lan_ip,  # Except gateway
+                "-j", "DROP",
+                "-m", "comment", "--comment", "block-lan"
+            ], capture_output=True)
+
+    def apply_device_policy(
+        self,
+        device_mac: str,
+        device_ip: str,
+        device_type: str,
+        policy_engine
+    ) -> bool:
+        """
+        Apply or update device policy.
+
+        Args:
+            device_mac: Device MAC address
+            device_ip: Device IP address
+            device_type: Device type
+            policy_engine: DevicePolicyEngine instance
+
+        Returns:
+            True if successful
+        """
+        # Remove existing chain if present
+        self.remove_device_chain(device_mac, device_ip)
+
+        # Create new chain with policy
+        return self.create_device_chain(device_mac, device_ip, device_type, policy_engine)
+
+    def remove_device_chain(self, device_mac: str, device_ip: str) -> bool:
+        """
+        Remove per-device chain.
+
+        Args:
+            device_mac: Device MAC address
+            device_ip: Device IP address
+
+        Returns:
+            True if successful
+        """
+        try:
+            device_id = device_mac.replace(":", "").lower()[:12]
+            chain_name = f"RAKSHAK_DEVICE_{device_id}"
+
+            # Remove jump rule from FORWARD chain
+            for _ in range(10):
+                result = subprocess.run([
+                    "iptables", "-D", "FORWARD",
+                    "-s", device_ip,
+                    "-j", chain_name
+                ], capture_output=True)
+                if result.returncode != 0:
+                    break
+
+            # Flush chain
+            subprocess.run(
+                ["iptables", "-F", chain_name],
+                capture_output=True
+            )
+
+            # Delete chain
+            subprocess.run(
+                ["iptables", "-X", chain_name],
+                capture_output=True
+            )
+
+            logger.debug(f"Removed device chain {chain_name}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to remove device chain for {device_mac}: {e}")
+            return False
+
+    def setup_iot_lateral_block(self, iot_network: str = "10.42.0.0/25") -> bool:
+        """
+        Setup global IoT lateral movement blocking.
+
+        CRITICAL: Prevents compromised IoT devices from attacking other IoT devices.
+
+        Args:
+            iot_network: IoT zone network CIDR
+
+        Returns:
+            True if successful
+        """
+        try:
+            # Create specific chain for IoT lateral blocking
+            subprocess.run(
+                ["iptables", "-N", "RAKSHAK_IOT_LATERAL"],
+                capture_output=True
+            )
+
+            subprocess.run(
+                ["iptables", "-F", "RAKSHAK_IOT_LATERAL"],
+                capture_output=True
+            )
+
+            # Block IoT-to-IoT traffic
+            subprocess.run([
+                "iptables", "-A", "RAKSHAK_IOT_LATERAL",
+                "-s", iot_network,
+                "-d", iot_network,
+                "-j", "LOG", "--log-prefix", "[CRITICAL-IOT-LATERAL] ",
+                "--log-level", "3"
+            ], check=True, capture_output=True)
+
+            subprocess.run([
+                "iptables", "-A", "RAKSHAK_IOT_LATERAL",
+                "-s", iot_network,
+                "-d", iot_network,
+                "-j", "DROP"
+            ], check=True, capture_output=True)
+
+            # Insert into FORWARD chain (high priority)
+            subprocess.run([
+                "iptables", "-I", "FORWARD", "1",
+                "-j", "RAKSHAK_IOT_LATERAL"
+            ], check=True, capture_output=True)
+
+            logger.critical(f"IoT lateral movement blocking enabled for {iot_network}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to setup IoT lateral blocking: {e}")
+            return False
 
     def get_status(self) -> Dict:
         """Get gateway status"""

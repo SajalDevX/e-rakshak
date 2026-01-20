@@ -9,9 +9,9 @@
 general:
   app_name: "RAKSHAK"
   version: "1.0.0"
-  debug: true
-  log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
-  language: "en"     # en, hi (English, Hindi)
+  debug: false        # Set to false for production Jetson deployment
+  log_level: "INFO"   # INFO for production (not DEBUG to save space)
+  language: "en"      # en, hi (English, Hindi)
 
 # -----------------------------------------------------------------------------
 # Simulation Mode (for testing without real network)
@@ -169,19 +169,20 @@ kaal:
 # LLM Honeypot (PRAHARI) Settings
 # -----------------------------------------------------------------------------
 llm:
-  # Ollama settings (preferred - local LLM server)
+  # Ollama settings (RECOMMENDED for Jetson - more efficient)
   ollama_enabled: true
   ollama_url: "http://localhost:11434"
-  ollama_model: "mistral:7b"   # or llama2:7b, phi3:mini
+  ollama_model: "phi3:mini"    # Lighter model for Jetson (phi3:mini faster than mistral:7b)
 
   # Transformers settings (fallback if Ollama unavailable)
+  # NOTE: Limited to transformers 4.30.2 on Ubuntu 18.04
   model_name: "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
   model_path: "models/tinyllama"
-  quantization: "int8"     # int8, int4, or none
-  max_new_tokens: 256
+  quantization: "int8"     # int8 quantization for memory efficiency
+  max_new_tokens: 128      # Reduced for faster response on Jetson
   temperature: 0.7
   do_sample: true
-  auto_download: true      # Download model on first run
+  auto_download: true      # Download model on first run (requires ~500MB)
 
   # Device personas for honeypot
   personas:
@@ -316,13 +317,13 @@ database:
 # -----------------------------------------------------------------------------
 logging:
   format: "%(asctime)s | %(levelname)s | %(name)s | %(message)s"
-  file: "data/logs/rakshak.log"
+  file: "data/logs/rakshak.log"  # JETSON: Optionally change to /mnt/sd-card/rakshak/logs/rakshak.log
   max_size: 10485760       # 10 MB
-  backup_count: 5
+  backup_count: 5          # Keep 5 backup files (saves eMMC space on Jetson)
 
   # Threat logging
   threats:
-    file: "data/threats/threats.json"
+    file: "data/threats/threats.json"  # JETSON: Optionally change to SD card path
     export_cctns: true
 
 # =============================================================================
@@ -345,17 +346,18 @@ gateway:
                                     # "standalone" = legacy passive mode (testing only)
 
   # ---------------------------------------------------------------------------
-  # Network Interface Configuration
+  # Network Interface Configuration (JETSON XAVIER NX)
   # ---------------------------------------------------------------------------
-  # WAN Interface: Connected to internet via WiFi
-  wan_interface: "wlo1"             # WiFi interface (internet)
+  # WAN Interface: Connected to internet
+  wan_interface: "eth0"             # Built-in Ethernet to modem (CHANGE IF DIFFERENT)
 
   # LAN Interface: Connected to router in AP mode (static IP)
-  lan_interface: "enx207bd51a6a7d"  # USB Ethernet to router in AP mode
-                                    # Can also be "auto" for auto-detection
+  lan_interface: "eth1"             # USB Ethernet to router (CHANGE TO YOUR MAC ADDRESS)
+                                    # Find with: ip link show
+                                    # Example: enx207bd51a6a7d
 
   # Auto-detection settings
-  auto_detect_interfaces: false     # Manual configuration for laptop setup
+  auto_detect_interfaces: true      # Enable for Jetson (will auto-detect if above fails)
   usb_ethernet_patterns:            # Patterns to match USB ethernet
     - "eth1"
     - "enx*"                        # Standard USB ethernet naming
@@ -369,10 +371,10 @@ gateway:
   lan_network: "10.42.0.0/24"       # Network CIDR
 
   # ---------------------------------------------------------------------------
-  # DHCP Server Configuration (dnsmasq)
+  # DHCP Server Configuration (dnsmasq) - JETSON
   # ---------------------------------------------------------------------------
   dhcp:
-    enabled: false                  # NetworkManager handles DHCP
+    enabled: true                   # Enable dnsmasq DHCP server on Jetson
     range_start: "10.42.0.10"       # First IP to assign
     range_end: "10.42.0.254"        # Last IP to assign
     lease_time: "24h"               # Lease duration
@@ -519,24 +521,13 @@ gateway:
     #     dest: "10.42.0.11"     # Chromecast
 
   # ---------------------------------------------------------------------------
-  # Auto-Isolation for Specific MAC Addresses
-  # ---------------------------------------------------------------------------
-  # Enables immediate automatic isolation of specific devices when DDoS detected.
-  # Bypasses KAAL AI evaluation for fast response on known problematic devices.
-  auto_isolation:
-    enabled: true                   # Enable MAC-based auto-isolation
-    target_macs:                    # List of MAC addresses to auto-isolate
-      - "C4:D8:D5:03:8E:7F"         # Device to auto-isolate on DDoS
-    reason: "Automatic isolation: Device performing DDoS attack"
-
-  # ---------------------------------------------------------------------------
-  # Jetson Xavier NX Specific Settings
+  # Jetson Xavier NX Specific Settings (UBUNTU 18.04 / JETPACK 4.6)
   # ---------------------------------------------------------------------------
   jetson:
-    is_jetson_platform: false       # Running on Ubuntu laptop
-    optimize_for_jetson: false      # Disable Jetson optimizations
-    use_gpu_for_ml: false           # Use GPU for ML inference (if available)
-    power_mode: "MAXN"              # Jetson power mode
+    is_jetson_platform: true        # Running on Jetson Xavier NX
+    optimize_for_jetson: true       # Enable Jetson optimizations
+    use_gpu_for_ml: false           # CPU inference is faster for small models (PyTorch 1.10)
+    power_mode: "MAXN"              # Maximum performance (15W 6-core @ 1.9GHz)
 
   # ---------------------------------------------------------------------------
   # Persistence and Recovery

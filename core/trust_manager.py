@@ -107,7 +107,7 @@ class TrustManager:
 
             cursor.execute("""
                 UPDATE devices
-                SET enrollment_status = 'unknown',
+                SET enrollment_status = 'pending',
                     zone = ?
                 WHERE ip = ? OR mac = ?
             """, (self.default_zone, device_ip, device_mac))
@@ -120,12 +120,12 @@ class TrustManager:
                 device_mac=device_mac,
                 action="auto_assign_guest",
                 old_status="new",
-                new_status="unknown",
+                new_status="pending",
                 zone_assigned=self.default_zone,
                 performed_by="system"
             )
 
-            device["enrollment_status"] = "unknown"
+            device["enrollment_status"] = "pending"
             device["zone"] = self.default_zone
 
             logger.info(f"Device {device_ip} assigned to {self.default_zone} zone")

@@ -1,0 +1,66 @@
+{
+  "1,3,6,15,31,33,43,44,46,47,121,249,252": {
+    "os": "Android",
+    "vendor": "Google",
+    "device_type": "mobile",
+    "confidence": 0.85,
+    "common_versions": ["Android 10+"],
+    "last_updated": "2026-01-18"
+  },
+  "1,121,3,6,15,28,51,58,59": {
+    "os": "iOS",
+    "vendor": "Apple",
+    "device_type": "mobile",
+    "confidence": 0.90,
+    "common_versions": ["iOS 14+"],
+    "last_updated": "2026-01-18"
+  },
+  "1,3,6,12,15,28,42": {
+    "os": "Embedded Linux (IoT)",
+    "vendor": "unknown",
+    "device_type": "camera",
+    "confidence": 0.70,
+    "common_devices": ["IP Cameras", "IoT Sensors"],
+    "last_updated": "2026-01-18"
+  },
+  "1,28,2,3,15,6,119,12": {
+    "os": "macOS",
+    "vendor": "Apple",
+    "device_type": "laptop",
+    "confidence": 0.88,
+    "common_versions": ["macOS 11+"],
+    "last_updated": "2026-01-18"
+  },
+  "1,3,6,15,31,33": {
+    "os": "Windows 10",
+    "vendor": "Microsoft",
+    "device_type": "desktop",
+    "confidence": 0.83,
+    "common_versions": ["Windows 10", "Windows 11"],
+    "last_updated": "2026-01-18"
+  },
+  "1,3,6,12,15,17,23,29,31,33,40,41,42": {
+    "os": "Linux (Ubuntu/Debian)",
+    "vendor": "Canonical",
+    "device_type": "laptop",
+    "confidence": 0.78,
+    "common_versions": ["Ubuntu 20.04+"],
+    "last_updated": "2026-01-18"
+  },
+  "1,3,6,15": {
+    "os": "Embedded (Simple IoT)",
+    "vendor": "unknown",
+    "device_type": "smart_plug",
+    "confidence": 0.65,
+    "common_devices": ["Smart Plugs", "Smart Bulbs"],
+    "last_updated": "2026-01-18"
+  },
+  "1,3,6,42": {
+    "os": "Embedded Linux (Router)",
+    "vendor": "various",
+    "device_type": "router",
+    "confidence": 0.72,
+    "common_devices": ["TP-Link Router", "Netgear Router"],
+    "last_updated": "2026-01-18"
+  }
+}

@@ -384,3 +384,309 @@ class DeviceBehaviorBaseline:
         except Exception as e:
             logger.error(f"Failed to get anomalies: {e}")
             return []
+
+    def calculate_identity_drift(
+        self,
+        device_ip: str,
+        device_mac: str,
+        current_fingerprint: dict
+    ) -> Optional[dict]:
+        """
+        Calculate identity drift score for a device.
+
+        Compares current behavior/fingerprints with baseline to detect identity changes
+        that may indicate device compromise or replacement.
+
+        Args:
+            device_ip: Device IP address
+            device_mac: Device MAC address
+            current_fingerprint: Current fingerprint data from fingerprinting module
+
+        Returns:
+            Drift detection result dict or None
+        """
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+
+            # Get baseline fingerprint
+            cursor.execute("""
+                SELECT ja3_hash, dhcp_option55, tcp_signature, dns_domains,
+                       fused_vendor, fused_device_type, fused_os
+                FROM device_fingerprints
+                WHERE device_mac = ?
+            """, (device_mac,))
+
+            baseline_row = cursor.fetchone()
+            if not baseline_row:
+                logger.debug(f"No baseline fingerprint for {device_ip}, skipping drift detection")
+                conn.close()
+                return None
+
+            baseline = {
+                'ja3_hash': baseline_row[0],
+                'dhcp_option55': baseline_row[1],
+                'tcp_signature': baseline_row[2],
+                'dns_domains': baseline_row[3],
+                'fused_vendor': baseline_row[4],
+                'fused_device_type': baseline_row[5],
+                'fused_os': baseline_row[6]
+            }
+
+            # Get baseline behavior profile
+            profile = self.get_profile(device_ip)
+            if not profile or profile.is_learning():
+                conn.close()
+                return None
+
+            # Calculate drift components
+            protocol_drift = self._calculate_protocol_drift(profile, current_fingerprint)
+            port_drift = self._calculate_port_drift(profile, current_fingerprint)
+            volume_drift = self._calculate_volume_drift(profile, current_fingerprint)
+            temporal_drift = self._calculate_temporal_drift(profile, current_fingerprint)
+            peer_drift = self._calculate_peer_drift(profile, current_fingerprint)
+
+            # Weighted drift score
+            drift_score = (
+                protocol_drift * 0.30 +
+                port_drift * 0.25 +
+                volume_drift * 0.20 +
+                temporal_drift * 0.15 +
+                peer_drift * 0.10
+            )
+
+            # Fingerprint changes (critical signals)
+            fingerprint_changed = False
+            changed_signals = []
+
+            if current_fingerprint.get('ja3_hash') and current_fingerprint['ja3_hash'] != baseline['ja3_hash']:
+                fingerprint_changed = True
+                changed_signals.append('ja3_hash')
+                drift_score += 0.3  # Major drift increase for TLS change
+
+            if current_fingerprint.get('dhcp_option55') and current_fingerprint['dhcp_option55'] != baseline['dhcp_option55']:
+                fingerprint_changed = True
+                changed_signals.append('dhcp_option55')
+                drift_score += 0.2
+
+            if current_fingerprint.get('tcp_signature') and current_fingerprint['tcp_signature'] != baseline['tcp_signature']:
+                fingerprint_changed = True
+                changed_signals.append('tcp_signature')
+                drift_score += 0.2
+
+            # Cap at 1.0
+            drift_score = min(drift_score, 1.0)
+
+            # Determine severity
+            if drift_score >= 0.8:
+                severity = "critical"
+                drift_type = "CONFIRMED_COMPROMISE"
+            elif drift_score >= 0.5:
+                severity = "high"
+                drift_type = "LIKELY_COMPROMISE"
+            elif drift_score >= 0.2:
+                severity = "medium"
+                drift_type = "SUSPICIOUS_CHANGE"
+            else:
+                severity = "low"
+                drift_type = "MINOR_DEVIATION"
+
+            result = {
+                'drift_score': drift_score,
+                'severity': severity,
+                'drift_type': drift_type,
+                'fingerprint_changed': fingerprint_changed,
+                'changed_signals': changed_signals,
+                'components': {
+                    'protocol_drift': protocol_drift,
+                    'port_drift': port_drift,
+                    'volume_drift': volume_drift,
+                    'temporal_drift': temporal_drift,
+                    'peer_drift': peer_drift
+                },
+                'baseline': baseline,
+                'current': current_fingerprint
+            }
+
+            # Log if significant drift
+            if drift_score >= 0.2:
+                self._log_identity_drift(device_ip, device_mac, result)
+                logger.warning(
+                    f"IDENTITY DRIFT: {device_ip} | Score={drift_score:.2f} | "
+                    f"Type={drift_type} | Signals={changed_signals}"
+                )
+
+            # Update device_confidence table with drift score
+            cursor.execute("""
+                UPDATE device_confidence
+                SET drift_score = ?,
+                    re_evaluation_needed = ?
+                WHERE device_ip = ?
+            """, (drift_score, 1 if drift_score >= 0.5 else 0, device_ip))
+
+            conn.commit()
+            conn.close()
+
+            return result
+
+        except Exception as e:
+            logger.error(f"Failed to calculate identity drift for {device_ip}: {e}")
+            return None
+
+    def _calculate_protocol_drift(self, profile: DeviceProfile, current: dict) -> float:
+        """Calculate protocol usage drift."""
+        current_protocols = set(current.get('protocols_used', []))
+        baseline_protocols = profile.protocols_used
+
+        if not baseline_protocols:
+            return 0.0
+
+        # Protocols in current but not in baseline
+        new_protocols = current_protocols - baseline_protocols
+
+        # Drift = ratio of new protocols
+        drift = len(new_protocols) / len(baseline_protocols | current_protocols)
+        return min(drift, 1.0)
+
+    def _calculate_port_drift(self, profile: DeviceProfile, current: dict) -> float:
+        """Calculate destination port drift."""
+        current_ports = set(current.get('dst_ports', []))
+        baseline_ports = profile.common_dst_ports
+
+        if not baseline_ports:
+            return 0.0
+
+        # Ports in current but not in baseline
+        new_ports = current_ports - baseline_ports
+
+        # Drift = ratio of new ports
+        drift = len(new_ports) / len(baseline_ports | current_ports)
+        return min(drift, 1.0)
+
+    def _calculate_volume_drift(self, profile: DeviceProfile, current: dict) -> float:
+        """Calculate traffic volume drift."""
+        current_avg = current.get('avg_bytes_per_flow', 0)
+        baseline_avg = profile.avg_bytes_per_flow
+
+        if baseline_avg == 0:
+            return 0.0
+
+        # Volume deviation ratio
+        ratio = abs(current_avg - baseline_avg) / baseline_avg
+
+        # Normalize to 0-1 (consider 5x change as max drift)
+        drift = min(ratio / 5.0, 1.0)
+        return drift
+
+    def _calculate_temporal_drift(self, profile: DeviceProfile, current: dict) -> float:
+        """Calculate temporal pattern drift (active hours)."""
+        current_hours = set(current.get('active_hours', []))
+        baseline_hours = profile.active_hours
+
+        if not baseline_hours:
+            return 0.0
+
+        # Hours active in current but not baseline
+        new_hours = current_hours - baseline_hours
+
+        # Drift = ratio of new active hours
+        drift = len(new_hours) / 24.0  # Out of 24 hours
+        return min(drift, 1.0)
+
+    def _calculate_peer_drift(self, profile: DeviceProfile, current: dict) -> float:
+        """Calculate internal peer relationship drift."""
+        current_peers = set(current.get('internal_peers', []))
+        baseline_peers = profile.internal_peers
+
+        if not baseline_peers:
+            return 0.0
+
+        # New peers not in baseline
+        new_peers = current_peers - baseline_peers
+
+        # Drift = ratio of new peers (capped at 3 new peers = max)
+        drift = min(len(new_peers) / 3.0, 1.0)
+        return drift
+
+    def _log_identity_drift(self, device_ip: str, device_mac: str, drift_result: dict):
+        """Log identity drift event to database."""
+        try:
+            import uuid
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+
+            event_id = f"drift-{uuid.uuid4().hex[:8]}"
+            timestamp = datetime.now().isoformat()
+
+            baseline = drift_result.get('baseline', {})
+            current = drift_result.get('current', {})
+
+            cursor.execute("""
+                INSERT INTO identity_drift_events (
+                    id, timestamp, device_ip, device_mac, drift_score, drift_type,
+                    severity, baseline_protocols, current_protocols,
+                    baseline_ports, current_ports, action_taken
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                event_id,
+                timestamp,
+                device_ip,
+                device_mac,
+                drift_result['drift_score'],
+                drift_result['drift_type'],
+                drift_result['severity'],
+                json.dumps(list(baseline.get('protocols_used', []))),
+                json.dumps(current.get('protocols_used', [])),
+                json.dumps(list(baseline.get('common_dst_ports', []))),
+                json.dumps(current.get('dst_ports', [])),
+                "re_evaluation" if drift_result['drift_score'] >= 0.5 else "logged"
+            ))
+
+            conn.commit()
+            conn.close()
+
+        except Exception as e:
+            logger.error(f"Failed to log identity drift event: {e}")
+
+    def get_drift_events(self, device_ip: Optional[str] = None, limit: int = 50) -> List[dict]:
+        """Get recent identity drift events."""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+
+            if device_ip:
+                cursor.execute("""
+                    SELECT id, timestamp, device_ip, drift_score, drift_type,
+                           severity, action_taken
+                    FROM identity_drift_events
+                    WHERE device_ip = ?
+                    ORDER BY timestamp DESC
+                    LIMIT ?
+                """, (device_ip, limit))
+            else:
+                cursor.execute("""
+                    SELECT id, timestamp, device_ip, drift_score, drift_type,
+                           severity, action_taken
+                    FROM identity_drift_events
+                    ORDER BY timestamp DESC
+                    LIMIT ?
+                """, (limit,))
+
+            events = []
+            for row in cursor.fetchall():
+                events.append({
+                    'id': row[0],
+                    'timestamp': row[1],
+                    'device_ip': row[2],
+                    'drift_score': row[3],
+                    'drift_type': row[4],
+                    'severity': row[5],
+                    'action_taken': row[6]
+                })
+
+            conn.close()
+            return events
+
+        except Exception as e:
+            logger.error(f"Failed to get drift events: {e}")
+            return []

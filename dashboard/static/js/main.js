@@ -28,7 +28,6 @@ const translations = {
         loading: 'Loading...',
         threat_activity: 'Threat Activity',
         live_events: 'Live Events',
-        simulate: 'Simulate Attack',
         waiting: 'Waiting for events...',
         active_honeypots: 'Active Honeypots',
         deploy: 'Deploy',
@@ -60,7 +59,6 @@ const translations = {
         loading: 'लोड हो रहा है...',
         threat_activity: 'खतरा गतिविधि',
         live_events: 'लाइव इवेंट्स',
-        simulate: 'हमला सिमुलेट करें',
         waiting: 'इवेंट्स का इंतजार...',
         active_honeypots: 'सक्रिय हनीपॉट',
         deploy: 'तैनात करें',
@@ -300,8 +298,8 @@ function renderDevices(devices) {
         return `
             <tr>
                 <td>
-                    <div style="font-weight: 500;">${device.hostname || 'Unknown'}</div>
-                    <div class="text-muted" style="font-size: 0.75rem;">${device.device_type || 'Unknown'}</div>
+                    <div style="font-weight: 500;">${getDeviceDisplayName(device)}</div>
+                    <div class="text-muted" style="font-size: 0.75rem;">${device.device_type || 'unknown'}</div>
                 </td>
                 <td><code>${device.ip}</code></td>
                 <td>${zoneBadge}</td>
@@ -360,6 +358,55 @@ function getRiskLevel(score) {
     if (score >= 60) return 'high';
     if (score >= 30) return 'medium';
     return 'low';
+}
+
+function getDeviceDisplayName(device) {
+    // If device has a hostname and it's not "unknown", use it
+    if (device.hostname && device.hostname !== 'unknown' && device.hostname !== '') {
+        return device.hostname;
+    }
+
+    // Generate friendly name from manufacturer and device_type
+    const manufacturer = device.manufacturer || 'unknown';
+    const deviceType = device.device_type || 'unknown';
+
+    // If both are unknown, return "Unknown Device"
+    if (manufacturer === 'unknown' && deviceType === 'unknown') {
+        return 'Unknown Device';
+    }
+
+    // Format device type nicely
+    const formatDeviceType = (type) => {
+        const typeMap = {
+            'esp32_cam': 'ESP32 Camera',
+            'network_adapter': 'Network Adapter',
+            'smart_bulb': 'Smart Bulb',
+            'smart_plug': 'Smart Plug',
+            'smart_tv': 'Smart TV',
+            'smart_speaker': 'Smart Speaker',
+            'thermostat': 'Thermostat',
+            'streaming': 'Streaming Device',
+            'camera': 'Camera',
+            'router': 'Router',
+            'mobile': 'Mobile Device',
+            'alexa': 'Alexa',
+            'unknown': 'Device'
+        };
+        return typeMap[type] || type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    };
+
+    // If only device type is known
+    if (manufacturer === 'unknown') {
+        return formatDeviceType(deviceType);
+    }
+
+    // If only manufacturer is known
+    if (deviceType === 'unknown') {
+        return `${manufacturer} Device`;
+    }
+
+    // Both known - combine them
+    return `${manufacturer} ${formatDeviceType(deviceType)}`;
 }
 
 function renderHoneypots(honeypots) {
@@ -646,20 +693,6 @@ async function deployHoneypot() {
         }
     } catch (error) {
         console.error('Failed to deploy honeypot:', error);
-    }
-}
-
-async function simulateThreat() {
-    try {
-        const response = await fetch(`${API_BASE}/api/simulate/threat`, {
-            method: 'POST'
-        });
-        const data = await response.json();
-        if (data.success) {
-            addEvent('warning', 'Simulated threat generated');
-        }
-    } catch (error) {
-        console.error('Failed to simulate threat:', error);
     }
 }
 
