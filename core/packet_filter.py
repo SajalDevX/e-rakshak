@@ -145,6 +145,10 @@ class PacketFilter:
             b"python -c"
         ]
 
+        # Auto-isolation for specific MAC addresses
+        self.target_mac_for_isolation = "C4:D8:D5:03:8E:7F"  # Will be set from config
+        self.mac_to_ip_cache: Dict[str, str] = {}  # MAC -> IP mapping
+
         logger.info("PacketFilter initialized")
 
     def setup_nfqueue(self, queue_num: int = 1) -> bool:
@@ -366,6 +370,63 @@ class PacketFilter:
 
         return suspicious
 
+    def _get_mac_from_ip(self, ip_address: str) -> Optional[str]:
+        """
+        Get MAC address for an IP from ARP cache.
+
+        Args:
+            ip_address: IP address to look up
+
+        Returns:
+            MAC address in uppercase format (AA:BB:CC:DD:EE:FF) or None
+        """
+        try:
+            result = subprocess.run(
+                ["ip", "neigh", "show", ip_address],
+                capture_output=True, text=True, timeout=2
+            )
+            output = result.stdout.strip()
+
+            # Extract MAC address
+            # Format: "10.42.0.103 dev eth1 lladdr c4:d8:d5:03:8e:7f REACHABLE"
+            if "lladdr" in output:
+                parts = output.split()
+                try:
+                    mac_index = parts.index("lladdr") + 1
+                    if mac_index < len(parts):
+                        mac = parts[mac_index].upper()
+                        self.mac_to_ip_cache[mac] = ip_address
+                        return mac
+                except (ValueError, IndexError):
+                    pass
+
+        except Exception as e:
+            logger.debug(f"Failed to get MAC for {ip_address}: {e}")
+
+        return None
+
+    def _is_local_ip(self, ip_address: str) -> bool:
+        """
+        Check if an IP address is on the local network.
+
+        Args:
+            ip_address: IP address to check
+
+        Returns:
+            True if IP is on the local network (10.42.0.x), False otherwise
+        """
+        try:
+            # Extract network prefix from gateway IP
+            gateway_parts = self.gateway_ip.split('.')
+            if len(gateway_parts) == 4:
+                # Assume /24 subnet (same as 10.42.0.x)
+                network_prefix = f"{gateway_parts[0]}.{gateway_parts[1]}.{gateway_parts[2]}."
+                return ip_address.startswith(network_prefix)
+        except Exception as e:
+            logger.debug(f"Failed to check if {ip_address} is local: {e}")
+
+        return False
+
     def _track_packet_rate(self, src_ip: str, dst_ip: str, protocol: str):
         """Track packet rate for DDoS detection."""
         current_time = time.time()
@@ -399,6 +460,51 @@ class PacketFilter:
         if packet_rate >= self.ddos_threshold:
             logger.critical(f"DDoS DETECTED: {src_ip} -> {dst_ip} ({packet_rate:.1f} packets/s)")
 
+            # Check if victim (dest) or attacker (source) is a local device
+            src_mac = self._get_mac_from_ip(src_ip)
+            dst_mac = self._get_mac_from_ip(dst_ip)
+
+            # Check if destination (victim) is a local device being attacked
+            is_local_victim = self._is_local_ip(dst_ip)
+            # Check if source (attacker) is a local device (compromised)
+            is_local_attacker = self._is_local_ip(src_ip)
+
+            # Determine which device to isolate
+            auto_isolate = False
+            target_ip_to_isolate = None
+            target_mac_to_isolate = None
+            isolation_reason = ""
+
+            if is_local_victim:
+                # Local device is being DDoS'd - isolate it to protect it
+                auto_isolate = True
+                target_ip_to_isolate = dst_ip
+                target_mac_to_isolate = dst_mac
+                isolation_reason = f"under DDoS attack from {src_ip}"
+                logger.critical(f"LOCAL DEVICE UNDER ATTACK: {dst_ip} ({dst_mac}) - ISOLATING TO PROTECT")
+            elif is_local_attacker:
+                # Local device is attacking (compromised) - isolate it to stop attack
+                auto_isolate = True
+                target_ip_to_isolate = src_ip
+                target_mac_to_isolate = src_mac
+                isolation_reason = f"performing DDoS attack against {dst_ip}"
+                logger.critical(f"LOCAL DEVICE ATTACKING: {src_ip} ({src_mac}) - ISOLATING COMPROMISED DEVICE")
+
+            # Also check target MAC for legacy compatibility
+            if self.target_mac_for_isolation:
+                if src_mac and src_mac.upper() == self.target_mac_for_isolation.upper():
+                    auto_isolate = True
+                    target_ip_to_isolate = src_ip
+                    target_mac_to_isolate = src_mac
+                    isolation_reason = "matches target MAC for auto-isolation"
+                    logger.critical(f"TARGET MAC DETECTED: {src_mac} ({src_ip}) - TRIGGERING IMMEDIATE ISOLATION")
+                elif dst_mac and dst_mac.upper() == self.target_mac_for_isolation.upper():
+                    auto_isolate = True
+                    target_ip_to_isolate = dst_ip
+                    target_mac_to_isolate = dst_mac
+                    isolation_reason = "matches target MAC for auto-isolation"
+                    logger.critical(f"TARGET MAC DETECTED: {dst_mac} ({dst_ip}) - TRIGGERING IMMEDIATE ISOLATION")
+
             # Mark alert time
             self.ddos_alerts[src_ip] = current_time
 
@@ -413,7 +519,14 @@ class PacketFilter:
                     "attack_type": "ddos_http" if protocol == "tcp" else "ddos_udp",
                     "severity": "critical",
                     "reason": "high_packet_rate",
-                    "packets_per_second": packet_rate
+                    "packets_per_second": packet_rate,
+                    # Add MAC information
+                    "source_mac": src_mac,
+                    "dest_mac": dst_mac,
+                    "target_ip_to_isolate": target_ip_to_isolate,
+                    "target_mac_to_isolate": target_mac_to_isolate,
+                    "isolation_reason": isolation_reason,
+                    "auto_isolate": auto_isolate  # Flag for immediate isolation
                 })
 
     def _log_traffic(self, src_ip: str, dst_ip: str, src_port: int, dst_port: int,
@@ -811,7 +924,15 @@ class PacketFilter:
 
         # Check for suspicious patterns
         connection_count = len(self.dashboard_connections[src_ip])
-        is_known_device = src_ip in self.known_devices
+
+        # Whitelist localhost and gateway IP (they're legitimate)
+        is_localhost = src_ip in ["127.0.0.1", "::1", "localhost"]
+        is_gateway = src_ip == self.gateway_ip
+        is_known_device = src_ip in self.known_devices or is_localhost or is_gateway
+
+        # Skip monitoring for localhost (it's the system itself accessing the dashboard)
+        if is_localhost or is_gateway:
+            return
 
         suspicious = False
         reason = ""

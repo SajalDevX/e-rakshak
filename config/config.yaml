@@ -519,6 +519,17 @@ gateway:
     #     dest: "10.42.0.11"     # Chromecast
 
   # ---------------------------------------------------------------------------
+  # Auto-Isolation for Specific MAC Addresses
+  # ---------------------------------------------------------------------------
+  # Enables immediate automatic isolation of specific devices when DDoS detected.
+  # Bypasses KAAL AI evaluation for fast response on known problematic devices.
+  auto_isolation:
+    enabled: true                   # Enable MAC-based auto-isolation
+    target_macs:                    # List of MAC addresses to auto-isolate
+      - "C4:D8:D5:03:8E:7F"         # Device to auto-isolate on DDoS
+    reason: "Automatic isolation: Device performing DDoS attack"
+
+  # ---------------------------------------------------------------------------
   # Jetson Xavier NX Specific Settings
   # ---------------------------------------------------------------------------
   jetson:

@@ -134,6 +134,10 @@ class RakshakGateway:
         self._original_lan_interface = None  # For bridge mode rollback
         self.firewall_persistence = None  # Will be set after database initialization
 
+        # Store original network state for proper cleanup
+        self._original_ip_forward = None
+        self._original_nat_rules = []
+
         # Paths
         self.dnsmasq_config_path = Path("/etc/dnsmasq.d/rakshak.conf")
         self.dhcp_leases_path = Path("/var/lib/misc/dnsmasq.leases")
@@ -303,6 +307,16 @@ class RakshakGateway:
     def enable_ip_forwarding(self) -> bool:
         """Enable IP forwarding in kernel"""
         try:
+            # Save original IP forwarding state before changing
+            if self._original_ip_forward is None:
+                try:
+                    with open("/proc/sys/net/ipv4/ip_forward", "r") as f:
+                        self._original_ip_forward = f.read().strip()
+                    logger.debug(f"Saved original IP forwarding state: {self._original_ip_forward}")
+                except Exception as e:
+                    logger.warning(f"Could not read original IP forward state: {e}")
+                    self._original_ip_forward = "0"  # Assume it was disabled
+
             # Enable immediately
             subprocess.run(
                 ["sysctl", "-w", "net.ipv4.ip_forward=1"],
@@ -1105,23 +1119,54 @@ expand-hosts
                 logger.info("Tearing down bridge...")
                 self.teardown_bridge()
 
-            # Flush NAT rules
-            subprocess.run(["iptables", "-t", "nat", "-F"], capture_output=True)
-            subprocess.run(["iptables", "-F", "FORWARD"], capture_output=True)
+            # Restore IP forwarding to original state
+            if self._original_ip_forward is not None:
+                logger.info(f"Restoring IP forwarding to original state: {self._original_ip_forward}")
+                try:
+                    subprocess.run(
+                        ["sysctl", "-w", f"net.ipv4.ip_forward={self._original_ip_forward}"],
+                        capture_output=True, check=True
+                    )
+                except Exception as e:
+                    logger.warning(f"Failed to restore IP forwarding: {e}")
 
-            # Reset FORWARD policy
-            subprocess.run(["iptables", "-P", "FORWARD", "ACCEPT"], capture_output=True)
+            # Remove persistent sysctl configuration
+            sysctl_conf = Path("/etc/sysctl.d/99-rakshak.conf")
+            if sysctl_conf.exists():
+                try:
+                    sysctl_conf.unlink()
+                    logger.info("Removed RAKSHAK sysctl configuration")
+                except Exception as e:
+                    logger.warning(f"Failed to remove sysctl config: {e}")
 
-            # Stop dnsmasq
-            subprocess.run(["systemctl", "stop", "dnsmasq"], capture_output=True)
+            # Only flush NAT rules if we were managing DHCP/NAT
+            # Otherwise, preserve NetworkManager's NAT configuration
+            if self.config.dhcp_enabled:
+                logger.info("Flushing RAKSHAK NAT rules...")
+                subprocess.run(["iptables", "-t", "nat", "-F", "POSTROUTING"], capture_output=True)
+                subprocess.run(["iptables", "-F", "FORWARD"], capture_output=True)
+                subprocess.run(["iptables", "-P", "FORWARD", "ACCEPT"], capture_output=True)
+            else:
+                logger.info("Preserving NetworkManager NAT configuration")
+                # Only clean up RAKSHAK-specific chains, not NAT
+                subprocess.run(["iptables", "-F", "FORWARD"], capture_output=True)
+
+            # Stop dnsmasq only if we started it
+            if self.config.dhcp_enabled:
+                logger.info("Stopping dnsmasq...")
+                subprocess.run(["systemctl", "stop", "dnsmasq"], capture_output=True)
 
             # Remove config
             if self.dnsmasq_config_path.exists():
-                self.dnsmasq_config_path.unlink()
+                try:
+                    self.dnsmasq_config_path.unlink()
+                    logger.info("Removed dnsmasq configuration")
+                except Exception as e:
+                    logger.warning(f"Failed to remove dnsmasq config: {e}")
 
             self.is_gateway_mode = False
 
-            logger.info("RAKSHAK Gateway stopped successfully")
+            logger.info("RAKSHAK Gateway stopped successfully - network restored")
             return True
 
         except Exception as e:
@@ -1339,43 +1384,138 @@ expand-hosts
             return False
 
     def unisolate_device(self, ip_address: str) -> bool:
-        """Remove isolation from a device"""
+        """Remove isolation from a device (supports both IP and MAC-based isolation)"""
         try:
-            # Remove all rules for this IP from RAKSHAK_ISOLATED
-            for _ in range(10):
-                result = subprocess.run([
-                    "iptables", "-D", "RAKSHAK_ISOLATED",
-                    "-s", ip_address, "-j", "DROP"
-                ], capture_output=True)
-                if result.returncode != 0:
-                    break
+            # Check if this is a MAC-based isolation
+            is_mac_isolation = ip_address.startswith("MAC:")
 
-            for _ in range(10):
-                result = subprocess.run([
-                    "iptables", "-D", "RAKSHAK_ISOLATED",
-                    "-d", ip_address, "-j", "DROP"
-                ], capture_output=True)
-                if result.returncode != 0:
-                    break
+            if is_mac_isolation:
+                # Extract MAC from key
+                mac_address = ip_address.split(":", 1)[1]
 
-            # Remove from RATELIMIT chain
-            for _ in range(10):
-                result = subprocess.run([
-                    "iptables", "-D", "RAKSHAK_RATELIMIT",
-                    "-s", ip_address
-                ], capture_output=True)
-                if result.returncode != 0:
-                    break
+                # Remove MAC-based iptables rule
+                for _ in range(10):
+                    result = subprocess.run([
+                        "iptables", "-D", "RAKSHAK_ISOLATED",
+                        "-m", "mac", "--mac-source", mac_address,
+                        "-j", "DROP"
+                    ], capture_output=True)
+                    if result.returncode != 0:
+                        break
+
+                logger.info(f"MAC-based isolation removed for {mac_address}")
+
+            else:
+                # IP-based isolation removal
+                # Remove all rules for this IP from RAKSHAK_ISOLATED
+                for _ in range(10):
+                    result = subprocess.run([
+                        "iptables", "-D", "RAKSHAK_ISOLATED",
+                        "-s", ip_address, "-j", "DROP"
+                    ], capture_output=True)
+                    if result.returncode != 0:
+                        break
+
+                for _ in range(10):
+                    result = subprocess.run([
+                        "iptables", "-D", "RAKSHAK_ISOLATED",
+                        "-d", ip_address, "-j", "DROP"
+                    ], capture_output=True)
+                    if result.returncode != 0:
+                        break
+
+                # Remove from RATELIMIT chain
+                for _ in range(10):
+                    result = subprocess.run([
+                        "iptables", "-D", "RAKSHAK_RATELIMIT",
+                        "-s", ip_address
+                    ], capture_output=True)
+                    if result.returncode != 0:
+                        break
+
+                logger.info(f"Device {ip_address} isolation removed")
 
             # Remove from tracking
             if ip_address in self.isolated_devices:
                 del self.isolated_devices[ip_address]
 
-            logger.info(f"Device {ip_address} isolation removed")
+            # Persist removal if firewall persistence is available
+            if self.firewall_persistence:
+                try:
+                    self.firewall_persistence.remove_isolation(ip_address)
+                except Exception as e:
+                    logger.warning(f"Failed to persist isolation removal to database: {e}")
+
             return True
 
         except Exception as e:
-            logger.error(f"Failed to unisolate device {ip_address}: {e}")
+            logger.error(f"Failed to unisolate {ip_address}: {e}")
+            return False
+
+    def isolate_device_by_mac(self, mac_address: str,
+                              reason: str = "Threat detected") -> bool:
+        """
+        Isolate a device by MAC address using iptables.
+
+        This provides redundant isolation even if the device changes IP.
+        Uses iptables MAC matching module to block traffic from specific MAC address.
+
+        Args:
+            mac_address: MAC address of device to isolate (format: AA:BB:CC:DD:EE:FF or AA-BB-CC-DD-EE-FF)
+            reason: Reason for isolation (for logging)
+
+        Returns:
+            True if isolation successful, False otherwise.
+        """
+        try:
+            # Normalize MAC address to uppercase with colons
+            mac_normalized = mac_address.upper().replace('-', ':')
+
+            # Check if already isolated by MAC
+            for device in self.isolated_devices.values():
+                if device.mac_address and device.mac_address.upper() == mac_normalized:
+                    logger.warning(f"Device with MAC {mac_normalized} already isolated")
+                    return True
+
+            # Block ALL traffic from this MAC address
+            # This rule catches the device regardless of IP address
+            subprocess.run([
+                "iptables", "-I", "RAKSHAK_ISOLATED", "1",
+                "-m", "mac", "--mac-source", mac_normalized,
+                "-m", "comment", "--comment", f"rakshak-isolate-mac-{mac_normalized}",
+                "-j", "DROP"
+            ], check=True, capture_output=True)
+
+            logger.critical(f"Device MAC {mac_normalized} ISOLATED - {reason}")
+
+            # Track MAC-based isolation
+            # Use MAC as key for tracking
+            self.isolated_devices[f"MAC:{mac_normalized}"] = IsolatedDevice(
+                ip_address="0.0.0.0",  # Unknown/dynamic IP
+                mac_address=mac_normalized,
+                isolation_level=IsolationLevel.FULL,
+                isolated_at=datetime.now(),
+                reason=reason,
+                auto_expire=None  # Permanent
+            )
+
+            # Persist to database if firewall persistence is available
+            if self.firewall_persistence:
+                try:
+                    self.firewall_persistence.save_isolation(
+                        identifier=f"MAC:{mac_normalized}",
+                        mac_address=mac_normalized,
+                        ip_address="0.0.0.0",
+                        level=IsolationLevel.FULL.value,
+                        reason=reason
+                    )
+                except Exception as e:
+                    logger.warning(f"Failed to persist MAC isolation to database: {e}")
+
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to isolate MAC {mac_address}: {e}")
             return False
 
     def isolate_device_enhanced(self, ip_address: str,

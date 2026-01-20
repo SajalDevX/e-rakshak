@@ -380,6 +380,17 @@ class RakshakOrchestrator:
             lan_interface = self.config.get("gateway", {}).get("lan_interface", "eth1")
             self.packet_filter = PacketFilter(lan_interface=lan_interface)
 
+            # Set target MAC from config for auto-isolation
+            auto_isolation_config = self.config.get("gateway", {}).get("auto_isolation", {})
+            if auto_isolation_config.get("enabled", True):
+                target_macs = auto_isolation_config.get("target_macs", ["C4:D8:D5:03:8E:7F"])
+                if target_macs:
+                    self.packet_filter.target_mac_for_isolation = target_macs[0].upper()
+                    logger.info(f"Auto-isolation enabled for MAC: {self.packet_filter.target_mac_for_isolation}")
+            else:
+                self.packet_filter.target_mac_for_isolation = None
+                logger.info("Auto-isolation disabled in config")
+
             logger.info("Gateway mode components initialized")
 
         except Exception as e:
@@ -554,8 +565,9 @@ class RakshakOrchestrator:
                         if device.status == "active" and device.mac:
                             self.arp_interceptor.add_device(device.ip, device.mac)
 
-                # Cleanup stale inactive devices (removes after 5 minutes of inactivity)
-                self.network_scanner.cleanup_stale_devices(inactive_threshold_seconds=300)
+                # Cleanup stale inactive devices (removes after 2 hours of inactivity)
+                # Increased from 5 minutes to prevent removal of idle/sleeping devices
+                self.network_scanner.cleanup_stale_devices(inactive_threshold_seconds=7200)
 
             except Exception as e:
                 logger.error(f"Scanner error: {e}")
@@ -823,7 +835,11 @@ class RakshakOrchestrator:
                 'packets_per_second': packet_info.get('packets_per_second', 0),
                 'confidence': 0.95,
                 'description': f"High packet rate DDoS detected: {packet_info.get('packet_rate', 0):.1f} packets/s",
-                'detected_by': 'rate_detector'
+                'detected_by': 'rate_detector',
+                # Add MAC information
+                'source_mac': packet_info.get('source_mac'),
+                'is_target_mac': packet_info.get('is_target_mac', False),
+                'auto_isolate': packet_info.get('auto_isolate', False)
             }
 
             # Add device info
@@ -832,13 +848,71 @@ class RakshakOrchestrator:
                 target_ip
             ) if hasattr(self.network_scanner, 'get_device_name') else 'Unknown Device'
 
-            # Log threat directly (bypass IDS)
-            self.threat_logger.log_threat(threat_info)
+            # Log threat directly (bypass IDS) - call with individual arguments
+            self.threat_logger.log_threat(
+                threat_type=threat_info['type'],
+                severity=threat_info['severity'],
+                source_ip=threat_info['source_ip'],
+                target_ip=threat_info['target_ip'],
+                target_device=threat_info['target_device'],
+                source_port=threat_info.get('source_port', 0),
+                target_port=threat_info.get('target_port', 0),
+                protocol=threat_info.get('protocol', 'tcp'),
+                payload=threat_info.get('description', ''),
+                packets_count=threat_info.get('packets_count', 1),
+                duration_seconds=threat_info.get('duration_seconds', 0.0),
+                detected_by=threat_info.get('detected_by', 'packet_filter'),
+                raw_data=threat_info.get('raw_data', {})
+            )
 
-            # Trigger KAAL AI evaluation
-            if self.agentic_defender:
-                logger.info("Submitting DDoS threat to KAAL for evaluation...")
-                self._process_threat(threat_info)
+            # If auto-isolate flag is set, skip KAAL and isolate immediately
+            if threat_info.get('auto_isolate'):
+                # Use the specific target identified by packet filter
+                target_ip = threat_info.get('target_ip_to_isolate', threat_info.get('source_ip'))
+                target_mac = threat_info.get('target_mac_to_isolate', threat_info.get('source_mac'))
+                isolation_reason = threat_info.get('isolation_reason', 'DDoS attack detected')
+
+                logger.critical(f"AUTO-ISOLATION TRIGGERED for {target_ip} (MAC: {target_mac}) - Reason: {isolation_reason}")
+
+                # Immediate isolation without AI evaluation
+                if self.gateway:
+                    # First, isolate by IP (standard method)
+                    self.gateway.isolate_device(
+                        ip_address=target_ip,
+                        level=IsolationLevel.FULL,
+                        reason=f"Auto-isolation: {isolation_reason}",
+                        duration_minutes=None  # Permanent
+                    )
+
+                    # Also add MAC-based iptables rule for redundancy if MAC is available
+                    if target_mac:
+                        self.gateway.isolate_device_by_mac(
+                            mac_address=target_mac,
+                            reason=f"Auto-isolation: {isolation_reason}"
+                        )
+
+                    logger.critical(f"Device {target_ip} (MAC: {target_mac}) ISOLATED via fast path")
+
+                    # Emit isolation event
+                    self._emit_event('device_isolated', {
+                        'device': threat_info.get('target_device', 'Unknown'),
+                        'ip': target_ip,
+                        'mac': target_mac,
+                        'message': f'Auto-isolated: {isolation_reason}',
+                        'real_action': True,
+                        'auto_isolation': True
+                    })
+
+                # Still process through KAAL for logging/learning
+                if self.agentic_defender:
+                    logger.info("Submitting DDoS threat to KAAL for evaluation (post-isolation)...")
+                    self._process_threat(threat_info)
+
+            else:
+                # Normal flow: Trigger KAAL AI evaluation
+                if self.agentic_defender:
+                    logger.info("Submitting DDoS threat to KAAL for evaluation...")
+                    self._process_threat(threat_info)
 
             return
 
