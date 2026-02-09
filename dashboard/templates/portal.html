@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>RAKSHAK - Secure Network</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        /* Portal-specific overrides (inline for reliability during redirect) */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body.portal-body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: radial-gradient(ellipse at top, #0f1629 0%, #0a0e17 70%);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: #f1f5f9;
+            padding: 1rem;
+        }
+
+        .portal-container {
+            max-width: 520px;
+            width: 100%;
+            background: #1a2234;
+            border-radius: 16px;
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            box-shadow: 0 0 60px rgba(6, 182, 212, 0.08), 0 8px 32px rgba(0,0,0,0.4);
+            padding: 2.5rem 2rem;
+            text-align: center;
+        }
+
+        .portal-shield {
+            font-size: 4.5rem;
+            line-height: 1;
+            margin-bottom: 0.75rem;
+            animation: shieldPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes shieldPulse {
+            0%, 100% { filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.3)); }
+            50% { filter: drop-shadow(0 0 24px rgba(6, 182, 212, 0.7)); }
+        }
+
+        .portal-title {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: #06b6d4;
+        }
+
+        .portal-title .logo-hindi {
+            font-size: 1.1rem;
+            color: #f59e0b;
+            display: block;
+            font-weight: 500;
+            letter-spacing: 4px;
+            margin-top: 0.15rem;
+        }
+
+        .portal-tagline {
+            color: #94a3b8;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+            font-style: italic;
+        }
+
+        .portal-subtitle {
+            color: #cbd5e1;
+            font-size: 0.95rem;
+            margin-top: 1rem;
+        }
+
+        .portal-divider {
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #06b6d4, transparent);
+            margin: 1.5rem auto;
+        }
+
+        /* Network status bar */
+        .portal-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 20px;
+            padding: 0.4rem 1.2rem;
+            font-size: 0.85rem;
+            color: #10b981;
+            margin: 1rem 0;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: dotPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes dotPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* Network name */
+        .portal-network-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 0.25rem;
+        }
+
+        /* Feature cards grid */
+        .portal-features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+        }
+
+        .feature-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 1rem 0.5rem;
+            background: #111827;
+            border-radius: 10px;
+            border: 1px solid #1e293b;
+            transition: border-color 0.2s;
+        }
+
+        .feature-card:hover {
+            border-color: rgba(6, 182, 212, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 1.5rem;
+        }
+
+        .feature-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #06b6d4;
+            line-height: 1.2;
+        }
+
+        .feature-label {
+            font-size: 0.7rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Security features list */
+        .portal-info {
+            text-align: left;
+            margin: 1.5rem 0;
+        }
+
+        .portal-info h3 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #64748b;
+            margin-bottom: 0.75rem;
+        }
+
+        .portal-info ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .portal-info li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #1e293b;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .portal-info li:last-child {
+            border-bottom: none;
+        }
+
+        .portal-info .check {
+            color: #10b981;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        /* Continue button */
+        .portal-continue-btn {
+            display: block;
+            width: 100%;
+            padding: 0.9rem 1.5rem;
+            background: linear-gradient(135deg, #06b6d4, #3b82f6);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 1.5rem;
+        }
+
+        .portal-continue-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(6, 182, 212, 0.3);
+            color: white;
+        }
+
+        .portal-continue-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Acknowledged state */
+        .portal-success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .portal-success .success-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .portal-success p {
+            color: #10b981;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .portal-success .success-sub {
+            color: #94a3b8;
+            font-weight: 400;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Footer */
+        .portal-footer {
+            margin-top: 1.5rem;
+            color: #475569;
+            font-size: 0.75rem;
+        }
+
+        .portal-footer a {
+            color: #06b6d4;
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .portal-container { padding: 1.5rem 1.25rem; }
+            .portal-title { font-size: 1.6rem; }
+            .portal-shield { font-size: 3.5rem; }
+            .portal-features { gap: 0.5rem; }
+            .feature-card { padding: 0.75rem 0.25rem; }
+        }
+    </style>
+</head>
+<body class="portal-body">
+
+    <div class="portal-container">
+
+        <!-- Header / Branding -->
+        <div class="portal-shield">&#x1F6E1;&#xFE0F;</div>
+        <h1 class="portal-title">
+            RAKSHAK
+            <span class="logo-hindi">रक्षक</span>
+        </h1>
+        <p class="portal-tagline">Har Ghar Ki Cyber Suraksha</p>
+
+        <div class="portal-divider"></div>
+
+        <!-- Network Info -->
+        <p class="portal-network-name">{{ network_name }}</p>
+        <div class="portal-status">
+            <span class="status-dot"></span>
+            <span>Protection Active</span>
+        </div>
+
+        <p class="portal-subtitle">
+            Your device is connected to a network protected by India's first
+            Agentic AI Cyber Guardian for Home IoT.
+        </p>
+
+        <!-- Live Stats Grid -->
+        <div class="portal-features">
+            <div class="feature-card">
+                <span class="feature-icon">&#x1F4F1;</span>
+                <span class="feature-value">{{ device_count }}</span>
+                <span class="feature-label">Devices Protected</span>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">&#x1F36F;</span>
+                <span class="feature-value">{{ honeypot_count }}</span>
+                <span class="feature-label">Active Honeypots</span>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">&#x1F916;</span>
+                <span class="feature-value">{{ 'Active' if ai_active else 'Standby' }}</span>
+                <span class="feature-label">AI Defense (KAAL)</span>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">&#x26A0;&#xFE0F;</span>
+                <span class="feature-value">{{ threats_blocked }}</span>
+                <span class="feature-label">Threats Blocked</span>
+            </div>
+        </div>
+
+        <!-- Security Features -->
+        <div class="portal-info">
+            <h3>Active Security Features</h3>
+            <ul>
+                <li><span class="check">&#x2713;</span> Zero Trust Network Architecture</li>
+                <li><span class="check">&#x2713;</span> AI-Powered Threat Detection (KAAL)</li>
+                <li><span class="check">&#x2713;</span> Dynamic Honeypot Deception (CHAKRAVYUH)</li>
+                <li><span class="check">&#x2713;</span> Real-time Deep Packet Inspection</li>
+                <li><span class="check">&#x2713;</span> Automated Device Isolation</li>
+            </ul>
+        </div>
+
+        {% if acknowledged %}
+        <!-- Acknowledged State -->
+        <div class="portal-success">
+            <div class="success-icon">&#x2705;</div>
+            <p>You are now connected!</p>
+            <p class="success-sub">Your device has been registered on the network.</p>
+        </div>
+        {% else %}
+        <!-- Continue Button -->
+        <a href="{{ continue_url }}" class="portal-continue-btn">
+            Continue to Internet &#x2192;
+        </a>
+        {% endif %}
+
+        <!-- Footer -->
+        <div class="portal-footer">
+            <p>{{ admin_contact }} &middot; RAKSHAK v{{ version }}</p>
+        </div>
+
+    </div>
+
+</body>
+</html>

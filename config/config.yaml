@@ -298,6 +298,17 @@ dashboard:
       - "hi"
 
 # -----------------------------------------------------------------------------
+# Captive Portal (DWAAR) Settings
+# -----------------------------------------------------------------------------
+captive_portal:
+  enabled: true
+  network_name: "RAKSHAK Protected Network"
+  admin_contact: "Network Administrator"
+  auto_release_minutes: 5       # Auto-release portal redirect after N minutes
+  redirect_http: true            # Redirect port 80 to portal
+  redirect_https: false          # Redirect port 443 (can cause cert errors)
+
+# -----------------------------------------------------------------------------
 # Database Settings
 # -----------------------------------------------------------------------------
 database:

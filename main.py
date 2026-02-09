@@ -90,6 +90,14 @@ except ImportError as e:
     ARP_INTERCEPTOR_AVAILABLE = False
     logger.warning(f"ARP interceptor not available: {e}")
 
+# Captive Portal (DWAAR)
+try:
+    from core.captive_portal import CaptivePortal
+    CAPTIVE_PORTAL_AVAILABLE = True
+except ImportError as e:
+    CAPTIVE_PORTAL_AVAILABLE = False
+    logger.warning(f"Captive portal not available: {e}")
+
 # Rich console for pretty output
 console = Console()
 
@@ -310,6 +318,19 @@ class RakshakOrchestrator:
                 logger.warning(f"Failed to initialize Trust Manager: {e}")
                 self.trust_manager = None
 
+        # Initialize Captive Portal (DWAAR)
+        self.captive_portal = None
+        if CAPTIVE_PORTAL_AVAILABLE:
+            try:
+                self.captive_portal = CaptivePortal(
+                    config=config,
+                    gateway=self.gateway if gateway_mode else None
+                )
+                logger.info("Captive Portal (DWAAR) initialized")
+            except Exception as e:
+                logger.warning(f"Failed to initialize Captive Portal: {e}")
+                self.captive_portal = None
+
         # Initialize IDS classifier
         self.ids_classifier = IDSClassifier(model_dir="models/ids")
         if self.ids_classifier.is_loaded:
@@ -502,6 +523,11 @@ class RakshakOrchestrator:
         self.running = False
         self.deception_engine.stop_all_honeypots()
 
+        # Stop captive portal if active
+        if self.captive_portal:
+            logger.info("Stopping captive portal (DWAAR)...")
+            self.captive_portal.stop()
+
         # Stop connection monitor if active
         if self.connection_monitor:
             logger.info("Stopping connection monitor...")
@@ -564,6 +590,18 @@ class RakshakOrchestrator:
                     for device in devices:
                         if device.status == "active" and device.mac:
                             self.arp_interceptor.add_device(device.ip, device.mac)
+
+                # Check new devices for captive portal redirect
+                if self.captive_portal and self.captive_portal.enabled:
+                    for device in devices:
+                        enrollment = getattr(device, 'enrollment_status', 'unknown')
+                        if (enrollment in ("unknown", "pending")
+                                and device.status == "active"
+                                and not self.captive_portal.is_device_acknowledged(device.ip)):
+                            self.captive_portal.on_new_device(device.ip, enrollment)
+
+                    # Auto-release devices that have been pending too long
+                    self.captive_portal.check_auto_release()
 
                 # Cleanup stale inactive devices (removes after 2 hours of inactivity)
                 # Increased from 5 minutes to prevent removal of idle/sleeping devices

@@ -571,6 +571,7 @@ class RakshakGateway:
                 ("filter", "RAKSHAK_FORWARD"),
                 ("filter", "RAKSHAK_ISOLATED"),
                 ("filter", "RAKSHAK_RATELIMIT"),
+                ("nat", "RAKSHAK_PORTAL"),
                 ("nat", "RAKSHAK_HONEYPOT"),
                 # Zero Trust zone chains
                 ("filter", "RAKSHAK_ZONE_ENFORCE"),
@@ -618,9 +619,15 @@ class RakshakGateway:
                 "-j", "RAKSHAK_FORWARD"
             ], capture_output=True)
 
-            # NAT PREROUTING: jump to RAKSHAK_HONEYPOT
+            # NAT PREROUTING: jump to RAKSHAK_PORTAL (captive portal first)
             subprocess.run([
                 "iptables", "-t", "nat", "-I", "PREROUTING", "1",
+                "-j", "RAKSHAK_PORTAL"
+            ], capture_output=True)
+
+            # NAT PREROUTING: jump to RAKSHAK_HONEYPOT (after portal)
+            subprocess.run([
+                "iptables", "-t", "nat", "-I", "PREROUTING", "2",
                 "-j", "RAKSHAK_HONEYPOT"
             ], capture_output=True)
 
@@ -642,6 +649,7 @@ class RakshakGateway:
                 ("filter", "RAKSHAK_FORWARD"),
                 ("filter", "RAKSHAK_ISOLATED"),
                 ("filter", "RAKSHAK_RATELIMIT"),
+                ("nat", "RAKSHAK_PORTAL"),
                 ("nat", "RAKSHAK_HONEYPOT"),
             ]
 
@@ -658,6 +666,10 @@ class RakshakGateway:
                 subprocess.run([
                     "iptables", "-D", "FORWARD",
                     "-j", "RAKSHAK_FORWARD"
+                ], capture_output=True)
+                subprocess.run([
+                    "iptables", "-t", "nat", "-D", "PREROUTING",
+                    "-j", "RAKSHAK_PORTAL"
                 ], capture_output=True)
                 subprocess.run([
                     "iptables", "-t", "nat", "-D", "PREROUTING",

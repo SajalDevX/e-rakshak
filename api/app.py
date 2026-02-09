@@ -20,7 +20,7 @@ from datetime import datetime
 from functools import wraps
 from typing import Optional
 
-from flask import Flask, jsonify, request, render_template, send_from_directory
+from flask import Flask, jsonify, request, render_template, send_from_directory, redirect
 from flask_socketio import SocketIO, emit
 from flask_cors import CORS
 from loguru import logger
@@ -96,6 +96,104 @@ def register_routes(app: Flask):
     def serve_static(filename):
         """Serve static files."""
         return send_from_directory(app.static_folder, filename)
+
+    # =========================================================================
+    # Captive Portal Routes (DWAAR)
+    # =========================================================================
+
+    @app.route("/portal")
+    def captive_portal():
+        """Serve captive portal page for new devices."""
+        portal_manager = getattr(app.orchestrator, 'captive_portal', None) if app.orchestrator else None
+
+        if portal_manager:
+            context = portal_manager.get_portal_context(app.orchestrator)
+        else:
+            # Fallback context for standalone mode without portal manager
+            context = {
+                "network_name": app.config_data.get("captive_portal", {}).get(
+                    "network_name", "RAKSHAK Protected Network"),
+                "admin_contact": app.config_data.get("captive_portal", {}).get(
+                    "admin_contact", "Network Administrator"),
+                "version": app.config_data.get("general", {}).get("version", "1.0.0"),
+                "device_count": 0,
+                "honeypot_count": 0,
+                "ai_active": False,
+                "threats_blocked": 0,
+                "continue_url": "/portal/ack",
+                "acknowledged": False,
+            }
+            if app.orchestrator:
+                try:
+                    context["device_count"] = len(app.orchestrator.network_scanner.devices)
+                    context["honeypot_count"] = app.orchestrator.deception_engine.get_active_count()
+                    context["ai_active"] = app.orchestrator.agentic_defender.model_loaded
+                    context["threats_blocked"] = app.orchestrator.threat_logger.get_threat_count()
+                except Exception:
+                    pass
+
+        return render_template("portal.html", **context)
+
+    @app.route("/portal/ack")
+    def portal_acknowledge():
+        """Acknowledge captive portal and release the device."""
+        device_ip = request.remote_addr
+        portal_manager = getattr(app.orchestrator, 'captive_portal', None) if app.orchestrator else None
+
+        if portal_manager:
+            portal_manager.acknowledge_portal(device_ip)
+            context = portal_manager.get_portal_context(app.orchestrator)
+        else:
+            context = {
+                "network_name": app.config_data.get("captive_portal", {}).get(
+                    "network_name", "RAKSHAK Protected Network"),
+                "admin_contact": app.config_data.get("captive_portal", {}).get(
+                    "admin_contact", "Network Administrator"),
+                "version": app.config_data.get("general", {}).get("version", "1.0.0"),
+                "device_count": 0,
+                "honeypot_count": 0,
+                "ai_active": False,
+                "threats_blocked": 0,
+                "continue_url": "/portal/ack",
+            }
+
+        context["acknowledged"] = True
+        return render_template("portal.html", **context)
+
+    # OS Captive Portal Detection Endpoints
+    @app.route("/generate_204")
+    @app.route("/gen_204")
+    def captive_portal_detect_android():
+        """Android captive portal detection."""
+        device_ip = request.remote_addr
+        portal_manager = getattr(app.orchestrator, 'captive_portal', None) if app.orchestrator else None
+
+        if portal_manager and not portal_manager.is_device_acknowledged(device_ip):
+            return redirect("/portal")
+
+        return '', 204
+
+    @app.route("/hotspot-detect.html")
+    def captive_portal_detect_apple():
+        """Apple captive portal detection."""
+        device_ip = request.remote_addr
+        portal_manager = getattr(app.orchestrator, 'captive_portal', None) if app.orchestrator else None
+
+        if portal_manager and not portal_manager.is_device_acknowledged(device_ip):
+            return redirect("/portal")
+
+        return '<HTML><HEAD><TITLE>Success</TITLE></HEAD><BODY>Success</BODY></HTML>'
+
+    @app.route("/connecttest.txt")
+    def captive_portal_detect_windows():
+        """Windows captive portal detection."""
+        device_ip = request.remote_addr
+        portal_manager = getattr(app.orchestrator, 'captive_portal', None) if app.orchestrator else None
+
+        if portal_manager and not portal_manager.is_device_acknowledged(device_ip):
+            return redirect("/portal")
+
+        return 'Microsoft Connect Test'
 
     # =========================================================================
     # API Routes - Status
