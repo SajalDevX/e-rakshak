@@ -156,6 +156,10 @@ body {
     animation: slideDown 0.3s ease;
 }
 
+.alert-banner.alert-info {
+    background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
+}
+
 @keyframes slideDown {
     from { transform: translateY(-100%); }
     to { transform: translateY(0); }

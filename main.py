@@ -44,6 +44,7 @@ import platform
 import subprocess
 import json
 import threading
+from datetime import datetime
 from pathlib import Path
 from typing import Tuple, List
 
@@ -282,6 +283,7 @@ class RakshakOrchestrator:
         self.running = False
         self.simulation_mode = config.get("simulation", {}).get("enabled", False)
         self.gateway_mode = gateway_mode
+        self._known_device_ips = set()
 
         logger.info("Initializing RAKSHAK components...")
 
@@ -574,10 +576,25 @@ class RakshakOrchestrator:
                 for device in devices:
                     self.network_scanner.update_device(device)
 
-                # Emit devices_update event to dashboard
+                # Detect genuinely new devices and notify dashboard
+                current_ips = {d.ip for d in devices}
+                new_ips = current_ips - self._known_device_ips
+                for device in devices:
+                    if device.ip in new_ips:
+                        self._emit_event('new_device_connected', {
+                            'ip': device.ip,
+                            'hostname': getattr(device, 'hostname', None) or 'Unknown',
+                            'device_type': getattr(device, 'device_type', None) or 'unknown',
+                            'timestamp': datetime.now().isoformat()
+                        })
+                self._known_device_ips = current_ips
+
+                # Emit ALL known devices to dashboard (not just discovery results)
+                # This keeps WebSocket and REST /api/devices in sync
+                all_devices = self.network_scanner.get_all_devices()
                 self._emit_event('devices_update', {
-                    'devices': [d.to_dict() for d in devices],
-                    'count': len(devices)
+                    'devices': [d.to_dict() for d in all_devices],
+                    'count': len(all_devices)
                 })
 
                 # Update known devices list for dashboard access monitoring

@@ -196,6 +196,15 @@ def register_routes(app: Flask):
         return 'Microsoft Connect Test'
 
     # =========================================================================
+    # Mobile Remote Control
+    # =========================================================================
+
+    @app.route("/remote")
+    def remote_control():
+        """Serve mobile remote control page."""
+        return render_template("remote.html")
+
+    # =========================================================================
     # API Routes - Status
     # =========================================================================
 
@@ -290,6 +299,31 @@ def register_routes(app: Flask):
             return jsonify({
                 "success": False,
                 "error": "Device not found"
+            }), 404
+
+    @app.route("/api/devices/<device_ip>/unisolate", methods=["POST"])
+    def unisolate_device(device_ip: str):
+        """Unisolate (restore) a device."""
+        if not app.orchestrator:
+            return jsonify({"success": False, "error": "Not initialized"}), 503
+
+        scanner = app.orchestrator.network_scanner
+        success = scanner.unisolate_device(device_ip)
+
+        if success:
+            socketio.emit("device_unisolated", {
+                "ip": device_ip,
+                "timestamp": datetime.now().isoformat()
+            })
+
+            return jsonify({
+                "success": True,
+                "message": f"Device {device_ip} restored"
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": "Device not found or not isolated"
             }), 404
 
     @app.route("/api/devices/statistics")

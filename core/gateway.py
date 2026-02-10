@@ -1214,6 +1214,8 @@ expand-hosts
 
         A device is considered reachable if its ARP entry is REACHABLE, STALE, or DELAY.
         If the entry is INCOMPLETE or FAILED, the device is not on the network.
+        Empty ARP cache (no entry) means the kernel hasn't communicated with the
+        device recently — not that it's gone. The DHCP lease is the real proof.
         """
         try:
             result = subprocess.run(
@@ -1223,7 +1225,9 @@ expand-hosts
             output = result.stdout.strip()
 
             if not output:
-                return False
+                # No ARP entry just means kernel cache expired (30-60s for idle devices).
+                # DHCP lease is the authoritative source — assume reachable.
+                return True
 
             # Check ARP state - REACHABLE, STALE, DELAY are OK; INCOMPLETE, FAILED are not
             if "REACHABLE" in output or "STALE" in output or "DELAY" in output or "PERMANENT" in output:
@@ -1236,7 +1240,7 @@ expand-hosts
             if "lladdr" in output:
                 return True
 
-            return False
+            return True  # Default to reachable to avoid false disconnections
 
         except Exception as e:
             logger.debug(f"ARP check failed for {ip_address}: {e}")
