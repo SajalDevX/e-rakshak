@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>RAKSHAK - Remote Control</title>
+    <style>
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --bg-card: #1a2234;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+            --accent-red: #ef4444;
+            --accent-purple: #8b5cf6;
+            --border-color: #1e293b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .shield-icon { font-size: 1.6rem; }
+
+        .header-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+
+        .header-sub {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        .conn-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .conn-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-orange);
+            animation: pulse 2s infinite;
+        }
+
+        .conn-dot.connected { background: var(--accent-green); }
+        .conn-dot.disconnected { background: var(--accent-red); }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* Summary bar */
+        .summary-bar {
+            display: flex;
+            gap: 8px;
+            padding: 10px 16px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            overflow-x: auto;
+        }
+
+        .summary-chip {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--bg-card);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            border: 1px solid var(--border-color);
+        }
+
+        .summary-chip .count {
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+
+        /* Pull to refresh hint */
+        .pull-hint {
+            text-align: center;
+            padding: 8px;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        /* Device list */
+        .device-list {
+            padding: 8px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-bottom: 24px;
+        }
+
+        /* Device card */
+        .device-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: border-color 0.2s;
+        }
+
+        .device-card.isolated {
+            border-color: rgba(239, 68, 68, 0.4);
+            background: linear-gradient(135deg, var(--bg-card), rgba(239, 68, 68, 0.05));
+        }
+
+        .device-status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .device-status-dot.active { background: var(--accent-green); box-shadow: 0 0 6px rgba(16, 185, 129, 0.5); }
+        .device-status-dot.isolated { background: var(--accent-red); box-shadow: 0 0 6px rgba(239, 68, 68, 0.5); }
+        .device-status-dot.inactive { background: #6b7280; }
+
+        .device-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .device-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .device-ip {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-family: monospace;
+        }
+
+        .device-meta {
+            display: flex;
+            gap: 6px;
+            margin-top: 4px;
+            flex-wrap: wrap;
+        }
+
+        .zone-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .zone-main { background: rgba(16, 185, 129, 0.2); color: var(--accent-green); }
+        .zone-iot { background: rgba(245, 158, 11, 0.2); color: var(--accent-orange); }
+        .zone-guest { background: rgba(148, 163, 184, 0.2); color: var(--text-secondary); }
+        .zone-quarantine { background: rgba(239, 68, 68, 0.2); color: var(--accent-red); }
+        .zone-mgmt { background: rgba(59, 130, 246, 0.2); color: var(--accent-blue); }
+        .zone-unknown { background: rgba(71, 85, 105, 0.2); color: var(--text-secondary); }
+
+        .risk-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+
+        .risk-low { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
+        .risk-medium { background: rgba(245, 158, 11, 0.15); color: var(--accent-orange); }
+        .risk-high { background: rgba(239, 68, 68, 0.15); color: var(--accent-red); }
+
+        /* Action button */
+        .device-action {
+            flex-shrink: 0;
+        }
+
+        .action-btn {
+            min-width: 80px;
+            min-height: 48px;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .action-btn:active { transform: scale(0.95); }
+        .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-isolate {
+            background: linear-gradient(135deg, #dc2626, var(--accent-red));
+            color: white;
+        }
+
+        .btn-restore {
+            background: linear-gradient(135deg, #059669, var(--accent-green));
+            color: white;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--bg-card);
+            color: var(--text-primary);
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            z-index: 200;
+            transition: transform 0.3s ease;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .toast.show { transform: translateX(-50%) translateY(0); }
+
+        .toast.success { border-color: var(--accent-green); }
+        .toast.error { border-color: var(--accent-red); }
+        .toast.info { border-color: var(--accent-cyan); }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+
+        /* Loading spinner */
+        .loading {
+            text-align: center;
+            padding: 48px;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent-cyan);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 8px;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Dashboard link */
+        .footer-link {
+            text-align: center;
+            padding: 16px;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+        }
+
+        .footer-link a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <span class="shield-icon">&#x1F6E1;</span>
+            <div>
+                <div class="header-title">RAKSHAK</div>
+                <div class="header-sub">Remote Control</div>
+            </div>
+        </div>
+        <div class="conn-status">
+            <span class="conn-dot" id="conn-dot"></span>
+            <span id="conn-text">Connecting...</span>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="summary-bar" id="summary-bar">
+        <div class="summary-chip">
+            Total: <span class="count" id="total-count">0</span>
+        </div>
+        <div class="summary-chip">
+            Active: <span class="count" id="active-count">0</span>
+        </div>
+        <div class="summary-chip">
+            Isolated: <span class="count" id="isolated-count" style="color: var(--accent-red);">0</span>
+        </div>
+    </div>
+
+    <!-- Pull hint -->
+    <div class="pull-hint">Tap a device to manage &bull; auto-updates via WebSocket</div>
+
+    <!-- Device list -->
+    <div class="device-list" id="device-list">
+        <div class="loading">
+            <div class="spinner"></div>
+            <div>Loading devices...</div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Footer -->
+    <div class="footer-link">
+        <a href="/">Open Full Dashboard</a>
+    </div>
+
+    <!-- Socket.IO -->
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script>
+        // State
+        let devices = [];
+        let socket = null;
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            initSocket();
+            loadDevices();
+        });
+
+        // Socket.IO
+        function initSocket() {
+            socket = io();
+
+            socket.on('connect', () => {
+                setConnStatus(true);
+            });
+
+            socket.on('disconnect', () => {
+                setConnStatus(false);
+            });
+
+            socket.on('device_isolated', (data) => {
+                showToast(`Device ${data.ip} isolated`, 'info');
+                loadDevices();
+            });
+
+            socket.on('device_unisolated', (data) => {
+                showToast(`Device ${data.ip} restored`, 'success');
+                loadDevices();
+            });
+
+            socket.on('devices_update', (data) => {
+                if (data.devices) {
+                    devices = data.devices;
+                    renderDevices();
+                }
+            });
+
+            socket.on('new_device_connected', (data) => {
+                showToast(`New device: ${data.hostname || data.ip}`, 'info');
+                loadDevices();
+            });
+        }
+
+        function setConnStatus(connected) {
+            const dot = document.getElementById('conn-dot');
+            const text = document.getElementById('conn-text');
+            if (connected) {
+                dot.className = 'conn-dot connected';
+                text.textContent = 'Connected';
+            } else {
+                dot.className = 'conn-dot disconnected';
+                text.textContent = 'Disconnected';
+            }
+        }
+
+        // Load devices via REST
+        async function loadDevices() {
+            try {
+                const resp = await fetch('/api/devices');
+                const data = await resp.json();
+                if (data.success) {
+                    devices = data.data;
+                    renderDevices();
+                }
+            } catch (e) {
+                console.error('Failed to load devices:', e);
+            }
+        }
+
+        // Render
+        function renderDevices() {
+            const container = document.getElementById('device-list');
+
+            // Update counts
+            const total = devices.length;
+            const active = devices.filter(d => d.status !== 'isolated').length;
+            const isolated = devices.filter(d => d.status === 'isolated').length;
+
+            document.getElementById('total-count').textContent = total;
+            document.getElementById('active-count').textContent = active;
+            document.getElementById('isolated-count').textContent = isolated;
+
+            if (!devices.length) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">&#x1F4E1;</div>
+                        <div>No devices found</div>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = devices.map(d => {
+                const name = getDeviceName(d);
+                const status = d.status || 'active';
+                const isIsolated = status === 'isolated';
+                const zone = d.zone || 'unknown';
+                const riskScore = d.risk_score || 0;
+                const riskLevel = riskScore >= 60 ? 'high' : riskScore >= 30 ? 'medium' : 'low';
+
+                return `
+                    <div class="device-card ${isIsolated ? 'isolated' : ''}">
+                        <div class="device-status-dot ${status}"></div>
+                        <div class="device-info">
+                            <div class="device-name">${escapeHtml(name)}</div>
+                            <div class="device-ip">${escapeHtml(d.ip)}</div>
+                            <div class="device-meta">
+                                <span class="zone-badge zone-${zone}">${zone.toUpperCase()}</span>
+                                <span class="risk-badge risk-${riskLevel}">${riskScore}%</span>
+                            </div>
+                        </div>
+                        <div class="device-action">
+                            ${isIsolated
+                                ? `<button class="action-btn btn-restore" onclick="restoreDevice('${d.ip}')">Restore</button>`
+                                : `<button class="action-btn btn-isolate" onclick="isolateDevice('${d.ip}')">Isolate</button>`
+                            }
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        // Actions
+        async function isolateDevice(ip) {
+            const btn = event.target;
+            btn.disabled = true;
+            btn.textContent = '...';
+
+            try {
+                const resp = await fetch(`/api/devices/${ip}/isolate`, { method: 'POST' });
+                const data = await resp.json();
+                if (data.success) {
+                    showToast(`Isolated ${ip}`, 'success');
+                    loadDevices();
+                } else {
+                    showToast(data.error || 'Failed to isolate', 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Isolate';
+                }
+            } catch (e) {
+                showToast('Network error', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Isolate';
+            }
+        }
+
+        async function restoreDevice(ip) {
+            const btn = event.target;
+            btn.disabled = true;
+            btn.textContent = '...';
+
+            try {
+                const resp = await fetch(`/api/devices/${ip}/unisolate`, { method: 'POST' });
+                const data = await resp.json();
+                if (data.success) {
+                    showToast(`Restored ${ip}`, 'success');
+                    loadDevices();
+                } else {
+                    showToast(data.error || 'Failed to restore', 'error');
+                    btn.disabled = false;
+                    btn.textContent = 'Restore';
+                }
+            } catch (e) {
+                showToast('Network error', 'error');
+                btn.disabled = false;
+                btn.textContent = 'Restore';
+            }
+        }
+
+        // Helpers
+        function getDeviceName(device) {
+            if (device.hostname && device.hostname !== 'unknown' && device.hostname !== '') {
+                return device.hostname;
+            }
+            const mfr = device.manufacturer || 'unknown';
+            const dt = device.device_type || 'unknown';
+            if (mfr === 'unknown' && dt === 'unknown') return 'Unknown Device';
+            if (mfr === 'unknown') return formatType(dt);
+            if (dt === 'unknown') return mfr + ' Device';
+            return mfr + ' ' + formatType(dt);
+        }
+
+        function formatType(type) {
+            const map = {
+                'esp32_cam': 'ESP32 Camera', 'network_adapter': 'Network Adapter',
+                'smart_bulb': 'Smart Bulb', 'smart_plug': 'Smart Plug',
+                'smart_tv': 'Smart TV', 'smart_speaker': 'Smart Speaker',
+                'thermostat': 'Thermostat', 'streaming': 'Streaming Device',
+                'camera': 'Camera', 'router': 'Router', 'mobile': 'Mobile',
+                'alexa': 'Alexa', 'unknown': 'Device'
+            };
+            return map[type] || type.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function showToast(msg, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.className = 'toast ' + type + ' show';
+            setTimeout(() => { toast.className = 'toast'; }, 3000);
+        }
+
+        // Auto-refresh fallback (in case WebSocket goes down)
+        setInterval(() => {
+            if (!socket || !socket.connected) {
+                loadDevices();
+            }
+        }, 10000);
+    </script>
+</body>
+</html>

@@ -807,7 +807,7 @@ class NetworkScanner:
                     # ENHANCED FIX: Check if device was recently seen by ANY method
                     # This includes passive discovery (SSDP, ARP, ONVIF) and static IPs
                     recently_seen = False
-                    inactive_timeout = 300  # 5 minutes (was 30 seconds - too aggressive)
+                    inactive_timeout = 1800  # 30 minutes (was 300 - too aggressive for idle IoT devices)
 
                     try:
                         last_seen = datetime.fromisoformat(device.last_seen)
@@ -877,16 +877,24 @@ class NetworkScanner:
                                     'timestamp': datetime.now().isoformat()
                                 })
                         elif not lease.is_active and device.status == "active":
-                            device.status = "inactive"
-                            logger.info(f"Device {device.hostname} ({device.ip}) is now inactive (disconnected)")
+                            # Only mark inactive if DHCP lease has actually expired
+                            # ARP cache being empty is not proof the device left
+                            lease_expired = (
+                                hasattr(lease, 'lease_end')
+                                and lease.lease_end
+                                and lease.lease_end < datetime.now()
+                            )
+                            if lease_expired:
+                                device.status = "inactive"
+                                logger.info(f"Device {device.hostname} ({device.ip}) is now inactive (DHCP lease expired)")
 
-                            # REAL-TIME FIX: Emit status change event
-                            if self.orchestrator:
-                                self.orchestrator._emit_event('device_status_changed', {
-                                    'ip': device.ip,
-                                    'status': 'inactive',
-                                    'timestamp': datetime.now().isoformat()
-                                })
+                                # REAL-TIME FIX: Emit status change event
+                                if self.orchestrator:
+                                    self.orchestrator._emit_event('device_status_changed', {
+                                        'ip': device.ip,
+                                        'status': 'inactive',
+                                        'timestamp': datetime.now().isoformat()
+                                    })
                 else:
                     # Create new device from lease
                     device = Device(

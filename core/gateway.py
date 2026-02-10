@@ -571,6 +571,7 @@ class RakshakGateway:
                 ("filter", "RAKSHAK_FORWARD"),
                 ("filter", "RAKSHAK_ISOLATED"),
                 ("filter", "RAKSHAK_RATELIMIT"),
+                ("nat", "RAKSHAK_PORTAL"),
                 ("nat", "RAKSHAK_HONEYPOT"),
                 # Zero Trust zone chains
                 ("filter", "RAKSHAK_ZONE_ENFORCE"),
@@ -618,9 +619,15 @@ class RakshakGateway:
                 "-j", "RAKSHAK_FORWARD"
             ], capture_output=True)
 
-            # NAT PREROUTING: jump to RAKSHAK_HONEYPOT
+            # NAT PREROUTING: jump to RAKSHAK_PORTAL (captive portal first)
             subprocess.run([
                 "iptables", "-t", "nat", "-I", "PREROUTING", "1",
+                "-j", "RAKSHAK_PORTAL"
+            ], capture_output=True)
+
+            # NAT PREROUTING: jump to RAKSHAK_HONEYPOT (after portal)
+            subprocess.run([
+                "iptables", "-t", "nat", "-I", "PREROUTING", "2",
                 "-j", "RAKSHAK_HONEYPOT"
             ], capture_output=True)
 
@@ -642,6 +649,7 @@ class RakshakGateway:
                 ("filter", "RAKSHAK_FORWARD"),
                 ("filter", "RAKSHAK_ISOLATED"),
                 ("filter", "RAKSHAK_RATELIMIT"),
+                ("nat", "RAKSHAK_PORTAL"),
                 ("nat", "RAKSHAK_HONEYPOT"),
             ]
 
@@ -658,6 +666,10 @@ class RakshakGateway:
                 subprocess.run([
                     "iptables", "-D", "FORWARD",
                     "-j", "RAKSHAK_FORWARD"
+                ], capture_output=True)
+                subprocess.run([
+                    "iptables", "-t", "nat", "-D", "PREROUTING",
+                    "-j", "RAKSHAK_PORTAL"
                 ], capture_output=True)
                 subprocess.run([
                     "iptables", "-t", "nat", "-D", "PREROUTING",
@@ -1202,6 +1214,8 @@ expand-hosts
 
         A device is considered reachable if its ARP entry is REACHABLE, STALE, or DELAY.
         If the entry is INCOMPLETE or FAILED, the device is not on the network.
+        Empty ARP cache (no entry) means the kernel hasn't communicated with the
+        device recently — not that it's gone. The DHCP lease is the real proof.
         """
         try:
             result = subprocess.run(
@@ -1211,7 +1225,9 @@ expand-hosts
             output = result.stdout.strip()
 
             if not output:
-                return False
+                # No ARP entry just means kernel cache expired (30-60s for idle devices).
+                # DHCP lease is the authoritative source — assume reachable.
+                return True
 
             # Check ARP state - REACHABLE, STALE, DELAY are OK; INCOMPLETE, FAILED are not
             if "REACHABLE" in output or "STALE" in output or "DELAY" in output or "PERMANENT" in output:
@@ -1224,7 +1240,7 @@ expand-hosts
             if "lladdr" in output:
                 return True
 
-            return False
+            return True  # Default to reachable to avoid false disconnections
 
         except Exception as e:
             logger.debug(f"ARP check failed for {ip_address}: {e}")

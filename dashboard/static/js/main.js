@@ -137,6 +137,17 @@ function initializeSocket() {
         loadDevices();
     });
 
+    socket.on('device_unisolated', (data) => {
+        addEvent('action', `Device ${data.ip} restored`);
+        loadDevices();
+    });
+
+    socket.on('new_device_connected', (data) => {
+        addEvent('info', `New device connected: ${data.hostname || data.ip}`);
+        showAlert(`New device connected: ${data.hostname || data.ip}`, 'info');
+        loadDevices();
+    });
+
     socket.on('honeypot_deployed', (data) => {
         addEvent('action', `Honeypot ${data.id} deployed on port ${data.port}`);
         loadHoneypots();
@@ -273,26 +284,23 @@ function renderDevices(devices) {
                 </button>
             `;
         } else if (enrollmentStatus === 'enrolled') {
-            // Enrolled - show zone change and isolate
+            // Enrolled - show zone change and isolate/restore
+            const isolateOrRestore = device.status === 'isolated'
+                ? `<button class="btn btn-sm btn-success" onclick="unisolateDevice('${device.ip}')">Restore</button>`
+                : `<button class="btn btn-sm btn-danger" onclick="isolateDevice('${device.ip}')">Isolate</button>`;
             actionButtons = `
                 <select id="zone-${device.ip}" class="zone-select" onchange="changeZone('${device.ip}')">
                     <option value="main" ${device.zone === 'main' ? 'selected' : ''}>MAIN</option>
                     <option value="iot" ${device.zone === 'iot' ? 'selected' : ''}>IOT</option>
                     <option value="guest" ${device.zone === 'guest' ? 'selected' : ''}>GUEST</option>
                 </select>
-                <button class="btn btn-sm btn-danger" onclick="isolateDevice('${device.ip}')"
-                        ${device.status === 'isolated' ? 'disabled' : ''}>
-                    Isolate
-                </button>
+                ${isolateOrRestore}
             `;
         } else {
-            // Fallback - just isolate button
-            actionButtons = `
-                <button class="btn btn-sm btn-danger" onclick="isolateDevice('${device.ip}')"
-                        ${device.status === 'isolated' ? 'disabled' : ''}>
-                    ${t('isolate')}
-                </button>
-            `;
+            // Fallback - isolate or restore button
+            actionButtons = device.status === 'isolated'
+                ? `<button class="btn btn-sm btn-success" onclick="unisolateDevice('${device.ip}')">Restore</button>`
+                : `<button class="btn btn-sm btn-danger" onclick="isolateDevice('${device.ip}')">${t('isolate')}</button>`;
         }
 
         return `
@@ -589,6 +597,21 @@ async function isolateDevice(ip) {
     }
 }
 
+async function unisolateDevice(ip) {
+    try {
+        const response = await fetch(`${API_BASE}/api/devices/${ip}/unisolate`, {
+            method: 'POST'
+        });
+        const data = await response.json();
+        if (data.success) {
+            addEvent('action', `Device ${ip} restored`);
+            loadDevices();
+        }
+    } catch (error) {
+        console.error('Failed to restore device:', error);
+    }
+}
+
 async function initiateEnrollment(ip) {
     const token = localStorage.getItem('auth_token');
 
@@ -757,6 +780,7 @@ function showAlert(message, severity = 'warning') {
     const messageEl = document.getElementById('alert-message');
 
     messageEl.textContent = message;
+    banner.className = 'alert-banner' + (severity === 'info' ? ' alert-info' : '');
     banner.style.display = 'flex';
 
     // Auto-hide after 5 seconds
