@@ -39,7 +39,8 @@ RAKSHAK is a revolutionary consumer cybersecurity device that combines:
 
 ```bash
 # Clone the repository
-cd /home/sajal/Desktop/Hackathons/e-raksha
+git clone https://github.com/SajalDevX/e-rakshak.git
+cd e-rakshak
 
 # Create virtual environment
 python3 -m venv venv
@@ -159,6 +160,10 @@ Edit `config/config.yaml` to customize:
 ## Contributing
 
 This project was developed for **eRaksha Hackathon 2026** by IIT Delhi + CyberPeace.
+
+### Contributors
+
+- [Charan-Tj](https://github.com/Charan-Tj)
 
 ## License
 
