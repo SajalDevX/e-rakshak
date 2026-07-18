@@ -163,7 +163,9 @@ This project was developed for **eRaksha Hackathon 2026** by IIT Delhi + CyberPe
 
 ### Contributors
 
+- [SajalDevX](https://github.com/SajalDevX)
 - [Charan-Tj](https://github.com/Charan-Tj)
+- [Pavan Kumar](https://github.com/Pavankumar07s)
 
 ## License
 
